@@ -1,15 +1,14 @@
 # Myth Mod Manager
 
-Myth Mod Manager is a simple mod manager for PAYDAY 2 to make managing all of those files a little bit easier.
+A simple mod manager for PAYDAY 2 to make managing all of those files a little bit easier.
 
 ![GitHub all releases](https://img.shields.io/github/downloads/Wolfmyths/Myth-Mod-Manager/total)
 ![GitHub contributors](https://img.shields.io/github/contributors/Wolfmyths/Myth-Mod-Manager)
-
-![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
-![Platform](https://img.shields.io/badge/OS-Windows-blue)
+![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Framework](https://img.shields.io/badge/Framework-PySide6-green)
+![Platform](https://img.shields.io/badge/OS-Windows-blue)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C4MJZS9)
 
@@ -41,6 +40,9 @@ and their features being windows exclusive
 I only have access to the Steam version,
 so I cannot say if it works for Epic Games
 without feedback.
+
+# Download
+You may download any version of Myth Mod Manager and view changelogs at the [releases page](https://github.com/Wolfmyths/Myth-Mod-Manager/releases)
 
 # Future Plans
 

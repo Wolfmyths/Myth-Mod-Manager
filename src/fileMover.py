@@ -175,7 +175,7 @@ class FileMover():
             mods = list([x for x in os.listdir(modPath) if x not in MODSIGNORE] + os.listdir(mod_overridePath) + os.listdir(disPath))
 
             # Step 5: Copy each mod into the backup folder
-            for mod in mods:
+            for mod in (x for x in mods):
 
                 modType = self.saveManager.get(mod, MOD_TYPE)
 

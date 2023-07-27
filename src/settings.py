@@ -14,8 +14,13 @@ class Options(qtw.QWidget):
 
         self.optionsManager = OptionsManager()
 
-        self.timeout = qt.QTimer()
-        self.timeout.timeout.connect(lambda: self.setGamePathTimeout())
+        self.gamePathTimeout = qt.QTimer(self)
+        self.gamePathTimeout.setObjectName('gamePathTimeout')
+        self.gamePathTimeout.timeout.connect(lambda: self.setGamePathTimeout())
+
+        self.disPathTimeout = qt.QTimer(self)
+        self.disPathTimeout.setObjectName('disPathTimeout')
+        self.disPathTimeout.timeout.connect(lambda: self.setDisPathTimeout())
 
         layout = qtw.QFormLayout()
         layout.setContentsMargins(40, 40, 40, 20)
@@ -28,13 +33,13 @@ class Options(qtw.QWidget):
 
         self.gameDir = qtw.QLineEdit(self)
         self.gameDir.setText(self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH, fallback=''))
-        self.gameDir.textChanged.connect(lambda: self.setGamePath())
+        self.gameDir.textChanged.connect(lambda: self.setPath(self.gamePathTimeout.objectName()))
 
         self.disabledModLabel = qtw.QLabel(self, text='Disabled Mods Path')
 
         self.disabledModDir = qtw.QLineEdit(self)
         self.disabledModDir.setText(self.optionsManager.get(self.disabledModDir.text(), OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT))
-        self.disabledModDir.textChanged.connect(lambda: self.optionsManager.setOption(self.disabledModDir.text(), OPTIONS_DISPATH))
+        self.disabledModDir.textChanged.connect(lambda: self.setPath(self.disPathTimeout.objectName()))
 
         self.backupModsLabel = qtw.QLabel(self, text='This will backup all of your mods and compress it into a zip file.')
 
@@ -50,28 +55,35 @@ class Options(qtw.QWidget):
         
         self.setLayout(layout)
     
-    def setGamePath(self):
+    def setPath(self, mode: str):
         '''
         QTimer is started so the save data function isn't called everytime the user changes a single character
-
-        setGamePathTimeout() is the function that actually saves the gamePath
+        on a QLineEdit
         '''
 
-        self.noticeLabelDesc.setText('Validating Game Path...')
+        timeout: qt.QTimer = self.findChild(qt.QTimer, mode)
 
-        if not self.timeout.isActive():
+        if timeout.objectName() == self.gamePathTimeout.objectName():
 
-            self.timeout.start(1000)
+            self.noticeLabelDesc.setText('Validating Game Path...')
+        
+        else:
+
+            self.noticeLabelDesc.setText('Saving disabled games path... do not turn off')
+
+        if not timeout.isActive():
+
+            timeout.start(1000)
 
         else:
 
-            self.timeout.stop()
-            self.timeout.start(1000)
+            timeout.stop()
+            timeout.start(1000)
             
     
     def setGamePathTimeout(self):
 
-        self.timeout.stop()
+        self.gamePathTimeout.stop()
 
         gamePath = self.gameDir.text()
 
@@ -87,7 +99,20 @@ class Options(qtw.QWidget):
         else:
 
             self.noticeLabel.setText('Error:')
-            self.noticeLabelDesc.setText('Game Path is not valid')
+            self.noticeLabelDesc.setText('Game Path is not valid, did not save.')
+    
+    def setDisPathTimeout(self):
+
+        self.disPathTimeout.stop()
+
+        disPath = self.disabledModDir.text()
+
+        self.optionsManager[OPTIONS_SECTION][OPTIONS_DISPATH] = disPath
+
+        self.optionsManager.writeData()
+
+        self.noticeLabel.setText('Success:')
+        self.noticeLabelDesc.setText('Progress has been saved')
     
     def startBackupMods(self) -> None:
         
@@ -95,10 +120,10 @@ class Options(qtw.QWidget):
 
         if outcome == 1:
 
-            text = "Mods backed up at MMM's directory"
+            self.noticeLabel.setText('Success:')
+            self.noticeLabelDesc.setText("Your backup has been saved to the manager's directory")
 
         else:
 
-            text = 'Error: Mods could not be backed up'
-
-        self.backupModsLabel.setText(text)
+            self.noticeLabel.setText('Error:')
+            self.noticeLabelDesc.setText('Something went wrong, changes have been reverted.')

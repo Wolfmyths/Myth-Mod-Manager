@@ -1,6 +1,5 @@
 
 import PySide6.QtWidgets as qtw
-import os
 
 from main_window import MainWindow
 from save import Save, OptionsManager
@@ -14,8 +13,6 @@ if __name__ == '__main__':
     import sys
 
     app = qtw.QApplication(sys.argv)
-
-    print(os.path.abspath(os.path.dirname(__file__)))
 
     save = Save()
     optionsManager = OptionsManager()

@@ -32,13 +32,13 @@ class Options(qtw.QWidget):
         self.gameDirLabel = qtw.QLabel(self, text='Payday 2 Game Path:')
 
         self.gameDir = qtw.QLineEdit(self)
-        self.gameDir.setText(self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH, fallback=''))
+        self.gameDir.setText(self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback=''))
         self.gameDir.textChanged.connect(lambda: self.setPath(self.gamePathTimeout.objectName()))
 
         self.disabledModLabel = qtw.QLabel(self, text='Disabled Mods Path')
 
         self.disabledModDir = qtw.QLineEdit(self)
-        self.disabledModDir.setText(self.optionsManager.get(self.disabledModDir.text(), OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT))
+        self.disabledModDir.setText(self.optionsManager.getOption(self.disabledModDir.text(), fallback=MODS_DISABLED_PATH_DEFAULT))
         self.disabledModDir.textChanged.connect(lambda: self.setPath(self.disPathTimeout.objectName()))
 
         self.backupModsLabel = qtw.QLabel(self, text='This will backup all of your mods and compress it into a zip file.')

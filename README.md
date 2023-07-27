@@ -46,11 +46,13 @@ You may download any version of Myth Mod Manager and view changelogs at the [rel
 
 # Future Plans
 
-+ Mod Profiles
-+ Displaying Mods Better
++ Mod profiles
++ Display mod information better
 + Dark Theme
 + If a .zip is dropped then automatically unzip it
-+ Add logging so bug reporting is a lot easier
++ Logging so bug reporting is a lot easier
++ A progress bar when adding, deleting, and backing up mods
++ Search bar
 
 *Suggestions are appreciated!*
 

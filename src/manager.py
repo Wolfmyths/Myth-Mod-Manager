@@ -7,7 +7,7 @@ import PySide6.QtWidgets as qtw
 from widgets.listWidget import ModListWidget
 from save import Save, OptionsManager
 import errorChecking
-from constant_vars import MODSIGNORE, TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_SECTION, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MOD_ENABLED, MOD_TYPE, MODS_DISABLED_PATH_DEFAULT, START_PAYDAY_PATH, MOD_LIST_OBJECT, MOD_OVERRIDE_LIST_OBJECT
+from constant_vars import MODSIGNORE, TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MOD_ENABLED, MOD_TYPE, MODS_DISABLED_PATH_DEFAULT, START_PAYDAY_PATH, MOD_LIST_OBJECT, MOD_OVERRIDE_LIST_OBJECT
 
 class ModManager(qtw.QWidget):
 
@@ -25,7 +25,7 @@ class ModManager(qtw.QWidget):
         self.refresh.clicked.connect(lambda: self.refreshMods())
 
         self.openGameDir = qtw.QPushButton('Open Game Directory', self)
-        self.openGameDir.clicked.connect(lambda: os.startfile(self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH)))
+        self.openGameDir.clicked.connect(lambda: os.startfile(self.optionsManager.getOption(OPTIONS_GAMEPATH)))
 
         self.startGame = qtw.QPushButton('Start PAYDAY 2', self)
         self.startGame.clicked.connect(lambda: self.startPayday())
@@ -90,7 +90,7 @@ class ModManager(qtw.QWidget):
         if not errorChecking.validDefaultDisabledModsPath():
             os.mkdir(MODS_DISABLED_PATH_DEFAULT)
 
-        disabledMods = os.listdir(self.optionsManager.get(OPTIONS_SECTION, OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT))
+        disabledMods = os.listdir(self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT))
 
         if self.saveManager.has_section(key) and key in disabledMods:
 
@@ -122,13 +122,13 @@ class ModManager(qtw.QWidget):
         mod_override: list[str] = []
         mods: list[str] = []
 
-        gamePath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH, fallback='')
+        gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback='')
 
         modsPath = os.path.join(gamePath, 'mods')
 
         mod_overridePath = os.path.join(gamePath, 'assets', 'mod_overrides')
 
-        disabledModsPath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+        disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
         # Mods Folder
         if os.path.exists(modsPath):
@@ -177,7 +177,7 @@ class ModManager(qtw.QWidget):
 
         if errorChecking.validGamePath():
 
-            gamePath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH)
+            gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH)
 
             drive = gamePath[0].lower()
 

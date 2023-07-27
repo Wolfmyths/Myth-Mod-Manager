@@ -29,7 +29,7 @@ class GamePathNotFound(qtw.QDialog):
         self.gameDirLabel = qtw.QLabel(self, text='Payday 2 Game Path:')
 
         self.gameDir = qtw.QLineEdit(self)
-        self.gameDir.setText(self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH, fallback=''))
+        self.gameDir.setText(self.optionsManager.getOption(OPTIONS_GAMEPATH))
         self.gameDir.textChanged.connect(lambda: self.setGamePath())
 
         buttons = qtw.QDialogButtonBox.Ok | qtw.QDialogButtonBox.Cancel

@@ -133,6 +133,9 @@ class OptionsManager(ConfigParser):
 
         self.writeData()
     
+    def getOption(self, option: str, fallback= None) -> str | None:
+        return self.get(OPTIONS_SECTION, option, fallback=fallback)
+    
     def checkAddSection(self, section: str) -> None:
         '''If a section doesn't exist then add it'''
 

@@ -3,7 +3,7 @@ import os
 
 from save import Save, OptionsManager
 import errorChecking
-from constant_vars import MOD_TYPE, TYPE_MODS, OPTIONS_GAMEPATH, OPTIONS_DISPATH, OPTIONS_SECTION, MODS_DISABLED_PATH_DEFAULT, MOD_LIST_OBJECT, MOD_OVERRIDE_LIST_OBJECT, TYPE_MODS_OVERRIDE, BACKUP_MODS, MODSIGNORE
+from constant_vars import MOD_TYPE, TYPE_MODS, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, MOD_LIST_OBJECT, MOD_OVERRIDE_LIST_OBJECT, TYPE_MODS_OVERRIDE, BACKUP_MODS, MODSIGNORE
 
 class FileMover():
     '''
@@ -19,9 +19,9 @@ class FileMover():
     def moveToDisabledDir(self, mod: str) -> None:
         '''Moves a mod to the disabled folder'''
 
-        gamePath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH, fallback='')
+        gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback='')
 
-        disabledModsPath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+        disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
         if not errorChecking.validDefaultDisabledModsPath():
             os.mkdir(disabledModsPath)
@@ -42,9 +42,9 @@ class FileMover():
     def moveToEnableModDir(self, mod: str) -> None:
         '''Returns a mod to their respective directory'''
 
-        gamePath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH, fallback='')
+        gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback='')
 
-        disabledModsPath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+        disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
         if not errorChecking.validDefaultDisabledModsPath():
             os.mkdir(MODS_DISABLED_PATH_DEFAULT)
@@ -68,7 +68,7 @@ class FileMover():
         This function is used for the listWidget.py drag and drop events
         '''
 
-        gamePath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH, fallback='')
+        gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback='')
         modsDirPath = None
 
 
@@ -106,9 +106,9 @@ class FileMover():
 
         type = self.saveManager.getType(modName) if enabled else 'disabled'
 
-        disPath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+        disPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
-        gamePath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH)
+        gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH)
 
         pathDict = {TYPE_MODS_OVERRIDE : os.path.join(gamePath, 'assets', 'mod_overrides'), TYPE_MODS : os.path.join(gamePath, 'mods'), 'disabled' : disPath}
 
@@ -128,9 +128,13 @@ class FileMover():
         1 = Success
         '''
 
-        gamePath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH, fallback=None)
+        # Step 1: Gather Options
 
-        disPath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+        gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH)
+
+        disPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+
+        # Step 2: Set Paths
 
         modPath = os.path.join(gamePath, 'mods')
 
@@ -146,9 +150,10 @@ class FileMover():
 
         srcPathDict = {TYPE_MODS_OVERRIDE : mod_overridePath, TYPE_MODS : modPath}
 
+        # Step 3: Create Folders
+
         try:
 
-            # Make folders
             # Backup folder
             if not os.path.exists(bundledFilePath):
 
@@ -163,10 +168,13 @@ class FileMover():
             if not os.path.exists(bundledOverridePath):
 
                 os.makedirs(bundledOverridePath)
+            
+            # Step 4: Create a list of all the mods
 
             # Every mod
             mods = list([x for x in os.listdir(modPath) if x not in MODSIGNORE] + os.listdir(mod_overridePath) + os.listdir(disPath))
 
+            # Step 5: Copy each mod into the backup folder
             for mod in mods:
 
                 modType = self.saveManager.get(mod, MOD_TYPE)
@@ -183,8 +191,12 @@ class FileMover():
 
                 shutil.copytree(src, output)
             
+            # Step 6: Zip Backup folder
+
             # Create Zip, this should overwrite if it already exists
             shutil.make_archive(BACKUP_MODS, 'zip', bundledFilePath)
+
+            # Step 7: Cleanup
 
             # Delete Folder
             shutil.rmtree(bundledFilePath)
@@ -204,7 +216,7 @@ class FileMover():
 
     def createDisabledModFolder(self) -> None:
 
-        path = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+        path = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
         if not os.path.exists(path):
 

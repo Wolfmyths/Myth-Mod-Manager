@@ -5,14 +5,14 @@ import semantic_version
 
 from save import OptionsManager
 from widgets.newUpdateQDialog import updateDetected
-from constant_vars import OPTIONS_SECTION, OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, VERSION
+from constant_vars import OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, VERSION
 
 def validGamePath() -> bool:
     '''Gets the gamepath from OPTIONS_CONFIG and checks if the paths contains the PAYDAY 2 exe'''
 
     optionsManager = OptionsManager()
 
-    gamePath = optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH, fallback=None)
+    gamePath = optionsManager.getOption(OPTIONS_GAMEPATH)
 
     if gamePath is None:
         return False

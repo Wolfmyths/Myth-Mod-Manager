@@ -48,6 +48,14 @@ class Save(ConfigParser):
 
                 self.newMod(arg[0], arg[1])
     
+    def isEnabled(self, mod: str) -> bool:
+        '''Returns if the mod is enabled or not'''
+        return self.getboolean(mod, MOD_ENABLED, fallback=False)
+    
+    def getType(self, mod: str) -> str | None:
+        '''Returns the mod's type, if the mod doesn't exist then returns None'''
+        return self.get(mod, MOD_TYPE, fallback=None)
+    
     def newMod(self, mod: str, type: str) -> None:
             '''
             Adds a new mod to config.ini
@@ -99,6 +107,10 @@ class OptionsManager(ConfigParser):
                 pass
         
         self.read(OPTIONS_CONFIG)
+
+        if not self.has_section(OPTIONS_SECTION):
+            self.add_section(OPTIONS_SECTION)
+            self.writeData()
     
     def __new__(cls) -> Self:
 

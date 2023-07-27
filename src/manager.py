@@ -6,6 +6,7 @@ import PySide6.QtWidgets as qtw
 
 from widgets.listWidget import ModListWidget
 from save import Save, OptionsManager
+import errorChecking
 from constant_vars import MODSIGNORE, TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_SECTION, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MOD_ENABLED, MOD_TYPE, MODS_DISABLED_PATH_DEFAULT, START_PAYDAY_PATH, MOD_LIST_OBJECT, MOD_OVERRIDE_LIST_OBJECT
 
 class ModManager(qtw.QWidget):
@@ -86,18 +87,21 @@ class ModManager(qtw.QWidget):
     
     def checkMod(self, index: int, key: str):
 
+        if not errorChecking.validDefaultDisabledModsPath():
+            os.mkdir(MODS_DISABLED_PATH_DEFAULT)
+
         disabledMods = os.listdir(self.optionsManager.get(OPTIONS_SECTION, OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT))
 
         if self.saveManager.has_section(key) and key in disabledMods:
 
             self.saveManager[key][MOD_ENABLED] = 'False'
 
-        if self.isDisabled(key):
+        if not self.saveManager.isEnabled(key):
 
             # setItemDisabled() disables the currently selected item
             # so an item needs to be selected first
 
-            if self.saveManager.get(key, MOD_TYPE) == TYPE_MODS:
+            if self.saveManager.getType(key) == TYPE_MODS:
 
                 self.mods.setCurrentRow(index)
                 self.mods.setItemNameDisabled(self.mods.item(index))
@@ -131,7 +135,9 @@ class ModManager(qtw.QWidget):
 
             for mod in os.listdir(modsPath):
 
-                if mod not in MODSIGNORE:
+                modPath = os.path.join(modsPath, mod)
+
+                if mod not in MODSIGNORE and errorChecking.getFileType(modPath) == 'dir':
                     
                     mods.append(mod)
 
@@ -140,7 +146,11 @@ class ModManager(qtw.QWidget):
 
             for mod in os.listdir(mod_overridePath):
 
-                mod_override.append(mod)
+                modPath = os.path.join(mod_overridePath, mod)
+
+                if errorChecking.getFileType(modPath) == 'dir':
+
+                    mod_override.append(mod)
 
         # Disabled Mods Folder
         if os.path.exists(disabledModsPath):
@@ -163,17 +173,16 @@ class ModManager(qtw.QWidget):
 
         return [mod_override, mods]
     
-    def isDisabled(self, mod: str) -> bool:
-        return not self.saveManager.getboolean(mod, MOD_ENABLED, fallback=False)
-    
     def startPayday(self):
 
-        gamePath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH)
+        if errorChecking.validGamePath():
 
-        drive = gamePath[0].lower()
+            gamePath = self.optionsManager.get(OPTIONS_SECTION, OPTIONS_GAMEPATH)
 
-        # Starts START_PAYDAY.bat
-        # First argument is to change the directory to the game's directory
-        # Second argument the drive for the cd command
-        # Third argument is the exe name
-        subprocess.call([START_PAYDAY_PATH, gamePath, drive, 'payday2_win32_release.exe'])
+            drive = gamePath[0].lower()
+
+            # Starts START_PAYDAY.bat
+            # First argument is to change the directory to the game's directory
+            # Second argument the drive for the cd command
+            # Third argument is the exe name
+            subprocess.call([START_PAYDAY_PATH, gamePath, drive, 'payday2_win32_release.exe'])

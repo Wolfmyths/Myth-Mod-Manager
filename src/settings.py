@@ -3,6 +3,7 @@ import os
 import PySide6.QtWidgets as qtw
 import PySide6.QtCore as qt
 
+from fileMover import FileMover
 from save import OptionsManager
 from constant_vars import OPTIONS_SECTION, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT
 
@@ -35,9 +36,15 @@ class Options(qtw.QWidget):
         self.disabledModDir.setText(self.optionsManager.get(self.disabledModDir.text(), OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT))
         self.disabledModDir.textChanged.connect(lambda: self.optionsManager.setOption(self.disabledModDir.text(), OPTIONS_DISPATH))
 
+        self.backupModsLabel = qtw.QLabel(self, text='This will backup all of your mods and compress it into a zip file.')
+
+        self.backupMods = qtw.QPushButton(parent=self, text='Backup Mods')
+        self.backupMods.clicked.connect(lambda: self.startBackupMods())
+
         for row in ( (self.noticeLabel, self.noticeLabelDesc),
                      (self.gameDirLabel, self.gameDir),
-                     (self.disabledModLabel, self.disabledModDir) ):
+                     (self.disabledModLabel, self.disabledModDir),
+                     (self.backupModsLabel, self.backupMods) ):
 
             layout.addRow(row[0], row[1])
         
@@ -81,3 +88,17 @@ class Options(qtw.QWidget):
 
             self.noticeLabel.setText('Error:')
             self.noticeLabelDesc.setText('Game Path is not valid')
+    
+    def startBackupMods(self) -> None:
+        
+        outcome = FileMover().backupMods()
+
+        if outcome == 1:
+
+            text = "Mods backed up at MMM's directory"
+
+        else:
+
+            text = 'Error: Mods could not be backed up'
+
+        self.backupModsLabel.setText(text)

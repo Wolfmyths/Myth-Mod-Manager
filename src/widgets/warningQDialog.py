@@ -2,7 +2,7 @@
 import os
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QTimer
+from PySide6.QtCore import QTimer
 
 from save import OptionsManager
 from constant_vars import OPTIONS_SECTION, OPTIONS_GAMEPATH
@@ -12,6 +12,8 @@ class GamePathNotFound(qtw.QDialog):
         super().__init__()
 
         self.QParent = QParent
+
+        self.setWindowTitle('Gamepath Not Found')
 
         self.optionsManager = OptionsManager()
 

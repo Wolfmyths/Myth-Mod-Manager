@@ -1,10 +1,19 @@
 
 import os
+import semantic_version
+
+# Detection if the program is being run through an exe or the script
+IS_SCRIPT = os.path.exists(os.path.join(os.path.dirname(__file__), 'main.py'))
+
+# Root Path
+ROOT_PATH = os.path.abspath(os.path.join(os.curdir, 'src')) if IS_SCRIPT else os.curdir
 
 # File names
 MOD_CONFIG = 'mods.ini'
 OPTIONS_CONFIG = 'config.ini'
 START_PAYDAY = 'runGame.bat'
+DISABLED_MODS = 'disabled-mods'
+BACKUP_MODS = 'backup mods'
 
 # Mod List Object Names
 MOD_OVERRIDE_LIST_OBJECT = 'mod_list_override'
@@ -24,15 +33,17 @@ TYPE_MODS_OVERRIDE = 'mods_override'
 # Option Sections
 OPTIONS_SECTION = 'OPTIONS'
 
-# Keys in a section
+# Keys in OPTIONS_CONFIG
 OPTIONS_GAMEPATH = 'game_path'
 OPTIONS_DISPATH = 'disabled-mods'
 
 # Default Disabled Folder
-MODS_DISABLED_PATH_DEFAULT = os.path.join(os.path.abspath(os.curdir), 'src', OPTIONS_DISPATH)
+MODS_DISABLED_PATH_DEFAULT = os.path.join(ROOT_PATH, DISABLED_MODS)
 
 # START_PAYDAY Path
-START_PAYDAY_PATH = os.path.join(os.path.abspath(os.curdir), 'src', START_PAYDAY)
+START_PAYDAY_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), START_PAYDAY)
 
-# Program Version Number
-VERSION = '1.0'
+# Program Info
+PROGRAM_NAME = 'Myth Mod Manager'
+VERSION = semantic_version.Version(major=1, minor=0, patch=0, prerelease=('beta', '1'))
+IS_PRE_RELEASE = False if len(VERSION.prerelease) == 0 else True

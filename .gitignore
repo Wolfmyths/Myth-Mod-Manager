@@ -39,6 +39,9 @@ mods.ini
 # Disabled Mods Directory
 disabled-mods/
 
+# Backup of mods
+*.zip
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt

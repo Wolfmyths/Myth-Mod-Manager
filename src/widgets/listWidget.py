@@ -1,9 +1,11 @@
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import Qt as qt, QUrl
 
 from widgets.contextMenu import ModContextMenu
+from widgets.deleteWarningQDialog import DeleteModConfirmation
+import errorChecking
 from save import Save, OptionsManager
 from fileMover import FileMover
 from constant_vars import MOD_ENABLED, MOD_LIST_OBJECT, MOD_OVERRIDE_LIST_OBJECT, TYPE_MODS, TYPE_MODS_OVERRIDE
@@ -39,7 +41,7 @@ class ModListWidget(qtw.QListWidget):
         # Uses fallback as False otherwise would result in a NoSectionError
         # A NoSectionError would've been raised anyway if disabled since currentItem().text()...
         # returns the mod name with (disabled) in front of it
-        if not self.saveManager.getboolean(self.currentItem().text(), MOD_ENABLED, fallback=False):
+        if not self.saveManager.isEnabled(self.currentItem().text()):
             return
         
         if self.isMultipleSelected():
@@ -67,7 +69,13 @@ class ModListWidget(qtw.QListWidget):
 
             FileMover().moveToDisabledDir(modName)
     
-    def deleteItem(self):
+    def deleteItem(self) -> None:
+
+        warning = DeleteModConfirmation(self)
+        warning.exec()
+
+        if not warning.result():
+            return
 
         if self.isMultipleSelected():
 
@@ -134,13 +142,16 @@ class ModListWidget(qtw.QListWidget):
     def dragEnterEvent(self, event: qtg.QDragEnterEvent) -> None:
         
         if event.mimeData().hasUrls():
+
             event.accept()
+
         else:
             event.ignore()
     
     def dragMoveEvent(self, event: qtg.QDragMoveEvent) -> None:
         
         if event.mimeData().hasUrls():
+
             event.setDropAction(qt.DropAction.MoveAction)
             event.accept()
         else:
@@ -158,19 +169,26 @@ class ModListWidget(qtw.QListWidget):
             for mod in event.mimeData().urls():
 
                 filepath = mod.toLocalFile()
-                filename = filepath.split('/')[-1]
+
+                if errorChecking.getFileType(filepath) == 'dir':
+
+                    filename = filepath.split('/')[-1]
+                    
+                    # Moving file to the correct dir
+                    FileMover().changeModType(filepath, ChosenDir = listName)
+
+                    # Adding mod to config
+                    self.saveManager.addMods((filename, conversion[listName]))
+
+                    # Adding file to the list
+                    self.addItem(filename)
+
+                    # Sorting items
+                    self.sortItems()
                 
-                # Moving file to the correct dir
-                FileMover().changeModType(filepath, ChosenDir = listName)
-
-                # Adding mod to config
-                self.saveManager.addMods((filename, conversion[listName]))
-
-                # Adding file to the list
-                self.addItem(filename)
-
-                # Sorting items
-                self.sortItems()
+                else:
+                    event.ignore()
+                    return
 
             event.accept()
         else:

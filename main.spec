@@ -1,13 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-
 block_cipher = None
 
 
 a = Analysis(
     ['src\\main.py'],
     pathex=[],
-    binaries=[],
+    binaries=[('src\\runGame.bat', '.')],
     datas=[],
     hiddenimports=[],
     hookspath=[],

@@ -1,16 +1,13 @@
+
 import PySide6.QtWidgets as qtw
+import os
 
 from main_window import MainWindow
 from save import Save, OptionsManager
 from widgets.warningQDialog import GamePathNotFound
-from constant_vars import VERSION
+from constant_vars import VERSION, PROGRAM_NAME
 import errorChecking
 
-##### Notes #####
-#
-# Make only folders in drop events and create runnable .exe
-# Add a are you sure QDialog for deleting files
-# 
 
 if __name__ == '__main__':
 
@@ -18,18 +15,24 @@ if __name__ == '__main__':
 
     app = qtw.QApplication(sys.argv)
 
+    print(os.path.abspath(os.path.dirname(__file__)))
+
     save = Save()
     optionsManager = OptionsManager()
 
+    # If the user agrees to update, the program will shutdown
+    if errorChecking.checkUpdate() == 1:
+        app.shutdown()
+
+    # Checking game path
     if not errorChecking.validGamePath():
         
         warning = GamePathNotFound(app)
         warning.exec()
-
     
 
     window = MainWindow(app)
-    window.setWindowTitle(f'Payday 2 Mod Manager {VERSION}')
+    window.setWindowTitle(f'{PROGRAM_NAME} {VERSION}')
     window.setMinimumSize(800, 800)
     window.show()
 

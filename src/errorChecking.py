@@ -1,7 +1,7 @@
 import os
 import requests
 
-import semantic_version
+from semantic_version import Version
 
 from save import OptionsManager
 from widgets.newUpdateQDialog import updateDetected
@@ -43,7 +43,7 @@ def getFileType(filePath: str) -> str | bool:
 
         elif filePath.endswith(('.zip', '.rar')):
 
-            output = '.zip'
+            output = 'zip'
         
         else:
             raise FileNotFoundError
@@ -55,6 +55,9 @@ def getFileType(filePath: str) -> str | bool:
     finally:
         return output
 
+def isPrerelease(version: Version) -> bool:
+    return len(version.prerelease) != 0
+
 def checkUpdate() -> int:
     '''
     Checks for latest update and returns the result value of the updateDetected() QDialog Widget
@@ -63,15 +66,31 @@ def checkUpdate() -> int:
     '''
 
     try:
-        version = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest').json()['tag_name']
-        version = semantic_version.Version.coerce(version)
+        # If the version is a pre-release, then look for latest pre-release updates as well
+        if isPrerelease(VERSION):
 
-        if version > VERSION:
+            data = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases').json()
 
-            notice = updateDetected(version)
-            notice.exec()
-    except:
+            latestVersion = Version.coerce(data[0]['tag_name'])
+        
+        else:
+
+            latestVersion = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest').json()['tag_name']
+            latestVersion = Version.coerce(latestVersion)
+
+    except Exception as e:
+        print(e)
 
         return 0
     
-    return notice.result()
+    if latestVersion > VERSION:
+
+            notice = updateDetected(latestVersion)
+            notice.exec()
+            result = notice.result()
+
+    else:
+
+        result = 0
+
+    return result

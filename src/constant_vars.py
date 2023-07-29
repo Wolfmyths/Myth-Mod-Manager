@@ -15,9 +15,8 @@ START_PAYDAY = 'runGame.bat'
 DISABLED_MODS = 'disabled-mods'
 BACKUP_MODS = 'backup mods'
 
-# Mod List Object Names
-MOD_OVERRIDE_LIST_OBJECT = 'mod_list_override'
-MOD_LIST_OBJECT = 'mod_list'
+# Mod Table Object Name
+MOD_TABLE_OBJECT = 'mod_table'
 
 # Keys that a mod has
 MOD_ENABLED = 'enabled'
@@ -38,12 +37,11 @@ OPTIONS_GAMEPATH = 'game_path'
 OPTIONS_DISPATH = 'disabled-mods'
 
 # Default Disabled Folder
-MODS_DISABLED_PATH_DEFAULT = os.path.join(ROOT_PATH, DISABLED_MODS)
+MODS_DISABLED_PATH_DEFAULT = os.path.join(os.path.abspath(ROOT_PATH), DISABLED_MODS)
 
 # START_PAYDAY Path
 START_PAYDAY_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), START_PAYDAY)
 
 # Program Info
 PROGRAM_NAME = 'Myth Mod Manager'
-VERSION = semantic_version.Version(major=1, minor=0, patch=0, prerelease=('beta', '1'))
-IS_PRE_RELEASE = False if len(VERSION.prerelease) == 0 else True
+VERSION = semantic_version.Version(major=1, minor=0, patch=0, prerelease=('beta', '2'))

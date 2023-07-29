@@ -3,11 +3,12 @@ import os
 import subprocess
 
 import PySide6.QtWidgets as qtw
+from PySide6.QtCore import Qt as qt
 
-from widgets.listWidget import ModListWidget
+from widgets.tableWidget import ModListWidget
 from save import Save, OptionsManager
 import errorChecking
-from constant_vars import MODSIGNORE, TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MOD_ENABLED, MOD_TYPE, MODS_DISABLED_PATH_DEFAULT, START_PAYDAY_PATH, MOD_LIST_OBJECT, MOD_OVERRIDE_LIST_OBJECT
+from constant_vars import MODSIGNORE, TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MOD_ENABLED, MOD_TYPE, MODS_DISABLED_PATH_DEFAULT, START_PAYDAY_PATH, MOD_TABLE_OBJECT
 
 class ModManager(qtw.QWidget):
 
@@ -30,20 +31,26 @@ class ModManager(qtw.QWidget):
         self.startGame = qtw.QPushButton('Start PAYDAY 2', self)
         self.startGame.clicked.connect(lambda: self.startPayday())
 
-        self.overrideLabel = qtw.QLabel(self)
-
-        self.override = ModListWidget()
-        self.override.setObjectName(MOD_OVERRIDE_LIST_OBJECT)
-
         self.modLabel = qtw.QLabel(self)
 
-        self.mods = ModListWidget()
-        self.mods.setObjectName(MOD_LIST_OBJECT)
+        self.search = qtw.QLineEdit()
+        self.search.setPlaceholderText('Search...')
+        self.search.textChanged.connect(lambda: self.modsTable.keyboardSearch(self.search.text()))
+
+        self.modsTable = ModListWidget()
+        self.modsTable.itemChanged.connect(lambda: self.modLabel.setText(
+            f'''
+            Total Mods: {self.modsTable.rowCount()}
+            Mods: {self.modsTable.getModTypeCount(TYPE_MODS)}
+            Mod_Overrides: {self.modsTable.getModTypeCount(TYPE_MODS_OVERRIDE)}
+            '''))
+        
+        self.modsTable.setObjectName(MOD_TABLE_OBJECT)
 
         self.refreshMods()
 
 
-        for widget in (self.refresh, self.openGameDir, self.startGame, self.overrideLabel, self.override, self.modLabel, self.mods):
+        for widget in (self.refresh, self.openGameDir, self.startGame, self.modLabel, self.search, self.modsTable):
             layout.addWidget(widget)
 
         self.setLayout(layout)
@@ -51,65 +58,71 @@ class ModManager(qtw.QWidget):
     def refreshMods(self) -> None:
         '''Refreshes the mod lists in the manager'''
 
-        # Clear lists if needed
-        if self.override.count() > 0:
-            self.override.clear()
-
-        if self.mods.count() > 0:
-            self.mods.clear()
+        if self.modsTable.rowCount() > 0:
+            for i in range(0, self.modsTable.rowCount() + 1):
+                self.modsTable.removeRow(i)
 
         # Gather mods from directories
         mods = self.getMods()
 
-        # Add mods from their respective dirs into the right list
-        self.override.addItems(mods[0])
-        self.mods.addItems(mods[1])
-
         # Save mods into .ini
         self.saveManager.addMods((mods[0], TYPE_MODS_OVERRIDE), (mods[1], TYPE_MODS))
 
-        self.overrideLabel.setText(f'{TYPE_MODS_OVERRIDE}: {self.override.count()} Mods Installed')
+        # Add mods to the table widget
+        for mod in (x for x in mods[0] + mods[1]):
 
-        self.modLabel.setText(f'{TYPE_MODS}: {self.mods.count()} Mods Installed')
+            type = self.saveManager.getType(mod)
+            isEnabled = self.saveManager.isEnabled(mod)
 
-        # Show which mods are disabled in each list
+            enabled = 'Enabled' if isEnabled else 'Disabled'
 
+            self.modsTable.addMod(name=mod, type=type, enabled=enabled)
+        
         # Checking if each mod is disabled
-        for list in mods:
-
-            for index, key in enumerate(list):
-
-                self.checkMod(index, key)
+        self.checkMods(list(mods[0] + mods[1]))
 
         # Clear selections from the disabled mod check
-        self.mods.clearSelection()
-        self.override.clearSelection()
+        self.modsTable.clearSelection()
+
+        self.modsTable.sort()
     
-    def checkMod(self, index: int, key: str):
+    def checkMods(self, mods: list[str]):
+        '''
+        Checks if enabled mods is in the disabled mods path
+        
+        The mod has to be installed normally first so the program knows
+        where to put it when it becomes enabled again
+        '''
 
         if not errorChecking.validDefaultDisabledModsPath():
             os.mkdir(MODS_DISABLED_PATH_DEFAULT)
-
+        
         disabledMods = os.listdir(self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT))
+        
+        for mod in (x for x in mods):
 
-        if self.saveManager.has_section(key) and key in disabledMods:
+            isInDisabled = mod in disabledMods
+            inSave = self.saveManager.has_section(mod)
 
-            self.saveManager[key][MOD_ENABLED] = 'False'
+            if all((isInDisabled, inSave)):
 
-        if not self.saveManager.isEnabled(key):
-
-            # setItemDisabled() disables the currently selected item
-            # so an item needs to be selected first
-
-            if self.saveManager.getType(key) == TYPE_MODS:
-
-                self.mods.setCurrentRow(index)
-                self.mods.setItemNameDisabled(self.mods.item(index))
+                self.saveManager[mod][MOD_ENABLED] = 'False'
             
             else:
+                continue
 
-                self.override.setCurrentRow(index)
-                self.override.setItemNameDisabled(self.override.item(index))
+            if not self.saveManager.isEnabled(mod):
+
+                item  = self.modsTable.findItems(mod, qt.MatchFlag.MatchExactly)[0]
+
+                row = item.row()
+                    
+                # setItemDisabled() disables the currently selected item
+                # so an item needs to be selected first
+                self.modsTable.selectRow(row)
+
+            if self.modsTable.selectedItems():
+                self.modsTable.setItemDisabled()
 
     def getMods(self) -> list[list[str]]:
         '''
@@ -166,10 +179,6 @@ class ModManager(qtw.QWidget):
                     elif self.saveManager[mod][MOD_TYPE] == TYPE_MODS_OVERRIDE:
 
                         mod_override.append(mod)
-        
-        # Sort lists because the disabled mods folder for loop makes them unsorted
-        mod_override = sorted(mod_override)
-        mods = sorted(mods)
 
         return [mod_override, mods]
     

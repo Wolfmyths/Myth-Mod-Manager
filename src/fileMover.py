@@ -1,9 +1,11 @@
 import shutil
 import os
+from zipfile import ZipFile
 
 from save import Save, OptionsManager
+from widgets.announcementQDialog import Notice
 import errorChecking
-from constant_vars import MOD_TYPE, TYPE_MODS, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, MOD_LIST_OBJECT, MOD_OVERRIDE_LIST_OBJECT, TYPE_MODS_OVERRIDE, BACKUP_MODS, MODSIGNORE
+from constant_vars import MOD_TYPE, TYPE_MODS, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, TYPE_MODS_OVERRIDE, BACKUP_MODS, MODSIGNORE
 
 class FileMover():
     '''
@@ -64,40 +66,100 @@ class FileMover():
     def changeModType(self, mod: str , ChosenDir: None | str = None) -> None:
         '''
         Moves the mod to a new directory
-        
-        This function is used for the listWidget.py drag and drop events
+
+        The arg ChosenDir is used when a brand new mod is introduced,
+        it must be one of the following types
+
+        + TYPE_MODS
+        + TYPE_MODS_OVERRIDE
         '''
 
         gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback='')
         modsDirPath = None
 
+        pathDict = {TYPE_MODS : os.path.join(gamePath, 'mods'), TYPE_MODS_OVERRIDE : os.path.join(gamePath, 'assets', 'mod_overrides')}
+
 
         if self.saveManager.getType(mod) == TYPE_MODS:
 
-            modsDirPath = os.path.join(gamePath, 'mods')
+            modsDirPath = pathDict[TYPE_MODS]
 
-            modDestPath = os.path.join(gamePath, 'assets', 'mod_overrides')
+            modDestPath = pathDict[TYPE_MODS_OVERRIDE]
         
         elif self.saveManager.getType(mod) == TYPE_MODS_OVERRIDE:
 
-            modsDirPath = os.path.join(gamePath, 'assets', 'mod_overrides')
+            modsDirPath = pathDict[TYPE_MODS_OVERRIDE]
 
-            modDestPath = os.path.join(gamePath, 'mods')
+            modDestPath = pathDict[TYPE_MODS]
         
-        elif ChosenDir == MOD_LIST_OBJECT:
+        elif ChosenDir == TYPE_MODS:
 
-            modDestPath = os.path.join(gamePath, 'mods')
+            modDestPath = pathDict[TYPE_MODS]
 
-        elif ChosenDir == MOD_OVERRIDE_LIST_OBJECT:
+        elif ChosenDir == TYPE_MODS_OVERRIDE:
 
-            modDestPath = os.path.join(gamePath, 'assets', 'mod_overrides')
+            modDestPath = pathDict[TYPE_MODS_OVERRIDE]
         
         else:
             return
         
         modPath = os.path.join(modsDirPath, mod) if modsDirPath is not None else mod
 
-        shutil.move(modPath, modDestPath)
+        if not os.path.exists(modDestPath):
+            shutil.move(modPath, modDestPath)
+    
+    def unZipMod(self, src: str, type: str) -> int | tuple[int, str]:
+        '''
+        Unzips a file to a specified directory
+        
+        Type arg needs to be one of the mod types like TYPE_MODS or TYPE_MODS_OVERRIDE
+        otherwise it will result in a keyerror
+
+        If a file was unzipped then it will return a tuple (exitcode, fileName)
+
+        Exit Codes:
+        + 0 : Error
+        + 1 : Success
+        + 2 : .rar is not supported
+        '''
+
+        if os.path.exists(src):
+
+            try:
+
+                gamepath = self.optionsManager.getOption(OPTIONS_GAMEPATH)
+
+                destPathDict = {TYPE_MODS : os.path.join(gamepath, 'mods'), TYPE_MODS_OVERRIDE : os.path.join(gamepath, 'assets', 'mod_overrides')}
+
+                if src.endswith('.rar'):
+
+                    notice = Notice(headline='.rar not supported :(', message="The .rar file format is not supported.\nYou can open the .rar and drag the mod from there.")
+                    notice.exec()
+
+                    exitCode = 2
+
+                else:
+
+                    # Find mod name (.zip version has other not needed info)
+                    for info in ZipFile(src).infolist():
+
+                        if info.is_dir():
+
+                            fileName = info.filename.split('/')[0]
+
+                    shutil.unpack_archive(src, destPathDict[type])
+
+                    exitCode = 1
+
+            except Exception as e:
+
+                print(e)
+
+                exitCode = 0
+
+            finally:
+
+                return exitCode if not fileName else exitCode, fileName
     
     def deleteMod(self, modName: str) -> None:
         '''Removes the mod from the user's computer'''
@@ -116,7 +178,8 @@ class FileMover():
 
         path = os.path.join(pathDict[type], modName)
 
-        shutil.rmtree(path)
+        if os.path.exists(path):
+            shutil.rmtree(path)
     
     def backupMods(self) -> int:
         '''

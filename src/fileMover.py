@@ -25,8 +25,7 @@ class FileMover():
 
         disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
-        if not errorChecking.validDefaultDisabledModsPath():
-            os.mkdir(disabledModsPath)
+        errorChecking.createDisabledModFolder()
 
         # Checking if the mod is already in the disabled mods folder
         if not mod in os.listdir(disabledModsPath):
@@ -48,8 +47,7 @@ class FileMover():
 
         disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
-        if not errorChecking.validDefaultDisabledModsPath():
-            os.mkdir(MODS_DISABLED_PATH_DEFAULT)
+        errorChecking.createDisabledModFolder()
 
         if mod in os.listdir(disabledModsPath):
 
@@ -79,8 +77,15 @@ class FileMover():
 
         pathDict = {TYPE_MODS : os.path.join(gamePath, 'mods'), TYPE_MODS_OVERRIDE : os.path.join(gamePath, 'assets', 'mod_overrides')}
 
+        if ChosenDir == TYPE_MODS:
 
-        if self.saveManager.getType(mod) == TYPE_MODS:
+            modDestPath = pathDict[TYPE_MODS]
+
+        elif ChosenDir == TYPE_MODS_OVERRIDE:
+
+            modDestPath = pathDict[TYPE_MODS_OVERRIDE]
+
+        elif self.saveManager.getType(mod) == TYPE_MODS:
 
             modsDirPath = pathDict[TYPE_MODS]
 
@@ -92,20 +97,19 @@ class FileMover():
 
             modDestPath = pathDict[TYPE_MODS]
         
-        elif ChosenDir == TYPE_MODS:
-
-            modDestPath = pathDict[TYPE_MODS]
-
-        elif ChosenDir == TYPE_MODS_OVERRIDE:
-
-            modDestPath = pathDict[TYPE_MODS_OVERRIDE]
-        
         else:
             return
         
-        modPath = os.path.join(modsDirPath, mod) if modsDirPath is not None else mod
+        modPath = os.path.join(modsDirPath, mod) if ChosenDir is None else mod
 
-        if not os.path.exists(modDestPath):
+        if ChosenDir:
+            doesPathAlreadyExist = os.path.exists(os.path.join(modDestPath, mod.split('/')[-1]))
+            print(os.path.join(modDestPath, mod.split('/')[-1]))
+        else:
+            doesPathAlreadyExist = os.path.exists(os.path.join(modDestPath, mod))
+            print(os.path.join(modDestPath, mod))
+
+        if not doesPathAlreadyExist:
             shutil.move(modPath, modDestPath)
     
     def unZipMod(self, src: str, type: str) -> int | tuple[int, str]:
@@ -130,6 +134,8 @@ class FileMover():
                 gamepath = self.optionsManager.getOption(OPTIONS_GAMEPATH)
 
                 destPathDict = {TYPE_MODS : os.path.join(gamepath, 'mods'), TYPE_MODS_OVERRIDE : os.path.join(gamepath, 'assets', 'mod_overrides')}
+
+                fileName = None
 
                 if src.endswith('.rar'):
 
@@ -275,18 +281,3 @@ class FileMover():
                 shutil.rmtree(bundledFilePath)
             
             return 0
-
-
-    def createDisabledModFolder(self) -> None:
-
-        path = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
-
-        if not os.path.exists(path):
-
-            try:
-
-                os.mkdir(path)
-
-            except FileNotFoundError:
-
-                os.mkdir(MODS_DISABLED_PATH_DEFAULT)

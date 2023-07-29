@@ -5,7 +5,7 @@ from semantic_version import Version
 
 from save import OptionsManager
 from widgets.newUpdateQDialog import updateDetected
-from constant_vars import OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, VERSION
+from constant_vars import OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, VERSION, OPTIONS_DISPATH, OPTIONS_SECTION
 
 def validGamePath() -> bool:
     '''Gets the gamepath from OPTIONS_CONFIG and checks if the paths contains the PAYDAY 2 exe'''
@@ -19,10 +19,35 @@ def validGamePath() -> bool:
 
     return os.path.exists(os.path.join(gamePath, 'payday2_win32_release.exe'))
 
-def validDefaultDisabledModsPath() -> bool:
-    '''Returns if the default disabled mods folder path exists'''
+def createDisabledModFolder() -> None:
+    '''
+    Checks if the OPTIONS_DISPATH path exists, if not, it will try to create a directory there.
 
-    return os.path.exists(MODS_DISABLED_PATH_DEFAULT)
+    If that fails then it will make a directory at the default location if it isn't already there.
+
+    During an exception it will also overwrite the current OPTIONS_DISPATH with the default value
+    to get rid of a faulty path.
+    '''
+
+    optionsManager = OptionsManager()
+
+    path = optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+
+    if not os.path.exists(path):
+
+        try:
+
+            os.mkdir(path)
+
+        except (FileNotFoundError, FileExistsError):
+
+            optionsManager[OPTIONS_SECTION][OPTIONS_DISPATH] = MODS_DISABLED_PATH_DEFAULT
+
+            optionsManager.writeData()
+
+            if not os.path.exists(MODS_DISABLED_PATH_DEFAULT):
+                
+                os.mkdir(MODS_DISABLED_PATH_DEFAULT)
 
 def getFileType(filePath: str) -> str | bool:
     '''

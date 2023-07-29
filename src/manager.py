@@ -68,61 +68,34 @@ class ModManager(qtw.QWidget):
         # Save mods into .ini
         self.saveManager.addMods((mods[0], TYPE_MODS_OVERRIDE), (mods[1], TYPE_MODS))
 
+        # Just incase disabled folder doesn't exist
+        errorChecking.createDisabledModFolder()
+
+        disModFolder = self.optionsManager.getOption(OPTIONS_DISPATH)
+        disModFolderContents = os.listdir(disModFolder)
+
         # Add mods to the table widget
         for mod in (x for x in mods[0] + mods[1]):
 
             type = self.saveManager.getType(mod)
-            isEnabled = self.saveManager.isEnabled(mod)
+            isDisabled = mod in disModFolderContents
 
-            enabled = 'Enabled' if isEnabled else 'Disabled'
+            if isDisabled:
+                self.saveManager[mod][MOD_ENABLED] = 'False'
+                enabled = 'Disabled'
+            else:
+                self.saveManager[mod][MOD_ENABLED] = 'True'
+                enabled = 'Enabled'
 
             self.modsTable.addMod(name=mod, type=type, enabled=enabled)
         
-        # Checking if each mod is disabled
-        self.checkMods(list(mods[0] + mods[1]))
+        # Save changes
+        self.saveManager.writeData()
 
         # Clear selections from the disabled mod check
         self.modsTable.clearSelection()
 
         self.modsTable.sort()
-    
-    def checkMods(self, mods: list[str]):
-        '''
-        Checks if enabled mods is in the disabled mods path
-        
-        The mod has to be installed normally first so the program knows
-        where to put it when it becomes enabled again
-        '''
-
-        if not errorChecking.validDefaultDisabledModsPath():
-            os.mkdir(MODS_DISABLED_PATH_DEFAULT)
-        
-        disabledMods = os.listdir(self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT))
-        
-        for mod in (x for x in mods):
-
-            isInDisabled = mod in disabledMods
-            inSave = self.saveManager.has_section(mod)
-
-            if all((isInDisabled, inSave)):
-
-                self.saveManager[mod][MOD_ENABLED] = 'False'
-            
-            else:
-                continue
-
-            if not self.saveManager.isEnabled(mod):
-
-                item  = self.modsTable.findItems(mod, qt.MatchFlag.MatchExactly)[0]
-
-                row = item.row()
-                    
-                # setItemDisabled() disables the currently selected item
-                # so an item needs to be selected first
-                self.modsTable.selectRow(row)
-
-            if self.modsTable.selectedItems():
-                self.modsTable.setItemDisabled()
 
     def getMods(self) -> list[list[str]]:
         '''

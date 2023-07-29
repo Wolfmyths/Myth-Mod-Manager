@@ -12,8 +12,4 @@ pip install -r %Txt%
 echo Running Pyinstaller
 pyinstaller --clean %Spec% --distpath ./%disFolder%
 
-echo Change Directory
-cd %disFolder%
-
-echo Open Exe
-%Exe%
+echo Installation Finished!

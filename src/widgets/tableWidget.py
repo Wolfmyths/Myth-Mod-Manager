@@ -120,7 +120,7 @@ class ModListWidget(qtw.QTableWidget):
                 case 'type':
                     self.setItem(self.rowCount() - 1, 1, qtw.QTableWidgetItem(value))
 
-                case 'enabled': # This key should be a boolean
+                case 'enabled': # The key to this value should be a boolean
 
                     value = 'Enabled' if value else 'Disabled'
                     self.setItem(self.rowCount() - 1, 2, qtw.QTableWidgetItem(value))
@@ -144,7 +144,7 @@ class ModListWidget(qtw.QTableWidget):
 
             modName = self.getNameItem(row).text()
 
-            if not self.saveManager.isEnabled(modName):
+            if self.saveManager.isEnabled(modName):
 
                 self.saveManager[modName][MOD_ENABLED] = 'False'
 
@@ -194,6 +194,7 @@ class ModListWidget(qtw.QTableWidget):
 
         self.saveManager.writeData()
     
+    # This isn't used anywhere, might be removed
     def isMultipleSelected(self) -> bool:
         return len(self.selectedItems()) > 1
 
@@ -243,6 +244,7 @@ class ModListWidget(qtw.QTableWidget):
                 filepath = mod.toLocalFile()
 
                 fileType = errorChecking.getFileType(filepath)
+                print(fileType)
 
                 if fileType == 'dir' or fileType == 'zip':
 
@@ -255,9 +257,11 @@ class ModListWidget(qtw.QTableWidget):
                     type = popup.type
 
                     if type is not None and fileType == 'dir':
+                        print('passed type is not none and is dir check')
                     
                         # Moving file to the correct dir
                         FileMover().changeModType(filepath, ChosenDir = type)
+                        print('Should be in mod_overrides now')
 
                         # Adding mod to config
                         self.saveManager.addMods((filename, type))
@@ -265,23 +269,28 @@ class ModListWidget(qtw.QTableWidget):
                         # Adding file to the table
                         self.addMod(name=filename, type=type, enabled=True)
 
+                        self.sort()
+
                         event.accept()
                         return
                     
                     elif type is not None and fileType == 'zip':
                         
                         # Outputs a tuple, please see unZipMod documentation
-                        fileName: str = FileMover().unZipMod(filepath, type)[1]
+                        outcome = FileMover().unZipMod(filepath, type)
 
-                        self.saveManager.addMods((fileName, type))
+                        if outcome[0] != 2:
 
-                        self.addMod(name=fileName, type=type, enabled=True)
+                            fileName = outcome[1]
+
+                            self.saveManager.addMods((fileName, type))
+
+                            self.addMod(name=fileName, type=type, enabled=True)
 
                     else:
                         event.ignore()
                         return
                     
-                    # Sorting items
                     self.sort()
                 
                 else:

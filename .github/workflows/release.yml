@@ -20,7 +20,9 @@ jobs:
             python-version: 3.11
 
         - name: Install Requirements
-          run: pip install -r requirements.txt
+          run: |
+               pip install -r requirements.txt
+               echo ${{github.ref}}
         
         - name: Build with PyInstaller
           run: pyinstaller --clean main.spec --distpath "./Myth Mod Manager"

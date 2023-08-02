@@ -19,19 +19,21 @@ jobs:
           with:
             python-version: 3.11
 
-        - name: Build Myth Mod Manager.exe
-          working-directory: ${{github.workspace}}
-          run: createEXE.bat
+        - name: Install Requirements
+          run: pip install -r requirements.txt
+        
+        - name: Build with PyInstaller
+          run: pyinstaller --clean main.spec --distpath "./Myth Mod Manager"
         
         - name: Zip Myth Mod Manager
           uses: vimtor/action-zip@v1
           with:
-            files: "${{github.workspace}}/Myth Mod Manager"
+            files: "Myth Mod Manager"
             recursive: false
-            dest: ${{github.workspace}}/Myth-Mod-Manager.zip
+            dest: Myth-Mod-Manager.zip
 
         - name: Upload Myth Mod Manager to Latest Release Assets
           uses: softprops/action-gh-release@v1
           if: startsWith(github.ref, 'refs/tags/')
           with:
-            files: ${{github.workspace}}/Myth-Mod-Manager.zip
+            files: Myth-Mod-Manager.zip

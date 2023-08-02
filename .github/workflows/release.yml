@@ -1,0 +1,36 @@
+
+name: Build into Executables And Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+  
+jobs:
+  BuildAndUploadToReleaseAssets:
+    runs-on: windows-latest
+
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+
+        - name: Set up Python
+          uses: actions/setup-python@v3
+          with:
+            python-version: 3.11
+
+        - name: Build Myth Mod Manager.exe
+          run: createEXE.bat
+        
+        - name: Zip Myth Mod Manager
+          uses: vimtor/action-zip@v1
+          with:
+            files: "${{github.workspace}}/Myth Mod Manager"
+            recursive: false
+            dest: Myth-Mod-Manager.zip
+
+        - name: Upload Myth Mod Manager to Latest Release Assets
+          uses: softprops/action-gh-release@v1
+          if: startsWith(github.ref, 'refs/tags/')
+          with:
+            files: Myth-Mod-Manager.zip

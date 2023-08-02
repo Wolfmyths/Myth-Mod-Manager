@@ -1,5 +1,6 @@
 
 import os
+import logging
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
@@ -19,6 +20,8 @@ class ModListWidget(qtw.QTableWidget):
 
     def __init__(self) -> None:
         super().__init__()
+
+        logging.getLogger(__name__)
 
         self.saveManager = Save()
         self.optionsManager = OptionsManager()
@@ -109,6 +112,8 @@ class ModListWidget(qtw.QTableWidget):
             sortType = qt.SortOrder.AscendingOrder
         else:
             sortType = qt.SortOrder.DescendingOrder
+        
+        logging.debug('Sorting items by col: %s, ascending: %s', self.sortState.get('col'), self.sortState.get('ascending'))
 
 
         self.sortItems(self.sortState['col'], sortType)
@@ -174,6 +179,9 @@ class ModListWidget(qtw.QTableWidget):
                 self.getEnabledItem(row).setText('Disabled')
 
                 StartFileMover(0, modName)
+
+            else:
+                logging.info('%s is already disabled in the save file', modName)
     
     def deleteItem(self) -> None:
         '''
@@ -251,9 +259,11 @@ class ModListWidget(qtw.QTableWidget):
                 self.saveManager[mod][MOD_ENABLED] = 'True'
             else:
                 self.saveManager[mod][MOD_ENABLED] = 'False'
+            
+            logging.debug('Adding mod to table, %s|%s|%s', mod, type, isEnabled)
 
             self.addMod(name=mod, type=type, enabled=isEnabled)
-        
+
         # Save changes
         self.saveManager.writeData()
 
@@ -293,6 +303,8 @@ class ModListWidget(qtw.QTableWidget):
                 if mod not in MODSIGNORE and errorChecking.getFileType(modPath) == 'dir':
                     
                     mods.append(mod)
+        else:
+            logging.error('The mods path does not exist:\n%s\nSkipping...', modsPath)
 
         # mod_override Folder
         if os.path.exists(mod_overridePath):
@@ -304,8 +316,10 @@ class ModListWidget(qtw.QTableWidget):
                 if errorChecking.getFileType(modPath) == 'dir':
 
                     mod_override.append(mod)
+        else:
+            logging.error('The mod_overrides path does not exist:\n%s\nSkipping...', mod_overridePath)
 
-                # mod_override Folder
+        # mod_override Folder
         if os.path.exists(maps_path):
 
             for mod in os.listdir(maps_path):
@@ -315,6 +329,10 @@ class ModListWidget(qtw.QTableWidget):
                 if errorChecking.getFileType(modPath) == 'dir':
 
                     maps.append(mod)
+        else:
+            logging.error('The modded maps path does not exist:\n%s\nSkipping...', maps_path)
+
+        errorChecking.createDisabledModFolder()
 
         # Disabled Mods Folder
         if os.path.exists(disabledModsPath):
@@ -336,6 +354,8 @@ class ModListWidget(qtw.QTableWidget):
                     elif modType == TYPE_MAPS:
 
                         maps.append(mod)
+                else:
+                    logging.error('%s needs to be installed first before becoming disabled', mod)
 
         return [mod_override, mods, maps]
     
@@ -399,8 +419,10 @@ class ModListWidget(qtw.QTableWidget):
                 rars: list[str] = []
 
                 for mod in urls:
+                    logging.info('Beginning to install %s via drop event', mod.fileName())
 
                     fileType = errorChecking.getFileType(mod.toLocalFile())
+                    logging.debug('File Type: %s', fileType)
 
                     if fileType == 'dir':
                         dirs.append(mod)
@@ -422,7 +444,7 @@ class ModListWidget(qtw.QTableWidget):
                 dict_ = notice.typeDict
 
                 if len(dict_) != len(dirs + zips):
-                    raise Exception('Canceled choosing new mod directories')
+                    raise Exception('canceled')
 
                 # Combine the mod location and URL into a Tuple
                 if dirs:
@@ -450,6 +472,8 @@ class ModListWidget(qtw.QTableWidget):
         except Exception as e:
             if str(e) == 'rar':
 
+                logging.warning('The following are rar files:\n%s\nThis file type is not supported :(', '\n'.join(rars))
+
                 # \n is not allowed in a f string prior to Python 3.12
                 nl = '\n'
 
@@ -462,8 +486,11 @@ class ModListWidget(qtw.QTableWidget):
                 rarError = Notice(headline='.rar not supported :(', message=msg)
                 rarError.exec()
 
+            elif str(e) == 'canceled':
+                logging.info('Table widget drop event has been canceled')
+
             else:
-                print(e)
+                logging.error('An error occured in the table widget drop event:\n%s', str(e))
         finally:
             event.ignore()
             

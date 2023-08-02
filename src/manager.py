@@ -1,11 +1,12 @@
 
 import os
 import subprocess
+import logging
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
 
 from widgets.tableWidget import ModListWidget
+from widgets.announcementQDialog import Notice
 from save import Save, OptionsManager
 import errorChecking
 from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_GAMEPATH, START_PAYDAY_PATH, MOD_TABLE_OBJECT, TYPE_MAPS
@@ -69,3 +70,9 @@ class ModManager(qtw.QWidget):
             # Second argument the drive for the cd command
             # Third argument is the exe name
             subprocess.call([START_PAYDAY_PATH, gamePath, drive, 'payday2_win32_release.exe'])
+        else:
+            
+            logging.error('Could not start PAYDAY 2, could not find payday2_win32_release.exe in:\n%s', gamePath)
+
+            notice = Notice(f'Could not find payday2_win32_release.exe in:\n{gamePath}', 'Error: Invalid Gamepath')
+            notice.exec()

@@ -1,4 +1,5 @@
-from typing import Self
+
+import logging
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
@@ -24,6 +25,8 @@ class StartFileMover(qtw.QDialog):
 
     def __init__(self, mode: int, *args) -> None:
         super().__init__()
+
+        logging.getLogger(__name__)
 
         self.setWindowTitle('Update Notice')
 
@@ -84,7 +87,7 @@ class StartFileMover(qtw.QDialog):
         Sets the cancel flag to true in which FileMover() will exit the function
         after it's done a step and pass the success signal
         '''
-
+        logging.info('Task was canceled...')
         self.warningLabel.setText('Canceling...')
 
         self.fileMover.cancel = True

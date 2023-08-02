@@ -1,10 +1,13 @@
 
 import webbrowser
+import logging
+
+import PySide6.QtWidgets as qtw
+
 from semantic_version import Version
 
 from constant_vars import VERSION
-
-import PySide6.QtWidgets as qtw
+from widgets.announcementQDialog import Notice
 
 class updateDetected(qtw.QDialog):
     def __init__(self, newVersion: Version) -> None:
@@ -28,8 +31,14 @@ class updateDetected(qtw.QDialog):
         self.setLayout(layout)
     
     def accept(self) -> None:
+        try:
+            webbrowser.open_new_tab('https://github.com/Wolfmyths/Myth-Mod-Manager/releases/latest')
+        except Exception as e:
 
-        webbrowser.open_new_tab('https://github.com/Wolfmyths/Myth-Mod-Manager/releases/latest')
+            logging.error('Could not open web browser:\n%s', str(e))
+
+            notice = Notice(f'Could not connect to webpage:\n{e}', 'Error:')
+            notice.exec()
 
         self.setResult(1)
 

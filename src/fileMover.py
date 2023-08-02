@@ -1,10 +1,10 @@
 import shutil
 import os
+import logging
 
 from PySide6.QtCore import QThread, Signal, QUrl
 
 from save import Save, OptionsManager
-from widgets.announcementQDialog import Notice
 from getPath import Pathing
 import errorChecking
 from constant_vars import MOD_TYPE, TYPE_MODS, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, TYPE_MODS_OVERRIDE, BACKUP_MODS, MODSIGNORE, TYPE_MAPS
@@ -49,6 +49,8 @@ class FileMover(QThread):
     def __init__(self, mode: int, *args):
         super().__init__()
 
+        logging.getLogger(__name__)
+
         self.mode = mode
 
         self.args = args
@@ -66,6 +68,8 @@ class FileMover(QThread):
                          5 : self.backupMods}
     
     def run(self) -> None:
+
+        logging.info('Starting thread for FileMover, mode %s', str(self.mode))
 
         self.modeDict[self.mode]()
 
@@ -92,6 +96,8 @@ class FileMover(QThread):
                 modPath = self.p.mod(self.saveManager.getType(mod), mod)
 
                 shutil.move(modPath, disabledModsPath)
+            else:
+                logging.info('%s is already in the disabled directory', mod)
         
         self.succeeded.emit()
 
@@ -115,6 +121,8 @@ class FileMover(QThread):
                 modDestPath = self.p.mod(self.saveManager.getType(mod), mod)
 
                 shutil.move(os.path.join(disabledModsPath, mod), modDestPath)
+            else:
+                logging.warning('%s was not found in:\n%s\nIgnoring...', mod, disabledModsPath)
         
         self.succeeded.emit()
     
@@ -130,16 +138,13 @@ class FileMover(QThread):
         ChosenDir = None
         
         for mod in mods:
-            
-            # If the current set of args are URLs to folders
-            if type(mod) == tuple:
 
-                modURL = mod[0]
-                ChosenDir = mod[1]
-                
-                modsDirPath = modURL.toLocalFile()
+            modURL = mod[0]
+            ChosenDir = mod[1]
 
-                mod = modURL.fileName()
+            modsDirPath = modURL.toLocalFile()
+
+            mod = modURL.fileName()
 
             self.setCurrentProgress.emit(1, f'Installing {mod}')
 
@@ -179,14 +184,14 @@ class FileMover(QThread):
                 if os.path.exists(src):
 
                         if src.endswith('.rar'):
-
-                            self.rarNotSupported.emit(mod)
-
+                            logging.warning('%s is a .rar, which is not supported, skipping...', mod)
                             continue
 
                         shutil.unpack_archive(src, modDestDict[type])
 
         except Exception as e:
+
+            logging.error('An error was raised in FileMover.unZipMod():\n%s', str(e))
 
             self.error.emit(str(e))
         
@@ -215,6 +220,8 @@ class FileMover(QThread):
 
             if os.path.exists(path):
                 shutil.rmtree(path)
+            else:
+                logging.error('An error was raised in FileMover.deleteMod(), mod path does not exist:\n%s', path)
 
         self.succeeded.emit()
 
@@ -291,6 +298,8 @@ class FileMover(QThread):
                 # shutil.copytree() can't overwrite files, so if it already exists it must be deleted first
                 if os.path.exists(output):
 
+                    logging.info('%s already exists within the backup, overwriting...', mod)
+
                     shutil.rmtree(output)
 
                 shutil.copytree(src, output)
@@ -316,4 +325,5 @@ class FileMover(QThread):
                 shutil.rmtree(bundledFilePath)
 
             if not self.cancel:
+                logging.error('Something went wrong in FileSaver.backupMods():\n%s', str(e))
                 self.error.emit(str(e))

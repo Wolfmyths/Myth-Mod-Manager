@@ -20,6 +20,7 @@ jobs:
             python-version: 3.11
 
         - name: Build Myth Mod Manager.exe
+          working-directory: ${{github.workspace}}
           run: createEXE.bat
         
         - name: Zip Myth Mod Manager
@@ -27,10 +28,10 @@ jobs:
           with:
             files: "${{github.workspace}}/Myth Mod Manager"
             recursive: false
-            dest: Myth-Mod-Manager.zip
+            dest: ${{github.workspace}}/Myth-Mod-Manager.zip
 
         - name: Upload Myth Mod Manager to Latest Release Assets
           uses: softprops/action-gh-release@v1
           if: startsWith(github.ref, 'refs/tags/')
           with:
-            files: Myth-Mod-Manager.zip
+            files: ${{github.workspace}}/Myth-Mod-Manager.zip

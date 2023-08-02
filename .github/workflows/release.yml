@@ -28,7 +28,7 @@ jobs:
           run: pyinstaller --clean main.spec --distpath "./Myth Mod Manager"
         
         - name: Zip Myth Mod Manager
-          run: tar -a -c -f Myth-Mod-Manager.zip "./Myth Mod Manager"
+          run: tar -a -c -f Myth-Mod-Manager.zip "Myth Mod Manager/Myth Mod Manager.exe"
 
         - name: Upload Myth Mod Manager to Latest Release Assets
           uses: softprops/action-gh-release@v1

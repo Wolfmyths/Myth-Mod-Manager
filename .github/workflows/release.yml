@@ -28,11 +28,7 @@ jobs:
           run: pyinstaller --clean main.spec --distpath "./Myth Mod Manager"
         
         - name: Zip Myth Mod Manager
-          uses: vimtor/action-zip@v1
-          with:
-            files: "Myth Mod Manager"
-            recursive: false
-            dest: Myth-Mod-Manager.zip
+          run: tar -a -c -f Myth-Mod-Manager.zip "./Myth Mod Manager"
 
         - name: Upload Myth Mod Manager to Latest Release Assets
           uses: softprops/action-gh-release@v1

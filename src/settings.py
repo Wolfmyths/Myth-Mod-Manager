@@ -3,7 +3,7 @@ import os
 import PySide6.QtWidgets as qtw
 import PySide6.QtCore as qt
 
-from fileMover import FileMover
+from widgets.progressWidget import StartFileMover
 from save import OptionsManager
 from constant_vars import OPTIONS_SECTION, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT
 
@@ -116,14 +116,5 @@ class Options(qtw.QWidget):
     
     def startBackupMods(self) -> None:
         
-        outcome = FileMover().backupMods()
-
-        if outcome == 1:
-
-            self.noticeLabel.setText('Success:')
-            self.noticeLabelDesc.setText("Your backup has been saved to the manager's directory")
-
-        else:
-
-            self.noticeLabel.setText('Error:')
-            self.noticeLabelDesc.setText('Something went wrong, changes have been reverted.')
+        startFileMover = StartFileMover(5)
+        startFileMover.exec()

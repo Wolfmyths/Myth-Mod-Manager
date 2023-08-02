@@ -14,6 +14,7 @@ OPTIONS_CONFIG = 'config.ini'
 START_PAYDAY = 'runGame.bat'
 DISABLED_MODS = 'disabled-mods'
 BACKUP_MODS = 'backup mods'
+LOG = 'log.txt'
 
 # Mod Table Object Name
 MOD_TABLE_OBJECT = 'mod_table'
@@ -26,8 +27,10 @@ MOD_TYPE = 'type'
 MODSIGNORE = ('base', 'logs', 'saves', 'downloads')
 
 # The type of mods
-TYPE_MODS = 'mods'
-TYPE_MODS_OVERRIDE = 'mods_override'
+TYPE_ALL = ('mods', 'mods_override', 'maps')
+TYPE_MODS = TYPE_ALL[0]
+TYPE_MODS_OVERRIDE = TYPE_ALL[1]
+TYPE_MAPS = TYPE_ALL[2]
 
 # Option Sections
 OPTIONS_SECTION = 'OPTIONS'
@@ -44,4 +47,4 @@ START_PAYDAY_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), STA
 
 # Program Info
 PROGRAM_NAME = 'Myth Mod Manager'
-VERSION = semantic_version.Version(major=1, minor=0, patch=0, prerelease=('beta', '2'))
+VERSION = semantic_version.Version(major=1, minor=0, patch=0, prerelease=('beta', '3'))

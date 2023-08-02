@@ -1,23 +1,32 @@
 
+import os
+import logging
+
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import Qt as qt, QUrl
 
 from widgets.contextMenu import ModContextMenu
+from widgets.progressWidget import StartFileMover
 from widgets.deleteWarningQDialog import DeleteModConfirmation
 from widgets.newModQDialog import newModLocation
+from widgets.announcementQDialog import Notice
+from getPath import Pathing
 import errorChecking
 from save import Save, OptionsManager
-from fileMover import FileMover
-from constant_vars import MOD_ENABLED, TYPE_MODS, TYPE_MODS_OVERRIDE
+from constant_vars import MOD_ENABLED, TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_DISPATH, MODSIGNORE, MODS_DISABLED_PATH_DEFAULT, TYPE_MAPS
 
 class ModListWidget(qtw.QTableWidget):
 
     def __init__(self) -> None:
         super().__init__()
 
+        logging.getLogger(__name__)
+
         self.saveManager = Save()
         self.optionsManager = OptionsManager()
+
+        self.p = Pathing()
 
         self.setSelectionMode(qtw.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.setSelectionBehavior(qtw.QAbstractItemView.SelectionBehavior.SelectRows)
@@ -65,16 +74,27 @@ class ModListWidget(qtw.QTableWidget):
     def getTypeItem(self, row: int) -> qtw.QTableWidgetItem:
         return self.item(row, 1)
     
+    def getSelectedNameItems(self) -> list[qtw.QTableWidgetItem]:
+        return self.selectedItems()[::self.columnCount()]
+    
     def getModTypeCount(self, modType: str) -> int | None:
         '''
-        Returns the modtype count in the table,
+        Returns the specified modtype count in the table,
         if an invalid parameter is passed then return None
+
+        Only mod types are allowed
         '''
 
-        if modType in (TYPE_MODS, TYPE_MODS_OVERRIDE):
+        if errorChecking.isTypeMod(modType):
             return len(self.findItems(modType, qt.MatchFlag.MatchExactly))
     
-    def changeSortState(self, header) -> None:
+    def changeSortState(self, header: int) -> None:
+        '''
+        Changes the sort state based off the header's index that wants to be sorted
+        
+        If the header is already the one being sorted, then reverse the order from
+        ascending to descending
+        '''
 
         if self.sortState['col'] == header:
 
@@ -85,12 +105,15 @@ class ModListWidget(qtw.QTableWidget):
         self.sort()
     
     def sort(self):
+        '''Sorts the table widget based on the sort state, see changeSortState()'''
 
         if self.sortState['ascending']:
 
             sortType = qt.SortOrder.AscendingOrder
         else:
             sortType = qt.SortOrder.DescendingOrder
+        
+        logging.debug('Sorting items by col: %s, ascending: %s', self.sortState.get('col'), self.sortState.get('ascending'))
 
 
         self.sortItems(self.sortState['col'], sortType)
@@ -129,20 +152,23 @@ class ModListWidget(qtw.QTableWidget):
                     continue
     
     def setItemDisabled(self) -> None:
-        '''Sets one or more mods to be disabled in MOD_CONFIG and in the GUI'''
+        '''
+        Sets one or more mods to be disabled in MOD_CONFIG and in the GUI
+        
+        If the mod specified is enabled already then continue to the next
+        iteration
+        '''
 
-        # Return if already disabled
-        # Uses fallback as False otherwise would result in a NoSectionError
-        # A NoSectionError would've been raised anyway if disabled since currentItem().text()...
-        # returns the mod name with (disabled) in front of it
+        items = self.getSelectedNameItems()
 
-        items = self.selectedItems()
+        startFileMover = StartFileMover(0, *[x.text() for x in items])
+        startFileMover.exec()
 
-        for i in range(0, len(items), self.columnCount()):
+        for item in items:
 
-            row = items[i].row()
+            row = item.row()
 
-            modName = self.getNameItem(row).text()
+            modName = item.text()
 
             if self.saveManager.isEnabled(modName):
 
@@ -152,52 +178,202 @@ class ModListWidget(qtw.QTableWidget):
 
                 self.getEnabledItem(row).setText('Disabled')
 
-                FileMover().moveToDisabledDir(modName)
+                StartFileMover(0, modName)
+
+            else:
+                logging.info('%s is already disabled in the save file', modName)
     
     def deleteItem(self) -> None:
+        '''
+        Deletes an row from the GUI,
+        and the mod assosiated with that row from the user's PC
+        '''
 
         warning = DeleteModConfirmation(self)
         warning.exec()
 
         if warning.result():
 
-            items = self.selectedItems()
+            items = self.getSelectedNameItems()
 
-            for i in range(0, len(items), self.columnCount()):
+            startFileMover = StartFileMover(4, *[x.text() for x in items])
+            startFileMover.exec()
 
-                mod = items[i]
+            for item in items:
 
-                modName = mod.text()
-
-                row = items[i].row()
-
-                FileMover().deleteMod(modName)
+                row = item.row()
 
                 self.removeRow(row)
+            
+            self.itemChanged.emit(*items)
     
     def setItemEnabled(self) -> None:
         '''Sets one or more mods to be enabled in MOD_CONFIG and in the GUI'''
 
-        items = self.selectedItems()
+        items = self.getSelectedNameItems()
 
-        for i in range(0, len(items), self.columnCount()):
+        startFileMover = StartFileMover(1, *[x.text() for x in items])
+        startFileMover.exec()
 
-            row = items[i].row()
+        for item in items:
 
-            modName = self.getNameItem(row).text()
+            row = item.row()
+
+            modName = item.text()
 
             self.saveManager[modName][MOD_ENABLED] = 'True'
-
-            FileMover().moveToEnableModDir(modName)
 
             self.getEnabledItem(row).setText('Enabled')
 
         self.saveManager.writeData()
     
-    # This isn't used anywhere, might be removed
+    # This isn't used anywhere, might be removed later
     def isMultipleSelected(self) -> bool:
         return len(self.selectedItems()) > 1
+    
+    def refreshMods(self, sorting: bool = True) -> None:
+        '''Refreshes the mod lists in the manager'''
 
+        if self.rowCount() > 0:
+            self.setRowCount(0)
+
+        # Gather mods from directories
+        mods = self.getMods()
+
+        # Save mods into .ini
+        self.saveManager.addMods((mods[0], TYPE_MODS_OVERRIDE), (mods[1], TYPE_MODS), (mods[2], TYPE_MAPS))
+
+        # Just incase disabled folder doesn't exist
+        errorChecking.createDisabledModFolder()
+
+        disModFolder = self.optionsManager.getOption(OPTIONS_DISPATH)
+        disModFolderContents = os.listdir(disModFolder)
+
+        # Add mods to the table widget
+        for mod in (x for x in mods[0] + mods[1] + mods[2]):
+
+            type = self.saveManager.getType(mod)
+            isEnabled = mod not in disModFolderContents
+
+            if isEnabled:
+                self.saveManager[mod][MOD_ENABLED] = 'True'
+            else:
+                self.saveManager[mod][MOD_ENABLED] = 'False'
+            
+            logging.debug('Adding mod to table, %s|%s|%s', mod, type, isEnabled)
+
+            self.addMod(name=mod, type=type, enabled=isEnabled)
+
+        # Save changes
+        self.saveManager.writeData()
+
+        # Clear selections from the disabled mod check
+        self.clearSelection()
+
+        if sorting:
+            self.sort()
+
+    def getMods(self) -> list[list[str]]:
+        '''
+        Returns a list of two lists that have all of the mods from 
+        "\\mods" and "\\assets\\mod_overrides"
+
+        Index 0 is "\\assets\\mod_overrides", index 1 is "\\mods"
+        '''
+
+        mod_override: list[str] = []
+        mods: list[str] = []
+        maps: list[str] = []
+
+        modsPath = self.p.mods()
+
+        mod_overridePath = self.p.mod_overrides()
+
+        maps_path = self.p.maps()
+
+        disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+
+        # Mods Folder
+        if os.path.exists(modsPath):
+
+            for mod in os.listdir(modsPath):
+
+                modPath = os.path.join(modsPath, mod)
+
+                if mod not in MODSIGNORE and errorChecking.getFileType(modPath) == 'dir':
+                    
+                    mods.append(mod)
+        else:
+            logging.error('The mods path does not exist:\n%s\nSkipping...', modsPath)
+
+        # mod_override Folder
+        if os.path.exists(mod_overridePath):
+
+            for mod in os.listdir(mod_overridePath):
+
+                modPath = os.path.join(mod_overridePath, mod)
+
+                if errorChecking.getFileType(modPath) == 'dir':
+
+                    mod_override.append(mod)
+        else:
+            logging.error('The mod_overrides path does not exist:\n%s\nSkipping...', mod_overridePath)
+
+        # mod_override Folder
+        if os.path.exists(maps_path):
+
+            for mod in os.listdir(maps_path):
+
+                modPath = os.path.join(maps_path, mod)
+
+                if errorChecking.getFileType(modPath) == 'dir':
+
+                    maps.append(mod)
+        else:
+            logging.error('The modded maps path does not exist:\n%s\nSkipping...', maps_path)
+
+        errorChecking.createDisabledModFolder()
+
+        # Disabled Mods Folder
+        if os.path.exists(disabledModsPath):
+            
+            for mod in os.listdir(disabledModsPath):
+
+                if self.saveManager.has_section(mod):
+
+                    modType = self.saveManager.getType(mod)
+                    
+                    if modType == TYPE_MODS:
+
+                        mods.append(mod)
+                    
+                    elif modType == TYPE_MODS_OVERRIDE:
+
+                        mod_override.append(mod)
+                    
+                    elif modType == TYPE_MAPS:
+
+                        maps.append(mod)
+                else:
+                    logging.error('%s needs to be installed first before becoming disabled', mod)
+
+        return [mod_override, mods, maps]
+    
+    def search(self, input: str) -> None:
+
+        results = self.findItems(f'{input}*', qt.MatchFlag.MatchWildcard | qt.MatchFlag.MatchExactly)
+
+        for i in range(0, self.rowCount() + 1):
+
+            item = self.item(i, 0)
+
+            if item not in results:
+                self.setRowHidden(i, True)
+            else:
+                self.setRowHidden(i, False)
+
+
+# EVENTS
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
 
         if event.button() == qt.MouseButton.RightButton:
@@ -227,77 +403,94 @@ class ModListWidget(qtw.QTableWidget):
     def dropEvent(self, event: qtg.QDropEvent) -> None:
 
         '''
-        All cases except where files can be moved should end in `return event.ignore()`
+        All cases except where files can be moved should end in `event.ignore()` then `return`
         to prevent the file from automatically being put into the recycling bin
 
         The only exception to this is when the file being dropped is a regular folder
         '''
-
-        if event.mimeData().hasUrls():            
-
-            event.setDropAction(qt.DropAction.MoveAction)
-
-            urls = event.mimeData().urls()
-
-            for mod in urls:
-
-                filepath = mod.toLocalFile()
-
-                fileType = errorChecking.getFileType(filepath)
-                print(fileType)
-
-                if fileType == 'dir' or fileType == 'zip':
-
-                    filename = filepath.split('/')[-1]
-
-                    # Pop up asking what directory it belongs to
-                    popup = newModLocation(filename)
-                    popup.exec()
-
-                    type = popup.type
-
-                    if type is not None and fileType == 'dir':
-                        print('passed type is not none and is dir check')
-                    
-                        # Moving file to the correct dir
-                        FileMover().changeModType(filepath, ChosenDir = type)
-                        print('Should be in mod_overrides now')
-
-                        # Adding mod to config
-                        self.saveManager.addMods((filename, type))
-
-                        # Adding file to the table
-                        self.addMod(name=filename, type=type, enabled=True)
-
-                        self.sort()
-
-                        event.accept()
-                        return
-                    
-                    elif type is not None and fileType == 'zip':
-                        
-                        # Outputs a tuple, please see unZipMod documentation
-                        outcome = FileMover().unZipMod(filepath, type)
-
-                        if outcome[0] != 2:
-
-                            fileName = outcome[1]
-
-                            self.saveManager.addMods((fileName, type))
-
-                            self.addMod(name=fileName, type=type, enabled=True)
-
-                    else:
-                        event.ignore()
-                        return
-                    
-                    self.sort()
+        try:
+            if event.mimeData().hasUrls():
                 
-                else:
+                # Get QUrls
+                urls = event.mimeData().urls()
+
+                dirs: list[QUrl] = []
+                zips: list[QUrl] = []
+                rars: list[str] = []
+
+                for mod in urls:
+                    logging.info('Beginning to install %s via drop event', mod.fileName())
+
+                    fileType = errorChecking.getFileType(mod.toLocalFile())
+                    logging.debug('File Type: %s', fileType)
+
+                    if fileType == 'dir':
+                        dirs.append(mod)
+
+                    elif fileType == 'zip':
+                        zips.append(mod)
                     
-                    continue
+                    elif fileType == 'rar':
+                        rars.append(mod.fileName())
+                
+                # If there are any rar files, raise this error
+                if len(rars):
+                    raise Exception('rar')
 
-            event.ignore()
+                # Gather where the user wants each mod to go
+                notice = newModLocation(*list(dirs + zips))
+                notice.exec()
 
-        else:
+                dict_ = notice.typeDict
+
+                if len(dict_) != len(dirs + zips):
+                    raise Exception('canceled')
+
+                # Combine the mod location and URL into a Tuple
+                if dirs:
+
+                    dirTuple: list[tuple[QUrl, str]] = []
+
+                    for dir in dirs:
+                        dirTuple.append((dir, dict_.get( dir.fileName() )))
+
+                    startFileMover = StartFileMover(2, *dirTuple)
+                    startFileMover.exec()
+
+                if zips:
+
+                    zipsTuple: list[tuple[QUrl, str]] = []
+
+                    for zip in zips:
+                        zipsTuple.append((zip, dict_.get( zip.fileName() )))
+
+                    startFileMover = StartFileMover(3, *zipsTuple)
+                    startFileMover.exec()
+                
+                self.refreshMods()
+
+        except Exception as e:
+            if str(e) == 'rar':
+
+                logging.warning('The following are rar files:\n%s\nThis file type is not supported :(', '\n'.join(rars))
+
+                # \n is not allowed in a f string prior to Python 3.12
+                nl = '\n'
+
+                msg = f"""
+                Mod(s) Effected: {nl.join(rars)}\n
+                The .rar file format is not supported.\n
+                You can open the .rar and drag the mod from there.
+                """
+
+                rarError = Notice(headline='.rar not supported :(', message=msg)
+                rarError.exec()
+
+            elif str(e) == 'canceled':
+                logging.info('Table widget drop event has been canceled')
+
+            else:
+                logging.error('An error occured in the table widget drop event:\n%s', str(e))
+        finally:
             event.ignore()
+            

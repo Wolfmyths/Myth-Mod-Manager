@@ -1,5 +1,6 @@
 
 import os
+import logging
 from typing import Self
 
 from configparser import ConfigParser
@@ -10,8 +11,11 @@ class Save(ConfigParser):
     def __init__(self) -> None:
         super().__init__()
 
+        logging.getLogger(__name__)
+
         # Ensuring that MOD_CONFIG exists
         if not os.path.exists(MOD_CONFIG):
+            logging.warning('%s does not exist, creating...', MOD_CONFIG)
             
             # Create a new .ini
             with open(MOD_CONFIG, 'w') as f:
@@ -85,6 +89,8 @@ class Save(ConfigParser):
     def clearModData(self) -> None:
         '''Wipes the MOD_CONFIG's data'''
 
+        logging.info('DELETING MODS FROM %s', MOD_CONFIG)
+
         self.clear()
 
         self.writeData()
@@ -94,6 +100,8 @@ class Save(ConfigParser):
         with open(MOD_CONFIG, 'w') as f:
 
             self.write(f)
+        
+        logging.debug('%s has been saved', MOD_CONFIG)
 
 class OptionsManager(ConfigParser):
     def __init__(self) -> None:
@@ -101,7 +109,8 @@ class OptionsManager(ConfigParser):
 
         # Ensuring that OPTIONS_CONFIG exists
         if not os.path.exists(OPTIONS_CONFIG):
-            
+            logging.warning('%s does not exist, creating...', OPTIONS_CONFIG)
+
             # Create a new .ini
             with open(OPTIONS_CONFIG, 'w') as f:
                 pass
@@ -132,15 +141,15 @@ class OptionsManager(ConfigParser):
         self[section][option] = value
 
         self.writeData()
-    
+
     def getOption(self, option: str, fallback= None) -> str | None:
         return self.get(OPTIONS_SECTION, option, fallback=fallback)
-    
+
     def checkAddSection(self, section: str) -> None:
         '''If a section doesn't exist then add it'''
 
         if not self.has_section(section):
-            
+
             self.add_section(section)
     
     def writeData(self) -> None:
@@ -148,3 +157,5 @@ class OptionsManager(ConfigParser):
         with open(OPTIONS_CONFIG, 'w+') as f:
 
             self.write(f)
+
+        logging.debug('%s has been saved', OPTIONS_CONFIG)

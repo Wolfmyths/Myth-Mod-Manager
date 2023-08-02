@@ -10,12 +10,12 @@ class Notice(qtw.QDialog):
         layout = qtw.QVBoxLayout()
 
         warningLabel = qtw.QLabel(self, text=message)
+        warningLabel.setWordWrap(True)
 
-        buttons = qtw.QDialogButtonBox.Ok | qtw.QDialogButtonBox.Cancel
+        buttons = qtw.QDialogButtonBox.Ok
 
         self.buttonBox = qtw.QDialogButtonBox(buttons)
         self.buttonBox.accepted.connect(lambda: self.accept())
-        self.buttonBox.rejected.connect(lambda: self.reject())
 
         for widget in (warningLabel, self.buttonBox):
             layout.addWidget(widget)

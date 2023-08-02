@@ -5,9 +5,9 @@ from PySide6.QtCore import QThread, Signal, QUrl
 
 from save import Save, OptionsManager
 from widgets.announcementQDialog import Notice
-from widgets.newModQDialog import newModLocation
+from getPath import Pathing
 import errorChecking
-from constant_vars import MOD_TYPE, TYPE_MODS, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, TYPE_MODS_OVERRIDE, BACKUP_MODS, MODSIGNORE
+from constant_vars import MOD_TYPE, TYPE_MODS, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, TYPE_MODS_OVERRIDE, BACKUP_MODS, MODSIGNORE, TYPE_MAPS
 
 
 class FileMover(QThread):
@@ -56,6 +56,8 @@ class FileMover(QThread):
         self.saveManager = Save()
         self.optionsManager = OptionsManager()
 
+        self.p = Pathing()
+
         self.modeDict = {0 : lambda: self.moveToDisabledDir(*args),
                          1 : lambda: self.moveToEnableModDir(*args),
                          2 : lambda: self.changeModType(*args),
@@ -74,8 +76,6 @@ class FileMover(QThread):
 
         self.setTotalProgress.emit(len(mods))
 
-        gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback='')
-
         disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
         errorChecking.createDisabledModFolder()
@@ -89,13 +89,7 @@ class FileMover(QThread):
             # Checking if the mod is already in the disabled mods folder
             if not mod in os.listdir(disabledModsPath):
 
-                if self.saveManager.getType(mod) == TYPE_MODS:
-
-                    modPath = os.path.join(gamePath, 'mods', mod)
-                
-                else:
-
-                    modPath = os.path.join(gamePath, 'assets', 'mod_overrides', mod)
+                modPath = self.p.mod(self.saveManager.getType(mod), mod)
 
                 shutil.move(modPath, disabledModsPath)
         
@@ -105,8 +99,6 @@ class FileMover(QThread):
         '''Returns a mod to their respective directory'''
 
         self.setTotalProgress.emit(len(mods))
-
-        gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback='')
 
         disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
@@ -120,33 +112,22 @@ class FileMover(QThread):
 
             if mod in os.listdir(disabledModsPath):
 
-                if self.saveManager.getType(mod) == TYPE_MODS:
-
-                    modDestPath = os.path.join(gamePath, 'mods', mod)
-                
-                else:
-
-                    modDestPath = os.path.join(gamePath, 'assets', 'mod_overrides', mod)
+                modDestPath = self.p.mod(self.saveManager.getType(mod), mod)
 
                 shutil.move(os.path.join(disabledModsPath, mod), modDestPath)
         
         self.succeeded.emit()
     
-    def changeModType(self, *mods: tuple[QUrl, str] | str) -> None:
+    def changeModType(self, *mods: tuple[QUrl, str]) -> None:
         '''
         Moves the mod to a new directory
 
-        If the arg is going to be a URL to a folder, convert into a QURL first.
+        The 1st index of the tuple should be a constant var
         '''
 
         self.setTotalProgress.emit(len(mods))
 
-        gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback='')
-
         ChosenDir = None
-
-        pathDict = {TYPE_MODS : os.path.join(gamePath, 'mods'), TYPE_MODS_OVERRIDE : os.path.join(gamePath, 'assets', 'mod_overrides')}
-
         
         for mod in mods:
             
@@ -162,39 +143,13 @@ class FileMover(QThread):
 
             self.setCurrentProgress.emit(1, f'Installing {mod}')
 
-            # Setting the destination and mod directory paths
-            # If the mod is a URL to a folder then we don't need set a mod directory path
-            if ChosenDir == TYPE_MODS:
+            # Setting the Destination path
+            if errorChecking.isTypeMod(ChosenDir):
 
-                modDestPath = pathDict[TYPE_MODS]
+                modDestPath = self.p.mod(ChosenDir, mod)
 
-            elif ChosenDir == TYPE_MODS_OVERRIDE:
-
-                modDestPath = pathDict[TYPE_MODS_OVERRIDE]
-
-            elif self.saveManager.getType(mod) == TYPE_MODS:
-
-                modsDirPath = pathDict[TYPE_MODS]
-
-                modDestPath = pathDict[TYPE_MODS_OVERRIDE]
-            
-            elif self.saveManager.getType(mod) == TYPE_MODS_OVERRIDE:
-
-                modsDirPath = pathDict[TYPE_MODS_OVERRIDE]
-
-                modDestPath = pathDict[TYPE_MODS]
-            
-            else:
-                continue
-
-            modPath = os.path.join(modsDirPath, mod) if ChosenDir is None else modsDirPath
-            print(modPath)
-            print(modDestPath)
-
-            doesPathAlreadyExist = os.path.exists(os.path.join(modDestPath, mod))
-
-            if not doesPathAlreadyExist:
-                shutil.move(modPath, modDestPath)
+                if not os.path.exists(modDestPath):
+                    shutil.move(modsDirPath, modDestPath)
         
         self.succeeded.emit()
 
@@ -202,8 +157,6 @@ class FileMover(QThread):
         '''Asks the user where each mod will go and then unzips it to that directory'''
 
         self.setTotalProgress.emit(len(mods))
-
-        print(mods)
 
         try:
 
@@ -217,31 +170,21 @@ class FileMover(QThread):
 
                 type = modURL[1]
 
+                modDestDict = {TYPE_MODS : self.p.mods(), TYPE_MODS_OVERRIDE : self.p.mod_overrides(), TYPE_MAPS : self.p.maps()}
+
                 if self.cancel: break
 
                 self.setCurrentProgress.emit(1, f"Unpacking {mod}")
 
                 if os.path.exists(src):
 
-                        gamepath = self.optionsManager.getOption(OPTIONS_GAMEPATH)
-
-                        destPathDict = {TYPE_MODS : os.path.join(gamepath, 'mods'), TYPE_MODS_OVERRIDE : os.path.join(gamepath, 'assets', 'mod_overrides')}
-
                         if src.endswith('.rar'):
 
-                            notice = Notice(headline='.rar not supported :(', message=
-                                            f"""
-                                            Mod Effected: {mod}
-                                            The .rar file format is not supported.
-                                            You can open the .rar and drag the mod from there.
-
-                                            Click OK to continue unzipping and installing the remaining mods.
-                                            """)
-                            notice.exec()
+                            self.rarNotSupported.emit(mod)
 
                             continue
 
-                        shutil.unpack_archive(src, destPathDict[type])
+                        shutil.unpack_archive(src, modDestDict[type])
 
         except Exception as e:
 
@@ -256,10 +199,6 @@ class FileMover(QThread):
 
         disPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
-        gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH)
-
-        pathDict = {TYPE_MODS_OVERRIDE : os.path.join(gamePath, 'assets', 'mod_overrides'), TYPE_MODS : os.path.join(gamePath, 'mods'), 'disabled' : disPath}
-
         for modName in mods:
 
             if self.cancel: break
@@ -272,7 +211,7 @@ class FileMover(QThread):
 
             self.saveManager.removeMods(modName)
 
-            path = os.path.join(pathDict[type], modName)
+            path = self.p.mod(type, modName) if type != 'disabled' else disPath
 
             if os.path.exists(path):
                 shutil.rmtree(path)
@@ -284,15 +223,15 @@ class FileMover(QThread):
 
         # Step 1: Gather Options
 
-        gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH)
-
         disPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
         # Step 2: Set Paths
 
-        modPath = os.path.join(gamePath, 'mods')
+        modPath = self.p.mods()
 
-        mod_overridePath = os.path.join(gamePath, 'assets', 'mod_overrides')
+        mod_overridePath = self.p.mod_overrides()
+
+        maps_path = self.p.maps()
 
         bundledFilePath = os.path.join(os.path.abspath(os.curdir), BACKUP_MODS)
 
@@ -300,16 +239,18 @@ class FileMover(QThread):
         
         bundledOverridePath = os.path.join(bundledFilePath, 'assets', 'mod_overrides')
 
-        outputPathDict = {TYPE_MODS_OVERRIDE : os.path.join(bundledFilePath, 'assets', 'mod_overrides'), TYPE_MODS : os.path.join(bundledFilePath, 'mods')}
+        bundledMapsPath = os.path.join(bundledFilePath, 'Maps')
 
-        srcPathDict = {TYPE_MODS_OVERRIDE : mod_overridePath, TYPE_MODS : modPath}
+        outputPathDict = {TYPE_MODS_OVERRIDE : bundledOverridePath, TYPE_MODS : bundledModsPath, TYPE_MAPS : bundledMapsPath}
+
+        srcPathDict = {TYPE_MODS_OVERRIDE : mod_overridePath, TYPE_MODS : modPath, TYPE_MAPS : maps_path}
 
         try:
             
             # Step 4: Create Folders
 
             # Every mod
-            mods = list([x for x in os.listdir(modPath) if x not in MODSIGNORE] + os.listdir(mod_overridePath) + os.listdir(disPath))
+            mods = list([x for x in os.listdir(modPath) if x not in MODSIGNORE] + os.listdir(mod_overridePath) + os.listdir(disPath) + os.listdir(maps_path))
 
             self.setTotalProgress.emit(len(mods) + 3) # Add 3 for the extra steps that aren't the list lengeth
 
@@ -328,6 +269,10 @@ class FileMover(QThread):
             if not os.path.exists(bundledOverridePath):
 
                 os.makedirs(bundledOverridePath)
+
+            # /Maps
+            if not os.path.exists(bundledMapsPath):
+                os.mkdir(bundledMapsPath)
 
             # Step 5: Copy each mod into the backup folder
             for mod in (x for x in mods):
@@ -352,6 +297,7 @@ class FileMover(QThread):
             
             # Step 6: Zip Backup folder
             self.setCurrentProgress.emit(1, f'Zipping to {bundledFilePath}')
+
             # Create Zip, this should overwrite if it already exists
             shutil.make_archive(BACKUP_MODS, 'zip', bundledFilePath)
 

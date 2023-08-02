@@ -26,8 +26,10 @@ MOD_TYPE = 'type'
 MODSIGNORE = ('base', 'logs', 'saves', 'downloads')
 
 # The type of mods
-TYPE_MODS = 'mods'
-TYPE_MODS_OVERRIDE = 'mods_override'
+TYPE_ALL = ('mods', 'mods_override', 'maps')
+TYPE_MODS = TYPE_ALL[0]
+TYPE_MODS_OVERRIDE = TYPE_ALL[1]
+TYPE_MAPS = TYPE_ALL[2]
 
 # Option Sections
 OPTIONS_SECTION = 'OPTIONS'

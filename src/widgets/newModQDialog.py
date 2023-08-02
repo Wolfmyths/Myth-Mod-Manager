@@ -1,10 +1,8 @@
 
-import PySide6.QtGui
 import PySide6.QtWidgets as qtw
-import PySide6.QtGui as qtg
 from PySide6.QtCore import QUrl, Qt as qt
 
-from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE
+from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, TYPE_MAPS
 
 class newModLocation(qtw.QDialog):
 
@@ -56,9 +54,15 @@ class newModLocation(qtw.QDialog):
             radioButtonOverride.clicked.connect(lambda: self.isAllChecked())
             radioButtonOverride.setChecked(False)
 
+            radioButtonMaps = qtw.QRadioButton(TYPE_MAPS, group)
+            radioButtonMaps.setObjectName(f'{mod} {TYPE_MAPS}')
+            radioButtonMaps.clicked.connect(lambda: self.isAllChecked())
+            radioButtonMaps.setChecked(False)
+
             h1 = qtw.QHBoxLayout()
             h1.addWidget(radioButtonMod)
             h1.addWidget(radioButtonOverride)
+            h1.addWidget(radioButtonMaps)
 
             group.setLayout(h1)
 
@@ -89,7 +93,7 @@ class newModLocation(qtw.QDialog):
 
             buttons: list[qtw.QRadioButton] = group.findChildren(qtw.QRadioButton)
 
-            if any((buttons[0].isChecked(), buttons[1].isChecked())):
+            if any((buttons[0].isChecked(), buttons[1].isChecked(), buttons[2].isChecked())):
                 continue
             else:
                 return
@@ -102,7 +106,7 @@ class newModLocation(qtw.QDialog):
 
         count = 0
 
-        # Buttons[0] is mods, buttons[1] is override
+        # Buttons[0] is mods, buttons[1] is override, buttons[2] is Maps
         for item in items:
 
             buttons: list[qtw.QRadioButton] = item.findChildren(qtw.QRadioButton)
@@ -115,6 +119,10 @@ class newModLocation(qtw.QDialog):
             elif buttons[1].isChecked():
 
                 self.typeDict[modName] = TYPE_MODS_OVERRIDE
+            
+            elif buttons[2].isChecked():
+
+                self.typeDict[modName] = TYPE_MAPS
 
             count += 1
 

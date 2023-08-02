@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt as qt
 from widgets.tableWidget import ModListWidget
 from save import Save, OptionsManager
 import errorChecking
-from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_GAMEPATH, START_PAYDAY_PATH, MOD_TABLE_OBJECT
+from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_GAMEPATH, START_PAYDAY_PATH, MOD_TABLE_OBJECT, TYPE_MAPS
 
 class ModManager(qtw.QWidget):
 
@@ -43,6 +43,7 @@ class ModManager(qtw.QWidget):
             Total Mods: {self.modsTable.rowCount()}
             Mods: {self.modsTable.getModTypeCount(TYPE_MODS)}
             Mod_Overrides: {self.modsTable.getModTypeCount(TYPE_MODS_OVERRIDE)}
+            Maps: {self.modsTable.getModTypeCount(TYPE_MAPS)}
             '''))
         
         self.modsTable.setObjectName(MOD_TABLE_OBJECT)

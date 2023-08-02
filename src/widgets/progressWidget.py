@@ -30,6 +30,8 @@ class StartFileMover(qtw.QDialog):
         self.fileMover = FileMover(mode, *args)
         self.fileMover.error.connect(lambda x: self.errorRaised(x))
 
+        self.rar = []
+
         layout = qtw.QVBoxLayout()
 
         self.warningLabel = qtw.QLabel(self)

@@ -5,7 +5,7 @@ from semantic_version import Version
 
 from save import OptionsManager
 from widgets.newUpdateQDialog import updateDetected
-from constant_vars import OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, VERSION, OPTIONS_DISPATH, OPTIONS_SECTION
+from constant_vars import OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, VERSION, OPTIONS_DISPATH, OPTIONS_SECTION, TYPE_ALL
 
 def validGamePath() -> bool:
     '''Gets the gamepath from OPTIONS_CONFIG and checks if the paths contains the PAYDAY 2 exe'''
@@ -66,9 +66,13 @@ def getFileType(filePath: str) -> str | bool:
 
             output = 'dir'
 
-        elif filePath.endswith(('.zip', '.rar')):
+        elif filePath.endswith('.zip'):
 
             output = 'zip'
+        
+        elif filePath.endswith('.rar'):
+
+            output = 'rar'
         
         else:
             raise FileNotFoundError
@@ -119,3 +123,6 @@ def checkUpdate() -> int:
         result = 0
 
     return result
+
+def isTypeMod(type: str):
+    return type in TYPE_ALL

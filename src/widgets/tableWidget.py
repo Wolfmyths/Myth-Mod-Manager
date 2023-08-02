@@ -9,9 +9,11 @@ from widgets.contextMenu import ModContextMenu
 from widgets.progressWidget import StartFileMover
 from widgets.deleteWarningQDialog import DeleteModConfirmation
 from widgets.newModQDialog import newModLocation
+from widgets.announcementQDialog import Notice
+from getPath import Pathing
 import errorChecking
 from save import Save, OptionsManager
-from constant_vars import MOD_ENABLED, TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MOD_TYPE, MODSIGNORE, MODS_DISABLED_PATH_DEFAULT
+from constant_vars import MOD_ENABLED, TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_DISPATH, MODSIGNORE, MODS_DISABLED_PATH_DEFAULT, TYPE_MAPS
 
 class ModListWidget(qtw.QTableWidget):
 
@@ -20,6 +22,8 @@ class ModListWidget(qtw.QTableWidget):
 
         self.saveManager = Save()
         self.optionsManager = OptionsManager()
+
+        self.p = Pathing()
 
         self.setSelectionMode(qtw.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.setSelectionBehavior(qtw.QAbstractItemView.SelectionBehavior.SelectRows)
@@ -75,13 +79,10 @@ class ModListWidget(qtw.QTableWidget):
         Returns the specified modtype count in the table,
         if an invalid parameter is passed then return None
 
-        Possible Parameters:
-
-        + TYPE_MODS
-        + TYPE_MODS_OVERRIDE
+        Only mod types are allowed
         '''
 
-        if modType in (TYPE_MODS, TYPE_MODS_OVERRIDE):
+        if errorChecking.isTypeMod(modType):
             return len(self.findItems(modType, qt.MatchFlag.MatchExactly))
     
     def changeSortState(self, header: int) -> None:
@@ -232,7 +233,7 @@ class ModListWidget(qtw.QTableWidget):
         mods = self.getMods()
 
         # Save mods into .ini
-        self.saveManager.addMods((mods[0], TYPE_MODS_OVERRIDE), (mods[1], TYPE_MODS))
+        self.saveManager.addMods((mods[0], TYPE_MODS_OVERRIDE), (mods[1], TYPE_MODS), (mods[2], TYPE_MAPS))
 
         # Just incase disabled folder doesn't exist
         errorChecking.createDisabledModFolder()
@@ -241,7 +242,7 @@ class ModListWidget(qtw.QTableWidget):
         disModFolderContents = os.listdir(disModFolder)
 
         # Add mods to the table widget
-        for mod in (x for x in mods[0] + mods[1]):
+        for mod in (x for x in mods[0] + mods[1] + mods[2]):
 
             type = self.saveManager.getType(mod)
             isEnabled = mod not in disModFolderContents
@@ -272,12 +273,13 @@ class ModListWidget(qtw.QTableWidget):
 
         mod_override: list[str] = []
         mods: list[str] = []
+        maps: list[str] = []
 
-        gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback='')
+        modsPath = self.p.mods()
 
-        modsPath = os.path.join(gamePath, 'mods')
+        mod_overridePath = self.p.mod_overrides()
 
-        mod_overridePath = os.path.join(gamePath, 'assets', 'mod_overrides')
+        maps_path = self.p.maps()
 
         disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
@@ -303,22 +305,39 @@ class ModListWidget(qtw.QTableWidget):
 
                     mod_override.append(mod)
 
+                # mod_override Folder
+        if os.path.exists(maps_path):
+
+            for mod in os.listdir(maps_path):
+
+                modPath = os.path.join(maps_path, mod)
+
+                if errorChecking.getFileType(modPath) == 'dir':
+
+                    maps.append(mod)
+
         # Disabled Mods Folder
         if os.path.exists(disabledModsPath):
             
             for mod in os.listdir(disabledModsPath):
 
                 if self.saveManager.has_section(mod):
+
+                    modType = self.saveManager.getType(mod)
                     
-                    if self.saveManager[mod][MOD_TYPE] == TYPE_MODS:
+                    if modType == TYPE_MODS:
 
                         mods.append(mod)
                     
-                    elif self.saveManager[mod][MOD_TYPE] == TYPE_MODS_OVERRIDE:
+                    elif modType == TYPE_MODS_OVERRIDE:
 
                         mod_override.append(mod)
+                    
+                    elif modType == TYPE_MAPS:
 
-        return [mod_override, mods]
+                        maps.append(mod)
+
+        return [mod_override, mods, maps]
     
     def search(self, input: str) -> None:
 
@@ -326,7 +345,12 @@ class ModListWidget(qtw.QTableWidget):
 
         for i in range(0, self.rowCount() + 1):
 
-            self.setRowHidden(i, True) if self.item(i, 0) not in results else self.setRowHidden(i, True)
+            item = self.item(i, 0)
+
+            if item not in results:
+                self.setRowHidden(i, True)
+            else:
+                self.setRowHidden(i, False)
 
 
 # EVENTS
@@ -364,57 +388,82 @@ class ModListWidget(qtw.QTableWidget):
 
         The only exception to this is when the file being dropped is a regular folder
         '''
+        try:
+            if event.mimeData().hasUrls():
+                
+                # Get QUrls
+                urls = event.mimeData().urls()
 
-        if event.mimeData().hasUrls():
+                dirs: list[QUrl] = []
+                zips: list[QUrl] = []
+                rars: list[str] = []
 
-            urls = event.mimeData().urls()
+                for mod in urls:
 
-            dirs: list[QUrl] = []
-            zips: list[QUrl] = []
+                    fileType = errorChecking.getFileType(mod.toLocalFile())
 
-            for mod in urls:
+                    if fileType == 'dir':
+                        dirs.append(mod)
 
-                fileType = errorChecking.getFileType(mod.toLocalFile())
+                    elif fileType == 'zip':
+                        zips.append(mod)
+                    
+                    elif fileType == 'rar':
+                        rars.append(mod.fileName())
+                
+                # If there are any rar files, raise this error
+                if len(rars):
+                    raise Exception('rar')
 
-                if fileType == 'dir':
-                    dirs.append(mod)
+                # Gather where the user wants each mod to go
+                notice = newModLocation(*list(dirs + zips))
+                notice.exec()
 
-                elif fileType == 'zip':
-                    zips.append(mod)
-            
-            notice = newModLocation(*list(dirs + zips))
-            notice.exec()
+                dict_ = notice.typeDict
 
-            dict_ = notice.typeDict
+                if len(dict_) != len(dirs + zips):
+                    raise Exception('Canceled choosing new mod directories')
 
-            if not len(dict_):
-                event.ignore()
-                return
+                # Combine the mod location and URL into a Tuple
+                if dirs:
 
-            if dirs:
+                    dirTuple: list[tuple[QUrl, str]] = []
 
-                dirTuple: list[tuple[QUrl, str]] = []
+                    for dir in dirs:
+                        dirTuple.append((dir, dict_.get( dir.fileName() )))
 
-                for dir in dirs:
-                    dirTuple.append((dir, dict_.get( dir.fileName() )))
+                    startFileMover = StartFileMover(2, *dirTuple)
+                    startFileMover.exec()
 
-                startFileMover = StartFileMover(2, *dirTuple)
-                startFileMover.exec()
+                if zips:
 
-            if zips:
+                    zipsTuple: list[tuple[QUrl, str]] = []
 
-                zipsTuple: list[tuple[QUrl, str]] = []
+                    for zip in zips:
+                        zipsTuple.append((zip, dict_.get( zip.fileName() )))
 
-                for zip in zips:
-                    zipsTuple.append((zip, dict_.get( zip.fileName() )))
+                    startFileMover = StartFileMover(3, *zipsTuple)
+                    startFileMover.exec()
+                
+                self.refreshMods()
 
-                print(zipsTuple)
-                startFileMover = StartFileMover(3, *zipsTuple)
-                startFileMover.exec()
-            
-            self.refreshMods()
+        except Exception as e:
+            if str(e) == 'rar':
 
+                # \n is not allowed in a f string prior to Python 3.12
+                nl = '\n'
+
+                msg = f"""
+                Mod(s) Effected: {nl.join(rars)}\n
+                The .rar file format is not supported.\n
+                You can open the .rar and drag the mod from there.
+                """
+
+                rarError = Notice(headline='.rar not supported :(', message=msg)
+                rarError.exec()
+
+            else:
+                print(e)
+        finally:
             event.ignore()
-
-        else:
-            event.ignore()
+            

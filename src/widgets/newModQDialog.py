@@ -1,47 +1,125 @@
 
+import PySide6.QtGui
+import PySide6.QtWidgets as qtw
+import PySide6.QtGui as qtg
+from PySide6.QtCore import QUrl, Qt as qt
+
 from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE
 
-import PySide6.QtWidgets as qtw
-
 class newModLocation(qtw.QDialog):
-    def __init__(self, modName: str) -> None:
+
+    typeDict = {}
+    
+    def __init__(self, *modName: QUrl) -> None:
         super().__init__()
 
-        self.setWindowTitle('Installing mod')
+        self.setWindowTitle('Installing mods')
 
+        self.setMaximumSize(400, 850)
+        self.setMinimumSize(320, 180)
+        self.setSizePolicy(qtw.QSizePolicy.Policy.MinimumExpanding, qtw.QSizePolicy.Policy.Preferred)
+
+        self.modName = modName
+                            
         layout = qtw.QVBoxLayout()
 
-        warningLabel = qtw.QLabel(self, text=f'What type of mod is {modName}?')
+        scrollArea = qtw.QScrollArea(self)
+        # Keep this for now until we have a style manager
+        scrollArea.setStyleSheet('''
+                                 QScrollArea{
+                                    border: none;
+                                 }
+                                 ''')
+        scrollArea.setWidgetResizable(True)
+        scrollArea.setVerticalScrollBarPolicy(qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scrollArea.setHorizontalScrollBarPolicy(qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-        buttonFrame = qtw.QFrame(self)
-        frameLayout = qtw.QHBoxLayout()
+        frame = qtw.QFrame(scrollArea)
 
-        modsButton = qtw.QPushButton(parent=buttonFrame, text=TYPE_MODS)
-        modsButton.clicked.connect(lambda: self.accept(TYPE_MODS))
+        scrollArea.setWidget(frame)
 
-        overrideButton = qtw.QPushButton(parent=buttonFrame, text=TYPE_MODS_OVERRIDE)
-        overrideButton.clicked.connect(lambda: self.accept(TYPE_MODS_OVERRIDE))
+        frameLayout = qtw.QVBoxLayout()
+        frameLayout.setSpacing(5)
 
-        cancelButton = qtw.QPushButton(parent=buttonFrame, text='Cancel')
-        cancelButton.clicked.connect(lambda: self.reject())
+        for mod in (x.fileName() for x in modName):
 
-        for widget in (modsButton, overrideButton, cancelButton):
+            group = qtw.QGroupBox(f'{mod}')
+            group.setObjectName(mod)
 
-            frameLayout.addWidget(widget)
-        
-        buttonFrame.setLayout(frameLayout)
+            radioButtonMod = qtw.QRadioButton(TYPE_MODS, group)
+            radioButtonMod.setObjectName(f'{mod} {TYPE_MODS}')
+            radioButtonMod.setChecked(False)
+            radioButtonMod.clicked.connect(lambda: self.isAllChecked())
 
-        for widget in (warningLabel, buttonFrame):
+            radioButtonOverride = qtw.QRadioButton(TYPE_MODS_OVERRIDE, group)
+            radioButtonOverride.setObjectName(f'{mod} {TYPE_MODS_OVERRIDE}')
+            radioButtonOverride.clicked.connect(lambda: self.isAllChecked())
+            radioButtonOverride.setChecked(False)
+
+            h1 = qtw.QHBoxLayout()
+            h1.addWidget(radioButtonMod)
+            h1.addWidget(radioButtonOverride)
+
+            group.setLayout(h1)
+
+            frameLayout.addWidget(group)
+
+        frame.setLayout(frameLayout)
+
+        buttons = qtw.QDialogButtonBox.Ok | qtw.QDialogButtonBox.Cancel
+
+        self.buttonBox = qtw.QDialogButtonBox(buttons)
+        self.changeOkButtonState(False)
+        self.buttonBox.accepted.connect(lambda: self.accept())
+        self.buttonBox.rejected.connect(lambda: self.reject())
+
+        for widget in (scrollArea, self.buttonBox):
             layout.addWidget(widget)
-        
+
         self.setLayout(layout)
     
-    def accept(self, type: str) -> None:
+    def changeOkButtonState(self, bool: bool) -> None:
+        self.buttonBox.buttons()[0].setEnabled(bool)
+    
+    def isAllChecked(self):
 
-        self.type = type
+        groups: list[qtw.QGroupBox] = self.findChildren(qtw.QGroupBox)
+
+        for group in groups:
+
+            buttons: list[qtw.QRadioButton] = group.findChildren(qtw.QRadioButton)
+
+            if any((buttons[0].isChecked(), buttons[1].isChecked())):
+                continue
+            else:
+                return
+        
+        self.changeOkButtonState(True)
+
+    def getData(self) -> None:
+
+        items: list[qtw.QGroupBox] = self.findChildren(qtw.QGroupBox)
+
+        count = 0
+
+        # Buttons[0] is mods, buttons[1] is override
+        for item in items:
+
+            buttons: list[qtw.QRadioButton] = item.findChildren(qtw.QRadioButton)
+
+            modName = self.modName[count].fileName()
+
+            if buttons[0].isChecked():
+
+                self.typeDict[modName] = TYPE_MODS
+            elif buttons[1].isChecked():
+
+                self.typeDict[modName] = TYPE_MODS_OVERRIDE
+
+            count += 1
+
+    def accept(self) -> None:
+
+        self.getData()
 
         return super().accept()
-    
-    def reject(self) -> None:
-        self.type = 0
-        return super().reject()

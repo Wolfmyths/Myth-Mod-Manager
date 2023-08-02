@@ -1,178 +1,258 @@
 import shutil
 import os
-from zipfile import ZipFile
+
+from PySide6.QtCore import QThread, Signal, QUrl
 
 from save import Save, OptionsManager
 from widgets.announcementQDialog import Notice
+from widgets.newModQDialog import newModLocation
 import errorChecking
 from constant_vars import MOD_TYPE, TYPE_MODS, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, TYPE_MODS_OVERRIDE, BACKUP_MODS, MODSIGNORE
 
-class FileMover():
+
+class FileMover(QThread):
     '''
     File Manager of the program.
 
     Any function that involves moving files goes here.
+
+    !IMPORTANT!
+    
+    Should usually not be ran by itself, please use `progress()` from `widgets.progressWidget`
+    or something similar
+
+    This allows it to properly thread and use the class' signals for the `QProgressBar`
+
+    The mode parameter is to choose which function you want (Since it needs to be
+    wrapped in `run()`)
+
+    Possible parameters:
+    
+    + 0 : moveToDisabledDir(*mods: str)
+    + 1 : moveToEnableModDir(*mods: str)
+    + 2 : changeModType(*mods: str | QUrl)
+    + 3 : unZipMod(tuple[str, str])
+    + 4 : deleteMod(modName: str)
+    + 5 : backupMods()
     '''
-    def __init__(self):
+
+    setTotalProgress = Signal(int)
+
+    setCurrentProgress = Signal(int, str)
+
+    succeeded = Signal()
+
+    error = Signal(str)
+
+    cancel = False
+
+    def __init__(self, mode: int, *args):
+        super().__init__()
+
+        self.mode = mode
+
+        self.args = args
 
         self.saveManager = Save()
         self.optionsManager = OptionsManager()
 
-    def moveToDisabledDir(self, mod: str) -> None:
+        self.modeDict = {0 : lambda: self.moveToDisabledDir(*args),
+                         1 : lambda: self.moveToEnableModDir(*args),
+                         2 : lambda: self.changeModType(*args),
+                         3 : lambda: self.unZipMod(*args),
+                         4 : lambda: self.deleteMod(*args),
+                         5 : self.backupMods}
+    
+    def run(self) -> None:
+
+        self.modeDict[self.mode]()
+
+        return super().run()
+
+    def moveToDisabledDir(self, *mods: str) -> None:
         '''Moves a mod to the disabled folder'''
 
+        self.setTotalProgress.emit(len(mods))
+
         gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback='')
 
         disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
         errorChecking.createDisabledModFolder()
 
-        # Checking if the mod is already in the disabled mods folder
-        if not mod in os.listdir(disabledModsPath):
+        for mod in mods:
 
-            if self.saveManager.getType(mod) == TYPE_MODS:
+            if self.cancel: break
 
-                modPath = os.path.join(gamePath, 'mods', mod)
-            
-            else:
+            self.setCurrentProgress.emit(1, f'Disabling {mod}')
 
-                modPath = os.path.join(gamePath, 'assets', 'mod_overrides', mod)
+            # Checking if the mod is already in the disabled mods folder
+            if not mod in os.listdir(disabledModsPath):
 
-            shutil.move(modPath, disabledModsPath)
+                if self.saveManager.getType(mod) == TYPE_MODS:
 
-    def moveToEnableModDir(self, mod: str) -> None:
+                    modPath = os.path.join(gamePath, 'mods', mod)
+                
+                else:
+
+                    modPath = os.path.join(gamePath, 'assets', 'mod_overrides', mod)
+
+                shutil.move(modPath, disabledModsPath)
+        
+        self.succeeded.emit()
+
+    def moveToEnableModDir(self, *mods: str) -> None:
         '''Returns a mod to their respective directory'''
 
+        self.setTotalProgress.emit(len(mods))
+
         gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback='')
 
         disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
         errorChecking.createDisabledModFolder()
 
-        if mod in os.listdir(disabledModsPath):
+        for mod in mods:
 
-            if self.saveManager.getType(mod) == TYPE_MODS:
+            if self.cancel: break
 
-                modDestPath = os.path.join(gamePath, 'mods', mod)
-            
-            else:
+            self.setCurrentProgress.emit(1, f'Enabling {mod}')
 
-                modDestPath = os.path.join(gamePath, 'assets', 'mod_overrides', mod)
+            if mod in os.listdir(disabledModsPath):
 
-            shutil.move(os.path.join(disabledModsPath, mod), modDestPath)
+                if self.saveManager.getType(mod) == TYPE_MODS:
+
+                    modDestPath = os.path.join(gamePath, 'mods', mod)
+                
+                else:
+
+                    modDestPath = os.path.join(gamePath, 'assets', 'mod_overrides', mod)
+
+                shutil.move(os.path.join(disabledModsPath, mod), modDestPath)
+        
+        self.succeeded.emit()
     
-    def changeModType(self, mod: str , ChosenDir: None | str = None) -> None:
+    def changeModType(self, *mods: tuple[QUrl, str] | str) -> None:
         '''
         Moves the mod to a new directory
 
-        The arg ChosenDir is used when a brand new mod is introduced,
-        it must be one of the following types
-
-        + TYPE_MODS
-        + TYPE_MODS_OVERRIDE
+        If the arg is going to be a URL to a folder, convert into a QURL first.
         '''
 
+        self.setTotalProgress.emit(len(mods))
+
         gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback='')
-        modsDirPath = None
+
+        ChosenDir = None
 
         pathDict = {TYPE_MODS : os.path.join(gamePath, 'mods'), TYPE_MODS_OVERRIDE : os.path.join(gamePath, 'assets', 'mod_overrides')}
 
-        if ChosenDir == TYPE_MODS:
-
-            modDestPath = pathDict[TYPE_MODS]
-
-        elif ChosenDir == TYPE_MODS_OVERRIDE:
-
-            modDestPath = pathDict[TYPE_MODS_OVERRIDE]
-
-        elif self.saveManager.getType(mod) == TYPE_MODS:
-
-            modsDirPath = pathDict[TYPE_MODS]
-
-            modDestPath = pathDict[TYPE_MODS_OVERRIDE]
         
-        elif self.saveManager.getType(mod) == TYPE_MODS_OVERRIDE:
+        for mod in mods:
+            
+            # If the current set of args are URLs to folders
+            if type(mod) == tuple:
 
-            modsDirPath = pathDict[TYPE_MODS_OVERRIDE]
+                modURL = mod[0]
+                ChosenDir = mod[1]
+                
+                modsDirPath = modURL.toLocalFile()
 
-            modDestPath = pathDict[TYPE_MODS]
-        
-        else:
-            return
-        
-        modPath = os.path.join(modsDirPath, mod) if ChosenDir is None else mod
+                mod = modURL.fileName()
 
-        if ChosenDir:
-            doesPathAlreadyExist = os.path.exists(os.path.join(modDestPath, mod.split('/')[-1]))
-            print(os.path.join(modDestPath, mod.split('/')[-1]))
-        else:
+            self.setCurrentProgress.emit(1, f'Installing {mod}')
+
+            # Setting the destination and mod directory paths
+            # If the mod is a URL to a folder then we don't need set a mod directory path
+            if ChosenDir == TYPE_MODS:
+
+                modDestPath = pathDict[TYPE_MODS]
+
+            elif ChosenDir == TYPE_MODS_OVERRIDE:
+
+                modDestPath = pathDict[TYPE_MODS_OVERRIDE]
+
+            elif self.saveManager.getType(mod) == TYPE_MODS:
+
+                modsDirPath = pathDict[TYPE_MODS]
+
+                modDestPath = pathDict[TYPE_MODS_OVERRIDE]
+            
+            elif self.saveManager.getType(mod) == TYPE_MODS_OVERRIDE:
+
+                modsDirPath = pathDict[TYPE_MODS_OVERRIDE]
+
+                modDestPath = pathDict[TYPE_MODS]
+            
+            else:
+                continue
+
+            modPath = os.path.join(modsDirPath, mod) if ChosenDir is None else modsDirPath
+            print(modPath)
+            print(modDestPath)
+
             doesPathAlreadyExist = os.path.exists(os.path.join(modDestPath, mod))
-            print(os.path.join(modDestPath, mod))
 
-        if not doesPathAlreadyExist:
-            shutil.move(modPath, modDestPath)
-    
-    def unZipMod(self, src: str, type: str) -> int | tuple[int, str]:
-        '''
-        Unzips a file to a specified directory
+            if not doesPathAlreadyExist:
+                shutil.move(modPath, modDestPath)
         
-        Type arg needs to be one of the mod types like TYPE_MODS or TYPE_MODS_OVERRIDE
-        otherwise it will result in a keyerror
+        self.succeeded.emit()
 
-        If a file was unzipped then it will return a tuple (exitcode, fileName)
+    def unZipMod(self, *mods: tuple[QUrl, str]) -> None:
+        '''Asks the user where each mod will go and then unzips it to that directory'''
 
-        Exit Codes:
-        + 0 : Error
-        + 1 : Success
-        + 2 : .rar is not supported
-        '''
+        self.setTotalProgress.emit(len(mods))
 
-        if os.path.exists(src):
+        print(mods)
 
-            try:
+        try:
 
-                gamepath = self.optionsManager.getOption(OPTIONS_GAMEPATH)
+            for modURL in mods:
 
-                destPathDict = {TYPE_MODS : os.path.join(gamepath, 'mods'), TYPE_MODS_OVERRIDE : os.path.join(gamepath, 'assets', 'mod_overrides')}
+                url = modURL[0]
 
-                fileName = None
+                src = url.toLocalFile()
 
-                if src.endswith('.rar'):
+                mod = url.fileName()
 
-                    notice = Notice(headline='.rar not supported :(', message="The .rar file format is not supported.\nYou can open the .rar and drag the mod from there.")
-                    notice.exec()
+                type = modURL[1]
 
-                    exitCode = 2
+                if self.cancel: break
 
-                else:
+                self.setCurrentProgress.emit(1, f"Unpacking {mod}")
 
-                    # Find mod name (.zip version has other not needed info)
-                    for info in ZipFile(src).infolist():
+                if os.path.exists(src):
 
-                        if info.is_dir():
+                        gamepath = self.optionsManager.getOption(OPTIONS_GAMEPATH)
 
-                            fileName = info.filename.split('/')[0]
+                        destPathDict = {TYPE_MODS : os.path.join(gamepath, 'mods'), TYPE_MODS_OVERRIDE : os.path.join(gamepath, 'assets', 'mod_overrides')}
 
-                    shutil.unpack_archive(src, destPathDict[type])
+                        if src.endswith('.rar'):
 
-                    exitCode = 1
+                            notice = Notice(headline='.rar not supported :(', message=
+                                            f"""
+                                            Mod Effected: {mod}
+                                            The .rar file format is not supported.
+                                            You can open the .rar and drag the mod from there.
 
-            except Exception as e:
+                                            Click OK to continue unzipping and installing the remaining mods.
+                                            """)
+                            notice.exec()
 
-                print(e)
+                            continue
 
-                exitCode = 0
+                        shutil.unpack_archive(src, destPathDict[type])
 
-            finally:
+        except Exception as e:
 
-                return exitCode if not fileName else exitCode, fileName
+            self.error.emit(str(e))
+        
+        self.succeeded.emit()
     
-    def deleteMod(self, modName: str) -> None:
-        '''Removes the mod from the user's computer'''
+    def deleteMod(self, *mods: str) -> None:
+        '''Removes the mod(s) from the user's computer'''
 
-        enabled = self.saveManager.isEnabled(modName)
-
-        type = self.saveManager.getType(modName) if enabled else 'disabled'
+        self.setTotalProgress.emit(len(mods))
 
         disPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
@@ -180,22 +260,27 @@ class FileMover():
 
         pathDict = {TYPE_MODS_OVERRIDE : os.path.join(gamePath, 'assets', 'mod_overrides'), TYPE_MODS : os.path.join(gamePath, 'mods'), 'disabled' : disPath}
 
-        self.saveManager.removeMods(modName)
+        for modName in mods:
 
-        path = os.path.join(pathDict[type], modName)
+            if self.cancel: break
 
-        if os.path.exists(path):
-            shutil.rmtree(path)
-    
-    def backupMods(self) -> int:
-        '''
-        Takes all of the mods and compresses them into a zip file, the output is in the exe directory
+            self.setCurrentProgress.emit(1, f'Deleting {modName}')
 
-        Returns an exit code:
+            enabled = self.saveManager.isEnabled(modName)
 
-        0 = Failure,
-        1 = Success
-        '''
+            type = self.saveManager.getType(modName) if enabled else 'disabled'
+
+            self.saveManager.removeMods(modName)
+
+            path = os.path.join(pathDict[type], modName)
+
+            if os.path.exists(path):
+                shutil.rmtree(path)
+
+        self.succeeded.emit()
+
+    def backupMods(self) -> None:
+        '''Takes all of the mods and compresses them into a zip file, the output is in the exe directory'''
 
         # Step 1: Gather Options
 
@@ -219,10 +304,16 @@ class FileMover():
 
         srcPathDict = {TYPE_MODS_OVERRIDE : mod_overridePath, TYPE_MODS : modPath}
 
-        # Step 3: Create Folders
-
         try:
+            
+            # Step 4: Create Folders
 
+            # Every mod
+            mods = list([x for x in os.listdir(modPath) if x not in MODSIGNORE] + os.listdir(mod_overridePath) + os.listdir(disPath))
+
+            self.setTotalProgress.emit(len(mods) + 3) # Add 3 for the extra steps that aren't the list lengeth
+
+            self.setCurrentProgress.emit(1, f'Validating backup folder paths')
             # Backup folder
             if not os.path.exists(bundledFilePath):
 
@@ -237,14 +328,13 @@ class FileMover():
             if not os.path.exists(bundledOverridePath):
 
                 os.makedirs(bundledOverridePath)
-            
-            # Step 4: Create a list of all the mods
-
-            # Every mod
-            mods = list([x for x in os.listdir(modPath) if x not in MODSIGNORE] + os.listdir(mod_overridePath) + os.listdir(disPath))
 
             # Step 5: Copy each mod into the backup folder
             for mod in (x for x in mods):
+
+                if self.cancel: raise Exception('Task was canceled')
+
+                self.setCurrentProgress.emit(1, f'Copying {mod} to {BACKUP_MODS}')
 
                 modType = self.saveManager.get(mod, MOD_TYPE)
 
@@ -261,23 +351,23 @@ class FileMover():
                 shutil.copytree(src, output)
             
             # Step 6: Zip Backup folder
-
+            self.setCurrentProgress.emit(1, f'Zipping to {bundledFilePath}')
             # Create Zip, this should overwrite if it already exists
             shutil.make_archive(BACKUP_MODS, 'zip', bundledFilePath)
 
             # Step 7: Cleanup
 
+            self.setCurrentProgress.emit(1, 'Cleanup')
             # Delete Folder
             shutil.rmtree(bundledFilePath)
 
-            return 1
+            self.succeeded.emit()
             
         except Exception as e:
-
-            print(e)
 
             # If something goes wrong, delete the unfinished bundled file
             if os.path.exists(bundledFilePath):
                 shutil.rmtree(bundledFilePath)
-            
-            return 0
+
+            if not self.cancel:
+                self.error.emit(str(e))

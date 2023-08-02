@@ -8,6 +8,8 @@ on:
   
 jobs:
   BuildAndUploadToReleaseAssets:
+    permissions:
+        contents: write
     runs-on: windows-latest
 
     steps:

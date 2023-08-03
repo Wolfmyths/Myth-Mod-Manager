@@ -18,9 +18,14 @@ Disable mods you don't want to use at the moment,
 and if you want to take it a step further, 
 even delete them from your computer.
 
-Drag and drop files into their respective directories. *Like "/mods/" and "/assets/mod_overrides/"*
+Automatic installation by 
+dragging and dropping files into the program.
+This also includes automatic unzipping.
+*You still have to choose where the mod needs to go*
 
 Easy to access buttons for your game directory and starting the game.
+
+Search bar to find the mod you're looking for in seconds
 
 Backup all of your mods and package it into a compressed file.
 
@@ -49,8 +54,8 @@ You may download any version of Myth Mod Manager and view changelogs at the [rel
 + Mod profiles
 + Dark Theme
 + .rar drop-install support
-+ Logging so bug reporting is a lot easier
-+ A progress bar when adding, deleting, and backing up mods
++ Improved visuals
++ Some kind of [modworkshop.net](https://modworkshop.net/g/payday-2) integration, see #14
 
 *Suggestions are appreciated!*
 

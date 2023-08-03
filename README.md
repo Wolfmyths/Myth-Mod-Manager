@@ -14,20 +14,19 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 
 # Features
 
-Disable mods you don't want to use at the moment, 
-and if you want to take it a step further, 
-even delete them from your computer.
+* Disable mods you don't want to use at the moment, and if you want to take it a step further, even delete them from your computer.
+    + *This feature is good for testing out which mod is crashing the game!*
 
-Automatic installation by 
-dragging and dropping files into the program.
-This also includes automatic unzipping.
-*You still have to choose where the mod needs to go*
+* Automatic installation by dragging and dropping files into the program.
+    + This also includes automatic unzipping.
 
-Easy to access buttons for your game directory and starting the game.
+    + *You still have to choose what type of mod it is (mods, mod_overrides, maps)*
 
-Search bar to find the mod you're looking for in seconds
+* Easy to access buttons for your game directory and starting the game.
 
-Backup all of your mods and package it into a compressed file.
+* Search bar to find the mod you're looking for in seconds
+
+* Backup all of your mods and package it into a compressed file.
 
 In the future there will be profiles so stay tuned for that 😁
 

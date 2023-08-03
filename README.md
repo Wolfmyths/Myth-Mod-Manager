@@ -54,7 +54,7 @@ You may download any version of Myth Mod Manager and view changelogs at the [rel
 + Dark Theme
 + .rar drop-install support
 + Improved visuals
-+ Some kind of [modworkshop.net](https://modworkshop.net/g/payday-2) integration, see #14
++ Some kind of [modworkshop.net](https://modworkshop.net/g/payday-2) integration, see [issue #14](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/14)
 
 *Suggestions are appreciated!*
 

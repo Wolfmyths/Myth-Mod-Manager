@@ -26,14 +26,14 @@ class StartFileMover(qtw.QDialog):
     def __init__(self, mode: int, *args) -> None:
         super().__init__()
 
+        self.mode = mode
+
         logging.getLogger(__name__)
 
         self.setWindowTitle('Update Notice')
 
         self.fileMover = FileMover(mode, *args)
         self.fileMover.error.connect(lambda x: self.errorRaised(x))
-
-        self.rar = []
 
         layout = qtw.QVBoxLayout()
 
@@ -87,8 +87,9 @@ class StartFileMover(qtw.QDialog):
         Sets the cancel flag to true in which FileMover() will exit the function
         after it's done a step and pass the success signal
         '''
-        logging.info('Task was canceled...')
-        self.warningLabel.setText('Canceling...')
+
+        logging.info('Task %s was canceled...', self.mode)
+        self.warningLabel.setText('Canceling... (Finishing current step)')
 
         self.fileMover.cancel = True
     

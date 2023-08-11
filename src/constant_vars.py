@@ -1,5 +1,6 @@
 
 import os
+
 import semantic_version
 
 # Detection if the program is being run through an exe or the script
@@ -38,6 +39,7 @@ OPTIONS_SECTION = 'OPTIONS'
 # Keys in OPTIONS_CONFIG
 OPTIONS_GAMEPATH = 'game_path'
 OPTIONS_DISPATH = 'disabled-mods'
+OPTIONS_THEME = 'color_theme'
 
 # Default Disabled Folder
 MODS_DISABLED_PATH_DEFAULT = os.path.join(os.path.abspath(ROOT_PATH), DISABLED_MODS)
@@ -45,6 +47,10 @@ MODS_DISABLED_PATH_DEFAULT = os.path.join(os.path.abspath(ROOT_PATH), DISABLED_M
 # START_PAYDAY Path
 START_PAYDAY_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), START_PAYDAY)
 
+# Color Themes
+DARK = 'dark'
+LIGHT = 'light'
+
 # Program Info
 PROGRAM_NAME = 'Myth Mod Manager'
-VERSION = semantic_version.Version(major=1, minor=0, patch=0, prerelease=('beta', '3'))
+VERSION = semantic_version.Version(major=1, minor=0, patch=0)

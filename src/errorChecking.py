@@ -78,13 +78,9 @@ def getFileType(filePath: str) -> str | bool:
 
             output = 'dir'
 
-        elif filePath.endswith('.zip'):
+        elif filePath.endswith(('.zip', '.rar', '.7z')):
 
             output = 'zip'
-        
-        elif filePath.endswith('.rar'):
-
-            output = 'rar'
         
         else:
             raise FileNotFoundError
@@ -92,10 +88,10 @@ def getFileType(filePath: str) -> str | bool:
         logging.debug('File name: %s\nType: %s', filePath.split('/')[-1], output)
         
     except FileNotFoundError:
-        logging.info('The file path is not a valid type: %s', filePath)
+        logging.warning('The file extension not valid and will be ignored: %s', filePath.split('/')[-1])
 
         output = False
-    
+
     finally:
         return output
 
@@ -105,7 +101,7 @@ def isPrerelease(version: Version) -> bool:
 def checkUpdate() -> int:
     '''
     Checks for latest update and returns the result value of the updateDetected() QDialog Widget
-    
+
     If the request.get() raises an exception, return 0
     '''
 
@@ -116,19 +112,19 @@ def checkUpdate() -> int:
             data = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases').json()
 
             latestVersion = Version.coerce(data[0]['tag_name'])
-        
+
         else:
 
             latestVersion = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest').json()['tag_name']
             latestVersion = Version.coerce(latestVersion)
-        
+
         logging.info('Latest Version: %s', latestVersion)
 
     except Exception as e:
         logging.error('Issue in errorChecking.checkUpdate():\n%s', str(e))
 
         return 0
-    
+
     if latestVersion > VERSION:
 
             notice = updateDetected(latestVersion)

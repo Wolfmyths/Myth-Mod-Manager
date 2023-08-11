@@ -2,3 +2,4 @@ pyinstaller==5.13.0
 PySide6==6.5.1.1
 semantic-version==2.10.0
 requests==2.31.0
+patool==1.12.0

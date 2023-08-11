@@ -28,6 +28,8 @@ class ModListWidget(qtw.QTableWidget):
 
         self.p = Pathing()
 
+        self.setFocusPolicy(qt.FocusPolicy.NoFocus)
+
         self.setSelectionMode(qtw.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.setSelectionBehavior(qtw.QAbstractItemView.SelectionBehavior.SelectRows)
         self.setAcceptDrops(True)
@@ -416,7 +418,6 @@ class ModListWidget(qtw.QTableWidget):
 
                 dirs: list[QUrl] = []
                 zips: list[QUrl] = []
-                rars: list[str] = []
 
                 for mod in urls:
                     logging.info('Beginning to install %s via drop event', mod.fileName())
@@ -429,13 +430,6 @@ class ModListWidget(qtw.QTableWidget):
 
                     elif fileType == 'zip':
                         zips.append(mod)
-                    
-                    elif fileType == 'rar':
-                        rars.append(mod.fileName())
-                
-                # If there are any rar files, raise this error
-                if len(rars):
-                    raise Exception('rar')
 
                 # Gather where the user wants each mod to go
                 notice = newModLocation(*list(dirs + zips))
@@ -470,27 +464,11 @@ class ModListWidget(qtw.QTableWidget):
                 self.refreshMods()
 
         except Exception as e:
-            if str(e) == 'rar':
 
-                logging.warning('The following are rar files:\n%s\nThis file type is not supported :(', '\n'.join(rars))
-
-                # \n is not allowed in a f string prior to Python 3.12
-                nl = '\n'
-
-                msg = f"""
-                Mod(s) Effected: {nl.join(rars)}\n
-                The .rar file format is not supported.\n
-                You can open the .rar and drag the mod from there.
-                """
-
-                rarError = Notice(headline='.rar not supported :(', message=msg)
-                rarError.exec()
-
-            elif str(e) == 'canceled':
+            if str(e) == 'canceled':
                 logging.info('Table widget drop event has been canceled')
 
             else:
                 logging.error('An error occured in the table widget drop event:\n%s', str(e))
         finally:
             event.ignore()
-            

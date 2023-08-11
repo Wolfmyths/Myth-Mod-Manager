@@ -1,6 +1,7 @@
 import shutil
 import os
 import logging
+import patoolib
 
 from PySide6.QtCore import QThread, Signal, QUrl
 
@@ -159,9 +160,11 @@ class FileMover(QThread):
         self.succeeded.emit()
 
     def unZipMod(self, *mods: tuple[QUrl, str]) -> None:
-        '''Asks the user where each mod will go and then unzips it to that directory'''
+        '''Extracts a mod and puts it into a destination based off the type given'''
 
         self.setTotalProgress.emit(len(mods))
+
+        modDestDict = {TYPE_MODS : self.p.mods(), TYPE_MODS_OVERRIDE : self.p.mod_overrides(), TYPE_MAPS : self.p.maps()}
 
         try:
 
@@ -175,19 +178,13 @@ class FileMover(QThread):
 
                 type = modURL[1]
 
-                modDestDict = {TYPE_MODS : self.p.mods(), TYPE_MODS_OVERRIDE : self.p.mod_overrides(), TYPE_MAPS : self.p.maps()}
-
                 if self.cancel: break
 
                 self.setCurrentProgress.emit(1, f"Unpacking {mod}")
 
                 if os.path.exists(src):
 
-                        if src.endswith('.rar'):
-                            logging.warning('%s is a .rar, which is not supported, skipping...', mod)
-                            continue
-
-                        shutil.unpack_archive(src, modDestDict[type])
+                    patoolib.extract_archive(src, outdir=modDestDict[type])
 
         except Exception as e:
 
@@ -243,7 +240,7 @@ class FileMover(QThread):
         bundledFilePath = os.path.join(os.path.abspath(os.curdir), BACKUP_MODS)
 
         bundledModsPath = os.path.join(bundledFilePath, 'mods')
-        
+
         bundledOverridePath = os.path.join(bundledFilePath, 'assets', 'mod_overrides')
 
         bundledMapsPath = os.path.join(bundledFilePath, 'Maps')
@@ -252,8 +249,12 @@ class FileMover(QThread):
 
         srcPathDict = {TYPE_MODS_OVERRIDE : mod_overridePath, TYPE_MODS : modPath, TYPE_MAPS : maps_path}
 
+        # Define error msg
+
+        taskCanceledError = 'Task was canceled'
+
         try:
-            
+
             # Step 4: Create Folders
 
             # Every mod
@@ -262,29 +263,23 @@ class FileMover(QThread):
             self.setTotalProgress.emit(len(mods) + 3) # Add 3 for the extra steps that aren't the list lengeth
 
             self.setCurrentProgress.emit(1, f'Validating backup folder paths')
-            # Backup folder
-            if not os.path.exists(bundledFilePath):
 
-                os.mkdir(bundledFilePath)
+            # Creating backup environment
+            for path in (bundledFilePath, bundledModsPath, bundledMapsPath):
 
-            # /mods
-            if not os.path.exists(bundledModsPath):
+                if not os.path.exists(path):
 
-                os.mkdir(bundledModsPath)
+                    os.mkdir(path)
 
-            # /assets/mod_overrides
+            # Because this dir is a nested one, needs os.makedirs unlike the others
             if not os.path.exists(bundledOverridePath):
 
                 os.makedirs(bundledOverridePath)
 
-            # /Maps
-            if not os.path.exists(bundledMapsPath):
-                os.mkdir(bundledMapsPath)
-
             # Step 5: Copy each mod into the backup folder
             for mod in (x for x in mods):
 
-                if self.cancel: raise Exception('Task was canceled')
+                if self.cancel: raise Exception(taskCanceledError)
 
                 self.setCurrentProgress.emit(1, f'Copying {mod} to {BACKUP_MODS}')
 
@@ -304,6 +299,8 @@ class FileMover(QThread):
 
                 shutil.copytree(src, output)
             
+            if self.cancel: raise Exception(taskCanceledError)
+
             # Step 6: Zip Backup folder
             self.setCurrentProgress.emit(1, f'Zipping to {bundledFilePath}')
 
@@ -313,11 +310,12 @@ class FileMover(QThread):
             # Step 7: Cleanup
 
             self.setCurrentProgress.emit(1, 'Cleanup')
+
             # Delete Folder
             shutil.rmtree(bundledFilePath)
 
             self.succeeded.emit()
-            
+
         except Exception as e:
 
             # If something goes wrong, delete the unfinished bundled file

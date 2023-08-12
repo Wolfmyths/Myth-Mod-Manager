@@ -24,7 +24,8 @@ MOD_ENABLED = 'enabled'
 MOD_TYPE = 'type'
 
 # Files in PAYDAY2/Mods/ to ignore
-MODSIGNORE = ('base', 'logs', 'saves', 'downloads')
+# FIXME: verify if MODSIGNORE should be a set or a tuple
+MODSIGNORE = set('base', 'logs', 'saves', 'downloads')
 
 # The type of mods
 TYPE_ALL = ('mods', 'mods_override', 'maps')

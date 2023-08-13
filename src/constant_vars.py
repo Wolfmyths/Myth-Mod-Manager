@@ -1,12 +1,14 @@
-
+#!/usr/bin/python3
 import os
 import semantic_version
 
-# Detection if the program is being run through an exe or the script
+# Detect if the program is being run as an exe or via the python interpreter
 IS_SCRIPT = os.path.exists(os.path.join(os.path.dirname(__file__), 'main.py'))
 
 # Root Path
-ROOT_PATH = os.path.abspath(os.path.join(os.curdir, 'src')) if IS_SCRIPT else os.curdir
+ROOT_PATH = os.path.abspath(os.path.join(os.curdir, 'src'))
+if not IS_SCRIPT:
+    ROOT_PATH = os.curdir
 
 # File names
 MOD_CONFIG = 'mods.ini'

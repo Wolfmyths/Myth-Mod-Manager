@@ -65,6 +65,7 @@ class StartFileMover(qtw.QDialog):
         error.exec()
 
         self.cancel()
+        self.close()
 
     def succeeded(self):
         self.progressBar.setValue(self.progressBar.maximum())

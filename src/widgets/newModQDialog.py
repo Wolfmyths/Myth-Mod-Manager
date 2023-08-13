@@ -21,13 +21,9 @@ class newModLocation(qtw.QDialog):
                             
         layout = qtw.QVBoxLayout()
 
+        self.label = qtw.QLabel(self, text='Please select where the mods should be installed:')
+
         scrollArea = qtw.QScrollArea(self)
-        # Keep this for now until we have a style manager
-        scrollArea.setStyleSheet('''
-                                 QScrollArea{
-                                    border: none;
-                                 }
-                                 ''')
         scrollArea.setWidgetResizable(True)
         scrollArea.setVerticalScrollBarPolicy(qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scrollArea.setHorizontalScrollBarPolicy(qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -77,7 +73,7 @@ class newModLocation(qtw.QDialog):
         self.buttonBox.accepted.connect(lambda: self.accept())
         self.buttonBox.rejected.connect(lambda: self.reject())
 
-        for widget in (scrollArea, self.buttonBox):
+        for widget in (self.label, scrollArea, self.buttonBox):
             layout.addWidget(widget)
 
         self.setLayout(layout)

@@ -73,6 +73,10 @@ class StyleManager():
                 border-top: 3px solid {2};
             }}
 
+            QScrollArea {{
+                border: None;
+            }}
+
             QScrollBar:vertical {{
                 border: none;
                 background-color: {0};

@@ -10,7 +10,6 @@ from widgets.contextMenu import ModContextMenu
 from widgets.progressWidget import StartFileMover
 from widgets.deleteWarningQDialog import DeleteModConfirmation
 from widgets.newModQDialog import newModLocation
-from widgets.announcementQDialog import Notice
 from getPath import Pathing
 import errorChecking
 from save import Save, OptionsManager
@@ -184,7 +183,7 @@ class ModListWidget(qtw.QTableWidget):
 
             else:
                 logging.info('%s is already disabled in the save file', modName)
-    
+
     def deleteItem(self) -> None:
         '''
         Deletes an row from the GUI,
@@ -228,7 +227,7 @@ class ModListWidget(qtw.QTableWidget):
             self.getEnabledItem(row).setText('Enabled')
 
         self.saveManager.writeData()
-    
+
     # This isn't used anywhere, might be removed later
     def isMultipleSelected(self) -> bool:
         return len(self.selectedItems()) > 1
@@ -437,7 +436,9 @@ class ModListWidget(qtw.QTableWidget):
 
                 dict_ = notice.typeDict
 
-                if len(dict_) != len(dirs + zips):
+                print(dict_)
+
+                if len(dict_.keys()) != len(dirs + zips):
                     raise Exception('canceled')
 
                 # Combine the mod location and URL into a Tuple
@@ -466,7 +467,10 @@ class ModListWidget(qtw.QTableWidget):
         except Exception as e:
 
             if str(e) == 'canceled':
-                logging.info('Table widget drop event has been canceled')
+                logging.info('''
+                             Table widget drop event has been canceled:
+                             Not all mods were given a destination
+                             ''')
 
             else:
                 logging.error('An error occured in the table widget drop event:\n%s', str(e))

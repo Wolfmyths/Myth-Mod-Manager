@@ -1,5 +1,6 @@
 import shutil
 import os
+import stat
 import logging
 import patoolib
 
@@ -134,28 +135,33 @@ class FileMover(QThread):
         The 1st index of the tuple should be a constant var
         '''
 
-        self.setTotalProgress.emit(len(mods))
+        try:
+            self.setTotalProgress.emit(len(mods))
 
-        ChosenDir = None
-        
-        for mod in mods:
+            ChosenDir = None
+            
+            for mod in mods:
 
-            modURL = mod[0]
-            ChosenDir = mod[1]
+                modURL = mod[0]
+                ChosenDir = mod[1]
 
-            modsDirPath = modURL.toLocalFile()
+                modsDirPath = modURL.toLocalFile()
 
-            mod = modURL.fileName()
+                mod = modURL.fileName()
 
-            self.setCurrentProgress.emit(1, f'Installing {mod}')
+                self.setCurrentProgress.emit(1, f'Installing {mod}')
 
-            # Setting the Destination path
-            if errorChecking.isTypeMod(ChosenDir):
+                # Setting the Destination path
+                if errorChecking.isTypeMod(ChosenDir):
 
-                modDestPath = self.p.mod(ChosenDir, mod)
+                    modDestPath = self.p.mod(ChosenDir, mod)
 
-                if not os.path.exists(modDestPath):
-                    shutil.move(modsDirPath, modDestPath)
+                    if not os.path.exists(modDestPath):
+                        shutil.move(modsDirPath, modDestPath)
+
+        except Exception as e:
+            logging.error('An error occured in changeModType:\n%s', str(e))
+            self.error.emit(str(e))
         
         self.succeeded.emit()
 
@@ -201,26 +207,36 @@ class FileMover(QThread):
 
         disPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
-        for modName in mods:
+        try: 
+            for modName in mods:
 
-            if self.cancel: break
+                if self.cancel: raise Exception('cancel')
 
-            self.setCurrentProgress.emit(1, f'Deleting {modName}')
+                self.setCurrentProgress.emit(1, f'Deleting {modName}')
 
-            enabled = self.saveManager.isEnabled(modName)
+                enabled = self.saveManager.isEnabled(modName)
 
-            type = self.saveManager.getType(modName) if enabled else 'disabled'
+                type = self.saveManager.getType(modName) if enabled else 'disabled'
 
-            self.saveManager.removeMods(modName)
+                self.saveManager.removeMods(modName)
 
-            path = self.p.mod(type, modName) if type != 'disabled' else disPath
+                path = self.p.mod(type, modName) if type != 'disabled' else disPath
 
-            if os.path.exists(path):
-                shutil.rmtree(path)
+                if os.path.exists(path):
+                    shutil.rmtree(path, onerror=self.onError)
+                else:
+                    logging.error('An error was raised in FileMover.deleteMod(), mod path does not exist:\n%s', path)
+
+            self.succeeded.emit()
+
+        except Exception as e:
+
+            if str(e) == 'cancel':
+                logging.info('Canceled deleteMod()')
+
             else:
-                logging.error('An error was raised in FileMover.deleteMod(), mod path does not exist:\n%s', path)
-
-        self.succeeded.emit()
+                logging.error('An error has occured in deleteMod():\n%s', str(e))
+                self.error.emit(str(e))
 
     def backupMods(self) -> None:
         '''Takes all of the mods and compresses them into a zip file, the output is in the exe directory'''
@@ -325,3 +341,13 @@ class FileMover(QThread):
             if not self.cancel:
                 logging.error('Something went wrong in FileSaver.backupMods():\n%s', str(e))
                 self.error.emit(str(e))
+
+    def onError(self, func, path, exc_info):
+
+        logging.warning('An error was raised in shutil:\n%s', exc_info)
+
+        # read-only error
+        if not os.access(path, os.W_OK):
+            logging.info('read-only error detected, fixing...')
+            os.chmod(path, stat.S_IWUSR)
+            func(path)

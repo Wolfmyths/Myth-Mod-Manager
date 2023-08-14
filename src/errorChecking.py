@@ -23,6 +23,8 @@ def validGamePath() -> bool:
         return False
 
     else:
+        # NOTE: can this else statement be removed
+        # and this line can then be moved back 1 tab?
         logging.info('Gamepath: %s', gamePath)
 
     return os.path.exists(os.path.join(gamePath, 'payday2_win32_release.exe'))
@@ -78,19 +80,14 @@ def getFileType(filePath: str) -> str | bool:
 
             output = 'dir'
 
-        elif filePath.endswith('.zip'):
-
-            output = 'zip'
-        
-        elif filePath.endswith('.rar'):
-
-            output = 'rar'
-        
         else:
-            raise FileNotFoundError
-        
-        logging.debug('File name: %s\nType: %s', filePath.split('/')[-1], output)
-        
+            file_name: str = os.path.basename(filePath)
+            file_name, filetype: str = file_name.split('.')
+            if filetype != 'zip' or 'rar':
+                raise FileNotFoundError
+                # NOTE - this will terminate the program
+                #        so we don't need a return.
+            logging.debug('File name: %s\nType: %s', filePath.split('/')[-1], output)
     except FileNotFoundError:
         logging.info('The file path is not a valid type: %s', filePath)
 

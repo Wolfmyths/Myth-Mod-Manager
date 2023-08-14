@@ -436,8 +436,6 @@ class ModListWidget(qtw.QTableWidget):
 
                 dict_ = notice.typeDict
 
-                print(dict_)
-
                 if len(dict_.keys()) != len(dirs + zips):
                     raise Exception('canceled')
 

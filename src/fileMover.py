@@ -1,7 +1,7 @@
 import shutil
 import os
-import stat
 import logging
+
 import patoolib
 
 from PySide6.QtCore import QThread, Signal, QUrl
@@ -97,7 +97,7 @@ class FileMover(QThread):
 
                 modPath = self.p.mod(self.saveManager.getType(mod), mod)
 
-                shutil.move(modPath, disabledModsPath)
+                self.move(modPath, disabledModsPath)
             else:
                 logging.info('%s is already in the disabled directory', mod)
         
@@ -122,7 +122,7 @@ class FileMover(QThread):
 
                 modDestPath = self.p.mod(self.saveManager.getType(mod), mod)
 
-                shutil.move(os.path.join(disabledModsPath, mod), modDestPath)
+                self.move(os.path.join(disabledModsPath, mod), modDestPath)
             else:
                 logging.warning('%s was not found in:\n%s\nIgnoring...', mod, disabledModsPath)
         
@@ -142,6 +142,8 @@ class FileMover(QThread):
             
             for mod in mods:
 
+                if self.cancel: break
+
                 modURL = mod[0]
                 ChosenDir = mod[1]
 
@@ -156,8 +158,8 @@ class FileMover(QThread):
 
                     modDestPath = self.p.mod(ChosenDir, mod)
 
-                    if not os.path.exists(modDestPath):
-                        shutil.move(modsDirPath, modDestPath)
+                    self.move(modsDirPath, modDestPath)
+
 
         except Exception as e:
             logging.error('An error occured in changeModType:\n%s', str(e))
@@ -276,7 +278,7 @@ class FileMover(QThread):
             # Every mod
             mods = list([x for x in os.listdir(modPath) if x not in MODSIGNORE] + os.listdir(mod_overridePath) + os.listdir(disPath) + os.listdir(maps_path))
 
-            self.setTotalProgress.emit(len(mods) + 3) # Add 3 for the extra steps that aren't the list lengeth
+            self.setTotalProgress.emit(len(mods) + 3) # Add 3 for the extra steps that aren't the list length
 
             self.setCurrentProgress.emit(1, f'Validating backup folder paths')
 
@@ -346,8 +348,40 @@ class FileMover(QThread):
 
         logging.warning('An error was raised in shutil:\n%s', exc_info)
 
-        # read-only error
-        if not os.access(path, os.W_OK):
-            logging.info('read-only error detected, fixing...')
-            os.chmod(path, stat.S_IWUSR)
+        if not errorChecking.permissionCheck(path):
+
             func(path)
+    
+    def move(self, src: str, dest: str):
+        '''`shutil.move()` with some extra exception handling'''
+
+        # Overwrite mod
+        if os.path.exists(dest):
+            shutil.rmtree(dest, onerror=self.onError)
+
+        # Will try to move the file, if there is an exception, fix the issue and try again
+        while True and not self.cancel:
+            try:
+                shutil.move(src, dest)
+                break
+            except PermissionError:
+                
+                # Grab all files in mod
+                for root, dirs, files in os.walk(src):
+                    
+                    # Checking files for perm errors
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        errorChecking.permissionCheck(file_path)
+                    
+                    # Checking folders for perm errors
+                    for dir in dirs:
+                        dir_path = os.path.join(root, dir)
+                        errorChecking.permissionCheck(dir_path)
+                    
+                    # Checking mod directory for perm errors
+                    errorChecking.permissionCheck(root)
+
+                # If shutil.move made a partial dir of the mod delete it
+                if os.path.exists(dest):
+                    shutil.rmtree(dest, onerror=self.onError)

@@ -1,4 +1,5 @@
 import os
+import stat
 import requests
 import logging
 
@@ -139,3 +140,25 @@ def checkUpdate() -> int:
 
 def isTypeMod(type: str):
     return type in TYPE_ALL
+
+def permissionCheck(src: str) -> int:
+    '''
+    Checks if a file has all perms,
+    if not it will change them to have the correct perms.
+
+    Returns a code depending on the outcome
+    '''
+
+    permission = str(oct(os.stat(src).st_mode))[-3:]
+
+    if int(permission) != 777:
+        logging.info('Permission error found, fixing...')
+        os.chmod(src, stat.S_IRWXU)
+
+        result = 0
+
+    else:
+
+        result = 1
+    
+    return result

@@ -9,6 +9,9 @@ IS_SCRIPT = os.path.exists(os.path.join(os.path.dirname(__file__), 'main.py'))
 # Root Path
 ROOT_PATH = os.path.abspath(os.path.join(os.curdir, 'src')) if IS_SCRIPT else os.curdir
 
+# Icon Path
+ICON = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'icon.ico')
+
 # File names
 MOD_CONFIG = 'mods.ini'
 OPTIONS_CONFIG = 'config.ini'

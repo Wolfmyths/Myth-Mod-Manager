@@ -108,6 +108,7 @@ def checkUpdate() -> int:
 
     try:
         # If the version is a pre-release, then look for latest pre-release updates as well
+        # If there is an error raised here in the code's execution then it's because this version does not have a release page yet
         if isPrerelease(VERSION):
 
             data = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases').json()

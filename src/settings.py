@@ -5,6 +5,7 @@ import PySide6.QtCore as qt
 
 from widgets.progressWidget import StartFileMover
 from save import OptionsManager
+from getPath import Pathing
 from style import StyleManager
 from constant_vars import OPTIONS_SECTION, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, DARK, LIGHT, OPTIONS_THEME
 
@@ -77,11 +78,19 @@ class Options(qtw.QWidget):
         self.backupMods = qtw.QPushButton(parent=self, text='Backup Mods')
         self.backupMods.clicked.connect(lambda: self.startBackupMods())
 
+        self.log = qtw.QPushButton(parent=self, text='Crash Logs')
+        self.log.clicked.connect(lambda: os.startfile(os.path.join('C:', 'Users', os.environ['USERNAME'], 'AppData', 'Local', 'PAYDAY 2')))
+
+        self.modLog = qtw.QPushButton(parent=self, text='Mod Crash Logs')
+        self.modLog.clicked.connect(lambda: self.openCrashLogBLT())
+
         for row in ( (self.noticeLabel, self.noticeLabelDesc),
                      (self.gameDirLabel, self.gameDir),
                      (self.disabledModLabel, self.disabledModDir),
                      (self.backupModsLabel, self.backupMods),
-                     (qtw.QLabel(), self.buttonFrame) ):
+                     (qtw.QLabel(), self.buttonFrame),
+                     (qtw.QLabel(), self.log),
+                     (qtw.QLabel(), self.modLog) ):
 
             layout.addRow(row[0], row[1])
         
@@ -111,6 +120,11 @@ class Options(qtw.QWidget):
 
             timeout.stop()
             timeout.start(1000)
+    
+    def openCrashLogBLT(self):
+        modPath = Pathing().mods()
+
+        os.startfile(os.path.join(modPath, 'logs'))
             
     
     def setGamePathTimeout(self):
@@ -144,7 +158,7 @@ class Options(qtw.QWidget):
         self.optionsManager.writeData()
 
         self.noticeLabel.setText('Success:')
-        self.noticeLabelDesc.setText('Progress has been saved')
+        self.noticeLabelDesc.setText('Progress has been saved.\n(Remember to move your disabled mods)')
     
     def startBackupMods(self) -> None:
         

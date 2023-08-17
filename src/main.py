@@ -3,11 +3,12 @@ import logging
 import os
 
 import PySide6.QtWidgets as qtw
+import PySide6.QtGui as qtg
 
 from main_window import MainWindow
 from save import Save, OptionsManager
 from widgets.gamepathQDialog import GamePathNotFound
-from constant_vars import VERSION, PROGRAM_NAME, LOG, IS_SCRIPT, OPTIONS_THEME, LIGHT
+from constant_vars import VERSION, PROGRAM_NAME, LOG, IS_SCRIPT, OPTIONS_THEME, LIGHT, ICON
 import errorChecking
 from style import StyleManager
 
@@ -44,8 +45,8 @@ if __name__ == '__main__':
         warning = GamePathNotFound(app)
         warning.exec()
 
-
     window = MainWindow(app)
+    window.setWindowIcon(qtg.QIcon(ICON))
     window.setWindowTitle(f'{PROGRAM_NAME} {VERSION}')
     window.setMinimumSize(800, 800)
     window.show()

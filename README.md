@@ -1,3 +1,6 @@
+
+[logo](./assets/icon.png)
+
 # Myth Mod Manager
 
 A simple mod manager for PAYDAY 2 to make managing all of those files a little bit easier.

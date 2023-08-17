@@ -60,6 +60,7 @@ You may download any version of Myth Mod Manager and view changelogs at the [rel
 
 # Future Plans
 
++ New Icon/Logo
 + Mod profiles
 + Duplicate mod detection
 + Auto mod type detection

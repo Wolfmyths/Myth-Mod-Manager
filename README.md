@@ -2,6 +2,8 @@
 
 A simple mod manager for PAYDAY 2 to make managing all of those files a little bit easier.
 
+<img src="./assets/icon.png" width="150" height="150" align="right">
+
 ![GitHub all releases](https://img.shields.io/github/downloads/Wolfmyths/Myth-Mod-Manager/total)
 ![GitHub contributors](https://img.shields.io/github/contributors/Wolfmyths/Myth-Mod-Manager)
 ![License](https://img.shields.io/badge/License-MIT-blue)
@@ -14,23 +16,29 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 
 # Features
 
-* Disable mods you don't want to use at the moment, and if you want to take it a step further, even delete them from your computer.
+* Disable mods you don't want to use at the moment
     + *This feature is good for testing out which mod is crashing the game!*
+
+* Delete mods from your computer
 
 * Automatic installation by dragging and dropping files into the program.
     + This also includes automatic unzipping.
 
     + *You still have to choose what type of mod it is (mods, mod_overrides, maps)*
 
-* Easy to access buttons for your game directory and starting the game.
+* Easy to access buttons for your game directory, crash logs, and starting the game.
 
-* Search bar to find the mod you're looking for in seconds
+* Search bar to find the installed mod you're looking for in seconds
 
 * Backup all of your mods and package it into a compressed file.
 
 In the future there will be profiles so stay tuned for that 😁
 
 **Like all PAYDAY 2 Mods, [Super BLT](https://superblt.znix.xyz/) is required to run mods**
+
+# Showcase
+
+<img src="./assets/preview.png" width="600" height="600" alt='Preview'>
 
 # Supported Platforms
 
@@ -39,21 +47,24 @@ In the future there will be profiles so stay tuned for that 😁
 At the moment this is only supported on windows due to some dependencies
 and their features being windows exclusive
 
+There are plans to release on Linux
+
+See more about it in [this issue here](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/18)
+
 ### Reguarding Storefront
 
-I only have access to the Steam version,
-so I cannot say if it works for Epic Games
-without feedback.
+It works with both steam and epic games versions.
 
 # Download
 You may download any version of Myth Mod Manager and view changelogs at the [releases page](https://github.com/Wolfmyths/Myth-Mod-Manager/releases)
 
 # Future Plans
 
++ New Icon/Logo
 + Mod profiles
-+ Dark Theme
-+ .rar drop-install support
-+ Improved visuals
++ Duplicate mod detection
++ Auto mod type detection
++ Linux support
 + Some kind of [modworkshop.net](https://modworkshop.net/g/payday-2) integration, see [issue #14](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/14)
 
 *Suggestions are appreciated!*
@@ -72,5 +83,6 @@ There are plans to add a CONTRIBUTING.md and maybe even a wiki.
 + If you want to run the program through the EXE, run `createEXE.bat`
 + Variables that are used throughout the project are stored in `constant_vars.py`
 + Please keep your code formatting consistent with the rest of the project
++ **Use the other branch which includes the next update when submitting commits and PRs**
 
 If you have any questions, [contact me](https://github.com/Wolfmyths) on one of my socials.

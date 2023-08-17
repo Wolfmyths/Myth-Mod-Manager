@@ -2,6 +2,8 @@ import shutil
 import os
 import logging
 
+import patoolib
+
 from PySide6.QtCore import QThread, Signal, QUrl
 
 from save import Save, OptionsManager
@@ -37,6 +39,8 @@ class FileMover(QThread):
     '''
 
     setTotalProgress = Signal(int)
+
+    addTotalProgress = Signal(int)
 
     setCurrentProgress = Signal(int, str)
 
@@ -95,7 +99,7 @@ class FileMover(QThread):
 
                 modPath = self.p.mod(self.saveManager.getType(mod), mod)
 
-                shutil.move(modPath, disabledModsPath)
+                self.move(modPath, disabledModsPath)
             else:
                 logging.info('%s is already in the disabled directory', mod)
         
@@ -120,7 +124,7 @@ class FileMover(QThread):
 
                 modDestPath = self.p.mod(self.saveManager.getType(mod), mod)
 
-                shutil.move(os.path.join(disabledModsPath, mod), modDestPath)
+                self.move(os.path.join(disabledModsPath, mod), modDestPath)
             else:
                 logging.warning('%s was not found in:\n%s\nIgnoring...', mod, disabledModsPath)
         
@@ -133,35 +137,44 @@ class FileMover(QThread):
         The 1st index of the tuple should be a constant var
         '''
 
-        self.setTotalProgress.emit(len(mods))
+        try:
+            self.setTotalProgress.emit(len(mods))
 
-        ChosenDir = None
-        
-        for mod in mods:
+            ChosenDir = None
+            
+            for mod in mods:
 
-            modURL = mod[0]
-            ChosenDir = mod[1]
+                if self.cancel: break
 
-            modsDirPath = modURL.toLocalFile()
+                modURL = mod[0]
+                ChosenDir = mod[1]
 
-            mod = modURL.fileName()
+                modsDirPath = modURL.toLocalFile()
 
-            self.setCurrentProgress.emit(1, f'Installing {mod}')
+                mod = modURL.fileName()
 
-            # Setting the Destination path
-            if errorChecking.isTypeMod(ChosenDir):
+                self.setCurrentProgress.emit(1, f'Installing {mod}')
 
-                modDestPath = self.p.mod(ChosenDir, mod)
+                # Setting the Destination path
+                if errorChecking.isTypeMod(ChosenDir):
 
-                if not os.path.exists(modDestPath):
-                    shutil.move(modsDirPath, modDestPath)
+                    modDestPath = self.p.mod(ChosenDir, mod)
+
+                    self.move(modsDirPath, modDestPath)
+
+
+        except Exception as e:
+            logging.error('An error occured in changeModType:\n%s', str(e))
+            self.error.emit(str(e))
         
         self.succeeded.emit()
 
     def unZipMod(self, *mods: tuple[QUrl, str]) -> None:
-        '''Asks the user where each mod will go and then unzips it to that directory'''
+        '''Extracts a mod and puts it into a destination based off the type given'''
 
         self.setTotalProgress.emit(len(mods))
+
+        modDestDict = {TYPE_MODS : self.p.mods(), TYPE_MODS_OVERRIDE : self.p.mod_overrides(), TYPE_MAPS : self.p.maps()}
 
         try:
 
@@ -175,19 +188,13 @@ class FileMover(QThread):
 
                 type = modURL[1]
 
-                modDestDict = {TYPE_MODS : self.p.mods(), TYPE_MODS_OVERRIDE : self.p.mod_overrides(), TYPE_MAPS : self.p.maps()}
-
                 if self.cancel: break
 
                 self.setCurrentProgress.emit(1, f"Unpacking {mod}")
 
                 if os.path.exists(src):
 
-                        if src.endswith('.rar'):
-                            logging.warning('%s is a .rar, which is not supported, skipping...', mod)
-                            continue
-
-                        shutil.unpack_archive(src, modDestDict[type])
+                    patoolib.extract_archive(src, outdir=modDestDict[type])
 
         except Exception as e:
 
@@ -204,26 +211,36 @@ class FileMover(QThread):
 
         disPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
-        for modName in mods:
+        try: 
+            for modName in mods:
 
-            if self.cancel: break
+                if self.cancel: raise Exception('cancel')
 
-            self.setCurrentProgress.emit(1, f'Deleting {modName}')
+                self.setCurrentProgress.emit(1, f'Deleting {modName}')
 
-            enabled = self.saveManager.isEnabled(modName)
+                enabled = self.saveManager.isEnabled(modName)
 
-            type = self.saveManager.getType(modName) if enabled else 'disabled'
+                type = self.saveManager.getType(modName) if enabled else 'disabled'
 
-            self.saveManager.removeMods(modName)
+                self.saveManager.removeMods(modName)
 
-            path = self.p.mod(type, modName) if type != 'disabled' else disPath
+                path = self.p.mod(type, modName) if type != 'disabled' else disPath
 
-            if os.path.exists(path):
-                shutil.rmtree(path)
+                if os.path.exists(path):
+                    shutil.rmtree(path, onerror=self.onError)
+                else:
+                    logging.error('An error was raised in FileMover.deleteMod(), mod path does not exist:\n%s', path)
+
+            self.succeeded.emit()
+
+        except Exception as e:
+
+            if str(e) == 'cancel':
+                logging.info('Canceled deleteMod()')
+
             else:
-                logging.error('An error was raised in FileMover.deleteMod(), mod path does not exist:\n%s', path)
-
-        self.succeeded.emit()
+                logging.error('An error has occured in deleteMod():\n%s', str(e))
+                self.error.emit(str(e))
 
     def backupMods(self) -> None:
         '''Takes all of the mods and compresses them into a zip file, the output is in the exe directory'''
@@ -243,7 +260,7 @@ class FileMover(QThread):
         bundledFilePath = os.path.join(os.path.abspath(os.curdir), BACKUP_MODS)
 
         bundledModsPath = os.path.join(bundledFilePath, 'mods')
-        
+
         bundledOverridePath = os.path.join(bundledFilePath, 'assets', 'mod_overrides')
 
         bundledMapsPath = os.path.join(bundledFilePath, 'Maps')
@@ -252,39 +269,37 @@ class FileMover(QThread):
 
         srcPathDict = {TYPE_MODS_OVERRIDE : mod_overridePath, TYPE_MODS : modPath, TYPE_MAPS : maps_path}
 
+        # Define error msg
+
+        taskCanceledError = 'Task was canceled'
+
         try:
-            
+
             # Step 4: Create Folders
 
             # Every mod
             mods = list([x for x in os.listdir(modPath) if x not in MODSIGNORE] + os.listdir(mod_overridePath) + os.listdir(disPath) + os.listdir(maps_path))
 
-            self.setTotalProgress.emit(len(mods) + 3) # Add 3 for the extra steps that aren't the list lengeth
+            self.setTotalProgress.emit(len(mods) + 3) # Add 3 for the extra steps that aren't the list length
 
             self.setCurrentProgress.emit(1, f'Validating backup folder paths')
-            # Backup folder
-            if not os.path.exists(bundledFilePath):
 
-                os.mkdir(bundledFilePath)
+            # Creating backup environment
+            for path in (bundledFilePath, bundledModsPath, bundledMapsPath):
 
-            # /mods
-            if not os.path.exists(bundledModsPath):
+                if not os.path.exists(path):
 
-                os.mkdir(bundledModsPath)
+                    os.mkdir(path)
 
-            # /assets/mod_overrides
+            # Because this dir is a nested one, needs os.makedirs unlike the others
             if not os.path.exists(bundledOverridePath):
 
                 os.makedirs(bundledOverridePath)
 
-            # /Maps
-            if not os.path.exists(bundledMapsPath):
-                os.mkdir(bundledMapsPath)
-
             # Step 5: Copy each mod into the backup folder
             for mod in (x for x in mods):
 
-                if self.cancel: raise Exception('Task was canceled')
+                if self.cancel: raise Exception(taskCanceledError)
 
                 self.setCurrentProgress.emit(1, f'Copying {mod} to {BACKUP_MODS}')
 
@@ -304,8 +319,10 @@ class FileMover(QThread):
 
                 shutil.copytree(src, output)
             
+            if self.cancel: raise Exception(taskCanceledError)
+
             # Step 6: Zip Backup folder
-            self.setCurrentProgress.emit(1, f'Zipping to {bundledFilePath}')
+            self.setCurrentProgress.emit(1, f'Zipping to {bundledFilePath}\nThis might take some time...')
 
             # Create Zip, this should overwrite if it already exists
             shutil.make_archive(BACKUP_MODS, 'zip', bundledFilePath)
@@ -313,11 +330,12 @@ class FileMover(QThread):
             # Step 7: Cleanup
 
             self.setCurrentProgress.emit(1, 'Cleanup')
+
             # Delete Folder
             shutil.rmtree(bundledFilePath)
 
             self.succeeded.emit()
-            
+
         except Exception as e:
 
             # If something goes wrong, delete the unfinished bundled file
@@ -327,3 +345,55 @@ class FileMover(QThread):
             if not self.cancel:
                 logging.error('Something went wrong in FileSaver.backupMods():\n%s', str(e))
                 self.error.emit(str(e))
+
+    def onError(self, func, path, exc_info):
+        """Used for `shutil.rmtree()`s `onerror` kwarg"""
+
+        logging.warning('An error was raised in shutil:\n%s', exc_info)
+
+        if not errorChecking.permissionCheck(path):
+
+            func(path)
+    
+    def move(self, src: str, dest: str):
+        '''`shutil.move()` with some extra exception handling'''
+
+        # Overwrite mod
+        if os.path.exists(dest):
+            shutil.rmtree(dest, onerror=self.onError)
+
+        # Will try to move the file, if there is an exception, fix the issue and try again
+        while True and not self.cancel:
+
+            try:
+
+                shutil.move(src, dest)
+                break
+
+            except PermissionError:
+                
+                # Grab all files in mod
+                for root, dirs, files in os.walk(src):
+
+                    self.addTotalProgress.emit(2 + len(dirs) + len(files))
+                    
+                    # Checking files for perm errors
+                    for file in files:
+                        self.setCurrentProgress.emit(1, f'Checking file permissions of {file}')
+                        file_path = os.path.join(root, file)
+                        errorChecking.permissionCheck(file_path)
+                    
+                    # Checking folders for perm errors
+                    for dir in dirs:
+                        self.setCurrentProgress.emit(1, f'Checking folder permissions of {dir}')
+                        dir_path = os.path.join(root, dir)
+                        errorChecking.permissionCheck(dir_path)
+                    
+                    # Checking mod directory for perm errors
+                    self.setCurrentProgress.emit(1, f'Checking folder permissions of {root}')
+                    errorChecking.permissionCheck(root)
+
+                self.setCurrentProgress.emit(1, f'Fixing install for {src.split("/")[-1]}')
+                # If shutil.move made a partial dir of the mod delete it
+                if os.path.exists(dest):
+                    shutil.rmtree(dest, onerror=self.onError)

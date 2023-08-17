@@ -1,5 +1,9 @@
 
 import PySide6.QtWidgets as qtw
+import PySide6.QtGui as qtg
+from PySide6.QtCore import Qt as qt
+
+from constant_vars import ICON
 
 class DeleteModConfirmation(qtw.QDialog):
     def __init__(self, QParent: qtw.QWidget | qtw.QApplication) -> None:
@@ -7,6 +11,8 @@ class DeleteModConfirmation(qtw.QDialog):
 
         self.QParent = QParent
         self.setWindowTitle('Mods are about to be permanently deleted!')
+        self.setWindowFlag(qt.WindowType.WindowStaysOnTopHint)
+        self.setWindowIcon(qtg.QIcon(ICON))
 
         layout = qtw.QVBoxLayout()
 

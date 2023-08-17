@@ -4,6 +4,7 @@ import subprocess
 import logging
 
 import PySide6.QtWidgets as qtw
+from PySide6.QtCore import Qt as qt
 
 from widgets.tableWidget import ModListWidget
 from widgets.announcementQDialog import Notice
@@ -32,31 +33,51 @@ class ModManager(qtw.QWidget):
         self.startGame = qtw.QPushButton('Start PAYDAY 2', self)
         self.startGame.clicked.connect(lambda: self.startPayday())
 
-        self.modLabel = qtw.QLabel(self)
+        modLabelLayout = qtw.QHBoxLayout()
+        modLabelLayout.setSpacing(100)
+        modLabelLayout.setAlignment(qt.AlignmentFlag.AlignHCenter)
+
+        self.labelFrame = qtw.QFrame()
+
+        self.totalModsLabel = qtw.QLabel(self)
+
+        self.modsLabel = qtw.QLabel(self)
+
+        self.overrideLabel = qtw.QLabel(self)
+
+        self.mapsLabel = qtw.QLabel(self)
+
+        for widget in (self.totalModsLabel, self.modsLabel, self.overrideLabel, self.mapsLabel):
+            modLabelLayout.addWidget(widget)
+
+        self.labelFrame.setLayout(modLabelLayout)
 
         self.search = qtw.QLineEdit()
         self.search.setPlaceholderText('Search...')
         self.search.textChanged.connect(lambda x: self.modsTable.search(x))
 
         self.modsTable = ModListWidget()
-        self.modsTable.itemChanged.connect(lambda: self.modLabel.setText(
-            f'''
-            Total Mods: {self.modsTable.rowCount()}
-            Mods: {self.modsTable.getModTypeCount(TYPE_MODS)}
-            Mod_Overrides: {self.modsTable.getModTypeCount(TYPE_MODS_OVERRIDE)}
-            Maps: {self.modsTable.getModTypeCount(TYPE_MAPS)}
-            '''))
+        self.modsTable.itemChanged.connect(lambda: self.updateModCount())
         
         self.modsTable.setObjectName(MOD_TABLE_OBJECT)
 
         self.modsTable.refreshMods()
 
-
-        for widget in (self.refresh, self.openGameDir, self.startGame, self.modLabel, self.search, self.modsTable):
+        for widget in (self.refresh, self.openGameDir, self.startGame, self.labelFrame, self.search, self.modsTable):
             layout.addWidget(widget)
 
         self.setLayout(layout)
     
+    def updateModCount(self):
+
+        self.totalModsLabel.setText(f'Total Mods: {self.modsTable.rowCount()}')
+
+        self.modsLabel.setText(f'Mods: {self.modsTable.getModTypeCount(TYPE_MODS)}')
+
+        self.overrideLabel.setText(f'Mod_Overrides: {self.modsTable.getModTypeCount(TYPE_MODS_OVERRIDE)}')
+
+        self.mapsLabel.setText(f'Maps: {self.modsTable.getModTypeCount(TYPE_MAPS)}')
+
     def startPayday(self):
 
         if errorChecking.validGamePath():

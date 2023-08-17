@@ -5,7 +5,9 @@ import PySide6.QtCore as qt
 
 from widgets.progressWidget import StartFileMover
 from save import OptionsManager
-from constant_vars import OPTIONS_SECTION, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT
+from getPath import Pathing
+from style import StyleManager
+from constant_vars import OPTIONS_SECTION, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, DARK, LIGHT, OPTIONS_THEME
 
 class Options(qtw.QWidget):
 
@@ -41,15 +43,54 @@ class Options(qtw.QWidget):
         self.disabledModDir.setText(self.optionsManager.getOption(self.disabledModDir.text(), fallback=MODS_DISABLED_PATH_DEFAULT))
         self.disabledModDir.textChanged.connect(lambda: self.setPath(self.disPathTimeout.objectName()))
 
+        gbLayout = qtw.QHBoxLayout()
+
+        self.buttonFrame = qtw.QGroupBox('Color Theme')
+    
+        self.colorThemeLight = qtw.QPushButton('Light', self.buttonFrame)
+        self.colorThemeLight.setCheckable(True)
+        self.colorThemeLight.clicked.connect(lambda: self.changeColorTheme(LIGHT))
+
+        self.colorThemeDark = qtw.QPushButton('Dark', self.buttonFrame)
+        self.colorThemeDark.setCheckable(True)
+        self.colorThemeDark.clicked.connect(lambda: self.changeColorTheme(DARK))
+
+        gbLayout.addWidget(self.colorThemeLight)
+        gbLayout.addWidget(self.colorThemeDark)
+        
+        self.buttonFrame.setLayout(gbLayout)
+
+        # Button group to set exclusive check state to color theme buttons
+        self.colorThemeBG = qtw.QButtonGroup(self)
+        self.colorThemeBG.setExclusive(True)
+
+        self.colorThemeBG.addButton(self.colorThemeLight, 0)
+        self.colorThemeBG.addButton(self.colorThemeDark, 1)
+
+        # Setting color theme buttons' checked state
+        if self.optionsManager.getOption(OPTIONS_THEME, LIGHT) == LIGHT:
+            self.colorThemeLight.setChecked(True)
+        else:
+            self.colorThemeDark.setChecked(True)
+
         self.backupModsLabel = qtw.QLabel(self, text='This will backup all of your mods and compress it into a zip file.')
 
         self.backupMods = qtw.QPushButton(parent=self, text='Backup Mods')
         self.backupMods.clicked.connect(lambda: self.startBackupMods())
 
+        self.log = qtw.QPushButton(parent=self, text='Crash Logs')
+        self.log.clicked.connect(lambda: os.startfile(os.path.join('C:', 'Users', os.environ['USERNAME'], 'AppData', 'Local', 'PAYDAY 2')))
+
+        self.modLog = qtw.QPushButton(parent=self, text='Mod Crash Logs')
+        self.modLog.clicked.connect(lambda: self.openCrashLogBLT())
+
         for row in ( (self.noticeLabel, self.noticeLabelDesc),
                      (self.gameDirLabel, self.gameDir),
                      (self.disabledModLabel, self.disabledModDir),
-                     (self.backupModsLabel, self.backupMods) ):
+                     (self.backupModsLabel, self.backupMods),
+                     (qtw.QLabel(), self.buttonFrame),
+                     (qtw.QLabel(), self.log),
+                     (qtw.QLabel(), self.modLog) ):
 
             layout.addRow(row[0], row[1])
         
@@ -79,6 +120,11 @@ class Options(qtw.QWidget):
 
             timeout.stop()
             timeout.start(1000)
+    
+    def openCrashLogBLT(self):
+        modPath = Pathing().mods()
+
+        os.startfile(os.path.join(modPath, 'logs'))
             
     
     def setGamePathTimeout(self):
@@ -112,9 +158,18 @@ class Options(qtw.QWidget):
         self.optionsManager.writeData()
 
         self.noticeLabel.setText('Success:')
-        self.noticeLabelDesc.setText('Progress has been saved')
+        self.noticeLabelDesc.setText('Progress has been saved.\n(Remember to move your disabled mods)')
     
     def startBackupMods(self) -> None:
         
         startFileMover = StartFileMover(5)
         startFileMover.exec()
+    
+    def changeColorTheme(self, theme: str):
+
+        self.optionsManager[OPTIONS_SECTION][OPTIONS_THEME] = theme
+
+        app: qtw.QApplication = qtw.QApplication.instance()
+        app.setStyleSheet(StyleManager().getStyleSheet(theme))
+
+        self.optionsManager.writeData()

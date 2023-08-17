@@ -1,8 +1,9 @@
 
 import PySide6.QtWidgets as qtw
+import PySide6.QtGui as qtg
 from PySide6.QtCore import QUrl, Qt as qt
 
-from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, TYPE_MAPS
+from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, TYPE_MAPS, ICON
 
 class newModLocation(qtw.QDialog):
 
@@ -12,6 +13,8 @@ class newModLocation(qtw.QDialog):
         super().__init__()
 
         self.setWindowTitle('Installing mods')
+        self.setWindowIcon(qtg.QIcon(ICON))
+        self.setWindowFlag(qt.WindowType.WindowStaysOnTopHint, True)
 
         self.setMaximumSize(400, 850)
         self.setMinimumSize(320, 180)
@@ -21,13 +24,9 @@ class newModLocation(qtw.QDialog):
                             
         layout = qtw.QVBoxLayout()
 
+        self.label = qtw.QLabel(self, text='Please select where the mods should be installed:')
+
         scrollArea = qtw.QScrollArea(self)
-        # Keep this for now until we have a style manager
-        scrollArea.setStyleSheet('''
-                                 QScrollArea{
-                                    border: none;
-                                 }
-                                 ''')
         scrollArea.setWidgetResizable(True)
         scrollArea.setVerticalScrollBarPolicy(qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scrollArea.setHorizontalScrollBarPolicy(qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -77,7 +76,7 @@ class newModLocation(qtw.QDialog):
         self.buttonBox.accepted.connect(lambda: self.accept())
         self.buttonBox.rejected.connect(lambda: self.reject())
 
-        for widget in (scrollArea, self.buttonBox):
+        for widget in (self.label, scrollArea, self.buttonBox):
             layout.addWidget(widget)
 
         self.setLayout(layout)

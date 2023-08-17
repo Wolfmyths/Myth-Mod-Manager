@@ -3,9 +3,11 @@ import logging
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
+from PySide6.QtCore import Qt as qt
 
 from fileMover import FileMover
 from widgets.announcementQDialog import Notice
+from constant_vars import ICON
 
 class StartFileMover(qtw.QDialog):
     '''
@@ -26,14 +28,17 @@ class StartFileMover(qtw.QDialog):
     def __init__(self, mode: int, *args) -> None:
         super().__init__()
 
+        self.setWindowFlag(qt.WindowType.WindowStaysOnTopHint, True)
+        self.setWindowIcon(qtg.QIcon(ICON))
+
+        self.mode = mode
+
         logging.getLogger(__name__)
 
-        self.setWindowTitle('Update Notice')
+        self.setWindowTitle('Myth Mod Manager Task')
 
         self.fileMover = FileMover(mode, *args)
         self.fileMover.error.connect(lambda x: self.errorRaised(x))
-
-        self.rar = []
 
         layout = qtw.QVBoxLayout()
 
@@ -42,6 +47,7 @@ class StartFileMover(qtw.QDialog):
         self.progressBar = qtw.QProgressBar()
         self.fileMover.setTotalProgress.connect(lambda x: self.progressBar.setMaximum(x))
         self.fileMover.setCurrentProgress.connect(lambda x, y: self.updateProgressBar(x, y))
+        self.fileMover.addTotalProgress.connect(lambda x: self.progressBar.setMaximum(self.progressBar.maximum() + x))
 
         self.fileMover.succeeded.connect(lambda: self.succeeded())
 
@@ -65,6 +71,7 @@ class StartFileMover(qtw.QDialog):
         error.exec()
 
         self.cancel()
+        self.close()
 
     def succeeded(self):
         self.progressBar.setValue(self.progressBar.maximum())
@@ -87,8 +94,9 @@ class StartFileMover(qtw.QDialog):
         Sets the cancel flag to true in which FileMover() will exit the function
         after it's done a step and pass the success signal
         '''
-        logging.info('Task was canceled...')
-        self.warningLabel.setText('Canceling...')
+
+        logging.info('Task %s was canceled...', self.mode)
+        self.warningLabel.setText('Canceling... (Finishing current step)')
 
         self.fileMover.cancel = True
     

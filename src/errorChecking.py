@@ -1,4 +1,5 @@
 import os
+import stat
 import requests
 import logging
 
@@ -78,13 +79,9 @@ def getFileType(filePath: str) -> str | bool:
 
             output = 'dir'
 
-        elif filePath.endswith('.zip'):
+        elif filePath.endswith(('.zip', '.rar', '.7z')):
 
             output = 'zip'
-        
-        elif filePath.endswith('.rar'):
-
-            output = 'rar'
         
         else:
             raise FileNotFoundError
@@ -92,10 +89,10 @@ def getFileType(filePath: str) -> str | bool:
         logging.debug('File name: %s\nType: %s', filePath.split('/')[-1], output)
         
     except FileNotFoundError:
-        logging.info('The file path is not a valid type: %s', filePath)
+        logging.warning('The file extension not valid and will be ignored: %s', filePath.split('/')[-1])
 
         output = False
-    
+
     finally:
         return output
 
@@ -105,30 +102,31 @@ def isPrerelease(version: Version) -> bool:
 def checkUpdate() -> int:
     '''
     Checks for latest update and returns the result value of the updateDetected() QDialog Widget
-    
+
     If the request.get() raises an exception, return 0
     '''
 
     try:
         # If the version is a pre-release, then look for latest pre-release updates as well
+        # If there is an error raised here in the code's execution then it's because this version does not have a release page yet
         if isPrerelease(VERSION):
 
             data = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases').json()
 
             latestVersion = Version.coerce(data[0]['tag_name'])
-        
+
         else:
 
             latestVersion = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest').json()['tag_name']
             latestVersion = Version.coerce(latestVersion)
-        
+
         logging.info('Latest Version: %s', latestVersion)
 
     except Exception as e:
         logging.error('Issue in errorChecking.checkUpdate():\n%s', str(e))
 
         return 0
-    
+
     if latestVersion > VERSION:
 
             notice = updateDetected(latestVersion)
@@ -143,3 +141,25 @@ def checkUpdate() -> int:
 
 def isTypeMod(type: str):
     return type in TYPE_ALL
+
+def permissionCheck(src: str) -> int:
+    '''
+    Checks if a file has all perms,
+    if not it will change them to have the correct perms.
+
+    Returns a code depending on the outcome
+    '''
+
+    permission = str(oct(os.stat(src).st_mode))[-3:]
+
+    if int(permission) != 777:
+        logging.info('Permission error found, fixing...')
+        os.chmod(src, stat.S_IRWXU)
+
+        result = 0
+
+    else:
+
+        result = 1
+    
+    return result

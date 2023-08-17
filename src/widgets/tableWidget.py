@@ -10,7 +10,6 @@ from widgets.contextMenu import ModContextMenu
 from widgets.progressWidget import StartFileMover
 from widgets.deleteWarningQDialog import DeleteModConfirmation
 from widgets.newModQDialog import newModLocation
-from widgets.announcementQDialog import Notice
 from getPath import Pathing
 import errorChecking
 from save import Save, OptionsManager
@@ -27,6 +26,8 @@ class ModListWidget(qtw.QTableWidget):
         self.optionsManager = OptionsManager()
 
         self.p = Pathing()
+
+        self.setFocusPolicy(qt.FocusPolicy.NoFocus)
 
         self.setSelectionMode(qtw.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.setSelectionBehavior(qtw.QAbstractItemView.SelectionBehavior.SelectRows)
@@ -182,7 +183,7 @@ class ModListWidget(qtw.QTableWidget):
 
             else:
                 logging.info('%s is already disabled in the save file', modName)
-    
+
     def deleteItem(self) -> None:
         '''
         Deletes an row from the GUI,
@@ -226,7 +227,7 @@ class ModListWidget(qtw.QTableWidget):
             self.getEnabledItem(row).setText('Enabled')
 
         self.saveManager.writeData()
-    
+
     # This isn't used anywhere, might be removed later
     def isMultipleSelected(self) -> bool:
         return len(self.selectedItems()) > 1
@@ -416,7 +417,6 @@ class ModListWidget(qtw.QTableWidget):
 
                 dirs: list[QUrl] = []
                 zips: list[QUrl] = []
-                rars: list[str] = []
 
                 for mod in urls:
                     logging.info('Beginning to install %s via drop event', mod.fileName())
@@ -429,13 +429,6 @@ class ModListWidget(qtw.QTableWidget):
 
                     elif fileType == 'zip':
                         zips.append(mod)
-                    
-                    elif fileType == 'rar':
-                        rars.append(mod.fileName())
-                
-                # If there are any rar files, raise this error
-                if len(rars):
-                    raise Exception('rar')
 
                 # Gather where the user wants each mod to go
                 notice = newModLocation(*list(dirs + zips))
@@ -443,7 +436,7 @@ class ModListWidget(qtw.QTableWidget):
 
                 dict_ = notice.typeDict
 
-                if len(dict_) != len(dirs + zips):
+                if len(dict_.keys()) != len(dirs + zips):
                     raise Exception('canceled')
 
                 # Combine the mod location and URL into a Tuple
@@ -470,27 +463,14 @@ class ModListWidget(qtw.QTableWidget):
                 self.refreshMods()
 
         except Exception as e:
-            if str(e) == 'rar':
 
-                logging.warning('The following are rar files:\n%s\nThis file type is not supported :(', '\n'.join(rars))
-
-                # \n is not allowed in a f string prior to Python 3.12
-                nl = '\n'
-
-                msg = f"""
-                Mod(s) Effected: {nl.join(rars)}\n
-                The .rar file format is not supported.\n
-                You can open the .rar and drag the mod from there.
-                """
-
-                rarError = Notice(headline='.rar not supported :(', message=msg)
-                rarError.exec()
-
-            elif str(e) == 'canceled':
-                logging.info('Table widget drop event has been canceled')
+            if str(e) == 'canceled':
+                logging.info('''
+                             Table widget drop event has been canceled:
+                             Not all mods were given a destination
+                             ''')
 
             else:
                 logging.error('An error occured in the table widget drop event:\n%s', str(e))
         finally:
             event.ignore()
-            

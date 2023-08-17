@@ -1,9 +1,8 @@
-
-[logo](./assets/icon.png)
-
 # Myth Mod Manager
 
 A simple mod manager for PAYDAY 2 to make managing all of those files a little bit easier.
+
+<img src="./assets/icon.png" width="150" height="150" align="right">
 
 ![GitHub all releases](https://img.shields.io/github/downloads/Wolfmyths/Myth-Mod-Manager/total)
 ![GitHub contributors](https://img.shields.io/github/contributors/Wolfmyths/Myth-Mod-Manager)
@@ -36,6 +35,10 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 In the future there will be profiles so stay tuned for that 😁
 
 **Like all PAYDAY 2 Mods, [Super BLT](https://superblt.znix.xyz/) is required to run mods**
+
+# Showcase
+
+<img src="./assets/preview.png" width="600" height="600" alt='Preview'>
 
 # Supported Platforms
 

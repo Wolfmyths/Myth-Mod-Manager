@@ -40,6 +40,8 @@ class FileMover(QThread):
 
     setTotalProgress = Signal(int)
 
+    addTotalProgress = Signal(int)
+
     setCurrentProgress = Signal(int, str)
 
     succeeded = Signal()
@@ -320,7 +322,7 @@ class FileMover(QThread):
             if self.cancel: raise Exception(taskCanceledError)
 
             # Step 6: Zip Backup folder
-            self.setCurrentProgress.emit(1, f'Zipping to {bundledFilePath}')
+            self.setCurrentProgress.emit(1, f'Zipping to {bundledFilePath}\nThis might take some time...')
 
             # Create Zip, this should overwrite if it already exists
             shutil.make_archive(BACKUP_MODS, 'zip', bundledFilePath)
@@ -362,27 +364,36 @@ class FileMover(QThread):
 
         # Will try to move the file, if there is an exception, fix the issue and try again
         while True and not self.cancel:
+
             try:
+
                 shutil.move(src, dest)
                 break
+
             except PermissionError:
                 
                 # Grab all files in mod
                 for root, dirs, files in os.walk(src):
+
+                    self.addTotalProgress.emit(2 + len(dirs) + len(files))
                     
                     # Checking files for perm errors
                     for file in files:
+                        self.setCurrentProgress.emit(1, f'Checking file permissions of {file}')
                         file_path = os.path.join(root, file)
                         errorChecking.permissionCheck(file_path)
                     
                     # Checking folders for perm errors
                     for dir in dirs:
+                        self.setCurrentProgress.emit(1, f'Checking folder permissions of {dir}')
                         dir_path = os.path.join(root, dir)
                         errorChecking.permissionCheck(dir_path)
                     
                     # Checking mod directory for perm errors
+                    self.setCurrentProgress.emit(1, f'Checking folder permissions of {root}')
                     errorChecking.permissionCheck(root)
 
+                self.setCurrentProgress.emit(1, f'Fixing install for {src.split("/")[-1]}')
                 # If shutil.move made a partial dir of the mod delete it
                 if os.path.exists(dest):
                     shutil.rmtree(dest, onerror=self.onError)

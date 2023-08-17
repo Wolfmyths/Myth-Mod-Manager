@@ -30,7 +30,7 @@ class StartFileMover(qtw.QDialog):
 
         logging.getLogger(__name__)
 
-        self.setWindowTitle('Update Notice')
+        self.setWindowTitle('Myth Mod Manager Task')
 
         self.fileMover = FileMover(mode, *args)
         self.fileMover.error.connect(lambda x: self.errorRaised(x))
@@ -42,6 +42,7 @@ class StartFileMover(qtw.QDialog):
         self.progressBar = qtw.QProgressBar()
         self.fileMover.setTotalProgress.connect(lambda x: self.progressBar.setMaximum(x))
         self.fileMover.setCurrentProgress.connect(lambda x, y: self.updateProgressBar(x, y))
+        self.fileMover.addTotalProgress.connect(lambda x: self.progressBar.setMaximum(self.progressBar.maximum() + x))
 
         self.fileMover.succeeded.connect(lambda: self.succeeded())
 

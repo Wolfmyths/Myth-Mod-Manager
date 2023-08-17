@@ -345,6 +345,7 @@ class FileMover(QThread):
                 self.error.emit(str(e))
 
     def onError(self, func, path, exc_info):
+        """Used for `shutil.rmtree()`s `onerror` kwarg"""
 
         logging.warning('An error was raised in shutil:\n%s', exc_info)
 

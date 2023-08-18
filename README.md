@@ -40,6 +40,27 @@ In the future there will be profiles so stay tuned for that 😁
 
 <img src="./assets/preview.png" width="600" height="600" alt='Preview'>
 
+<br>
+
+# Anti-Virus False Positives (And building the exe yourself)
+
+There have been multiple reports from users that anti virus programs believe the program contains
+a trojan.
+
+[This issue is being worked on](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/22)
+
+Rest assured, this program does not contain malicious code.
+
+**When a release is published, github builds the executable as seen [here](https://github.com/Wolfmyths/Myth-Mod-Manager/blob/main/.github/workflows/release.yml), not me.**
+
+If you still are suspicious, you can build the executable yourself with these steps:
+
+1. [Install Python 3.11](https://www.python.org/downloads/)
+2. Clone this repository
+3. Run `createEXE.bat`
+4. After the `createEXE.bat` automatically closes, there will be a folder created called `Myth Mod Manager` which contains the newly compiled executable. This is created within the repository.
+5. Move `Myth Mod Manager` to your preferred directory and start it.
+
 # Supported Platforms
 
 ### Reguarding OS

@@ -3,21 +3,18 @@ import webbrowser
 import logging
 
 import PySide6.QtWidgets as qtw
-import PySide6.QtGui as qtg
-from PySide6.QtCore import Qt as qt
 
 from semantic_version import Version
 
-from constant_vars import VERSION, ICON
+from widgets.QDialog import Dialog
+from constant_vars import VERSION
 from widgets.announcementQDialog import Notice
 
-class updateDetected(qtw.QDialog):
+class updateDetected(Dialog):
     def __init__(self, newVersion: Version) -> None:
         super().__init__()
 
         self.setWindowTitle('Update Notice')
-        self.setWindowIcon(qtg.QIcon(ICON))
-        self.setWindowFlag(qt.WindowType.WindowStaysOnTopHint, True)
 
         layout = qtw.QVBoxLayout()
 

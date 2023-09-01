@@ -1,11 +1,12 @@
 
 import PySide6.QtWidgets as qtw
-import PySide6.QtGui as qtg
 from PySide6.QtCore import QUrl, Qt as qt
 
-from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, TYPE_MAPS, ICON
+from widgets.QDialog import Dialog
 
-class newModLocation(qtw.QDialog):
+from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, TYPE_MAPS
+
+class newModLocation(Dialog):
 
     typeDict = {}
     
@@ -13,8 +14,6 @@ class newModLocation(qtw.QDialog):
         super().__init__()
 
         self.setWindowTitle('Installing mods')
-        self.setWindowIcon(qtg.QIcon(ICON))
-        self.setWindowFlag(qt.WindowType.WindowStaysOnTopHint, True)
 
         self.setMaximumSize(400, 850)
         self.setMinimumSize(320, 180)

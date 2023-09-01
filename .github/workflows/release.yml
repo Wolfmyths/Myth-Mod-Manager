@@ -15,6 +15,17 @@ jobs:
     steps:
         - name: Checkout code
           uses: actions/checkout@v3
+        
+        - name: Clone Pyinstaller Repo
+          run: |
+            gh repo clone pyinstaller/pyinstaller
+            dir ./
+        
+        - name: Setup MinGW-64x
+          uses: egor-tensin/setup-mingw@v2
+        
+        - name: Compile Pyinstaller
+          run: python ./waf --gcc all
 
         - name: Set up Python
           uses: actions/setup-python@v3
@@ -22,7 +33,10 @@ jobs:
             python-version: 3.11
 
         - name: Install Requirements
-          run: pip install -r requirements.txt
+          run: |
+            pip install wheel
+            pip install ./pyinstaller
+            pip install -r requirements.txt
         
         - name: Build with PyInstaller
           run: pyinstaller --clean main.spec --distpath "./Myth Mod Manager"

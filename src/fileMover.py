@@ -99,7 +99,7 @@ class FileMover(QThread):
 
                 modPath = self.p.mod(self.saveManager.getType(mod), mod)
 
-                self.move(modPath, disabledModsPath)
+                self.move(modPath, os.path.join(disabledModsPath, mod))
             else:
                 logging.info('%s is already in the disabled directory', mod)
         
@@ -161,7 +161,6 @@ class FileMover(QThread):
                     modDestPath = self.p.mod(ChosenDir, mod)
 
                     self.move(modsDirPath, modDestPath)
-
 
         except Exception as e:
             logging.error('An error occured in changeModType:\n%s', str(e))
@@ -366,7 +365,6 @@ class FileMover(QThread):
         while True and not self.cancel:
 
             try:
-
                 shutil.move(src, dest)
                 break
 

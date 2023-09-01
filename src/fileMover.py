@@ -99,7 +99,7 @@ class FileMover(QThread):
 
                 modPath = self.p.mod(self.saveManager.getType(mod), mod)
 
-                self.move(modPath, disabledModsPath)
+                self.move(modPath, os.path.join(disabledModsPath, mod))
             else:
                 logging.info('%s is already in the disabled directory', mod)
         

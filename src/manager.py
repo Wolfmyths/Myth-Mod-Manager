@@ -2,6 +2,7 @@
 import os
 import subprocess
 import logging
+import sys
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt
@@ -11,6 +12,13 @@ from widgets.announcementQDialog import Notice
 from save import Save, OptionsManager
 import errorChecking
 from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_GAMEPATH, START_PAYDAY_PATH, MOD_TABLE_OBJECT, TYPE_MAPS
+
+def open_file(filename):
+    if sys.platform == "win32":
+        os.startfile(filename)
+    else:
+        opener = "open" if sys.platform == "darwin" else "xdg-open"
+        subprocess.call([opener, filename])
 
 class ModManager(qtw.QWidget):
 
@@ -28,7 +36,7 @@ class ModManager(qtw.QWidget):
         self.refresh.clicked.connect(lambda: self.modsTable.refreshMods())
 
         self.openGameDir = qtw.QPushButton('Open Game Directory', self)
-        self.openGameDir.clicked.connect(lambda: os.startfile(self.optionsManager.getOption(OPTIONS_GAMEPATH)))
+        self.openGameDir.clicked.connect(lambda: open_file(self.optionsManager.getOption(OPTIONS_GAMEPATH)))
 
         self.startGame = qtw.QPushButton('Start PAYDAY 2', self)
         self.startGame.clicked.connect(lambda: self.startPayday())

@@ -22,12 +22,12 @@ class ModListWidget(qtw.QTableWidget):
 
         logging.getLogger(__name__)
 
+        self.setObjectName('modlistwidget')
+
         self.saveManager = Save()
         self.optionsManager = OptionsManager()
 
         self.p = Pathing()
-
-        self.setFocusPolicy(qt.FocusPolicy.NoFocus)
 
         self.setSelectionMode(qtw.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.setSelectionBehavior(qtw.QAbstractItemView.SelectionBehavior.SelectRows)
@@ -374,12 +374,12 @@ class ModListWidget(qtw.QTableWidget):
                 self.setRowHidden(i, False)
 
 
-# EVENTS
+# EVENT OVERRIDES
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
 
         if event.button() == qt.MouseButton.RightButton:
 
-            self.contextMenu.show()
+            self.contextMenu.exec(qtg.QCursor.pos())
 
         return super().mousePressEvent(event)
     

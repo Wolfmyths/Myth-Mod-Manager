@@ -76,18 +76,12 @@ class GamePathNotFound(Dialog):
             self.noticeLabel.setText('Success:')
             self.noticeLabelDesc.setText('Game Path is valid')
 
-            self.optionsManager[OPTIONS_SECTION][OPTIONS_GAMEPATH] = gamePath
+            self.optionsManager.setOption(gamePath, OPTIONS_GAMEPATH)
 
         else:
 
             self.noticeLabel.setText('Error:')
             self.noticeLabelDesc.setText('Game Path is not valid')
-    
-    def accept(self) -> None:
-
-        self.optionsManager.writeData()
-
-        return super().accept()
     
     def reject(self) -> None:
 

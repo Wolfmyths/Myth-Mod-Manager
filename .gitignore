@@ -35,6 +35,7 @@ MANIFEST
 # Save files
 config.ini
 mods.ini
+profiles.json
 
 # Disabled Mods Directory
 disabled-mods/

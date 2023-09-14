@@ -1,10 +1,11 @@
-
 import os
 import subprocess
 import logging
+import PySide6.QtGui
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt
+import PySide6.QtGui as qtg
 
 from widgets.tableWidget import ModListWidget
 from widgets.announcementQDialog import Notice
@@ -16,6 +17,13 @@ class ModManager(qtw.QWidget):
 
     def __init__(self) -> None:
         super().__init__()
+
+        self.setObjectName('manager')
+        selectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+A"), self)
+        selectAllShortCut.activated.connect(lambda: self.modsTable.selectAll())
+
+        deselectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+D"), self)
+        deselectAllShortCut.activated.connect(lambda: self.deselectAllShortcut())
 
         self.saveManager = Save()
         self.optionsManager = OptionsManager()
@@ -97,3 +105,14 @@ class ModManager(qtw.QWidget):
 
             notice = Notice(f'Could not find payday2_win32_release.exe in:\n{gamePath}', 'Error: Invalid Gamepath')
             notice.exec()
+
+    def deselectAllShortcut(self):
+        selectedItems = self.modsTable.selectedItems()
+        if selectedItems:
+            for item in selectedItems:
+                item.setSelected(False)
+    
+    def keyPressEvent(self, event: qtg.QKeyEvent) -> None:
+        if event.key() == qt.Key.Key_Delete and self.modsTable.selectedItems():
+            self.modsTable.deleteItem()
+        return super().keyPressEvent(event)

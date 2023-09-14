@@ -10,6 +10,7 @@ from widgets.contextMenu import ModContextMenu
 from widgets.insertStringQDialog import insertString
 from widgets.announcementQDialog import Notice
 from widgets.modSelectionQDialog import SelectMod
+from widgets.profileSelectionQDialog import SelectProfile
 
 import errorChecking
 from profileManager import ProfileManager
@@ -58,6 +59,9 @@ class ProfileList(qtw.QTreeWidget):
 
         self.modRemove = qtg.QAction('Remove Mod')
         self.modRemove.triggered.connect(lambda: self.removeMods())
+
+        self.copyModsTo = qtg.QAction('Copy mod(s) to...')
+        self.copyModsTo.triggered.connect(lambda: self.copyModsToProfileMenu())
 
         self.updateView()
     
@@ -215,6 +219,28 @@ class ProfileList(qtw.QTreeWidget):
 
         profile.setText(1, str(int(profile.text(1)) - 1))
     
+    def copyModsToProfileMenu(self):
+        qDialog = SelectProfile()
+        qDialog.exec()
+
+        if qDialog.result() and qDialog.profile:
+            self.copyModsToProfile(qDialog.profile)
+    
+    def copyModsToProfile(self, modsDestination: str):
+
+        selectedItem = self.__selectedItem()
+
+        copyingTo = self.__findProfile(modsDestination)
+
+        selectedItem.setSelected(False)
+
+        copyingTo.setSelected(True)
+
+        if self.isProfile(selectedItem):
+            self.addMods(*[x.text(0) for x in self.__getMods(selectedItem)])
+        else:
+            self.addMods(selectedItem.text(0))
+    
     def menuAddProfile(self):
         '''
         Prompts the user to ask what the profile
@@ -346,22 +372,19 @@ class ProfileList(qtw.QTreeWidget):
         if toBeUnselected:
             toBeUnselected.setSelected(False)
 
-
-
 # EVENT OVERRIDES
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
 
         if event.button() == qt.MouseButton.RightButton:
 
-            selectedItems = self.selectedItems()
+            selectedItem = self.__selectedItem()
 
-            if selectedItems:
+            if selectedItem:
 
-                for item in selectedItems:
-                    if self.isProfile(item):
-                        self.menu.addActions((self.profileApply, self.modAdd, self.profileRemove, self.profileEdit, self.profileCopy))
-                    else:
-                        self.menu.addActions((self.profileApply, self.modAdd, self.modRemove))
+                if self.isProfile(selectedItem):
+                    self.menu.addActions((self.profileApply, self.modAdd, self.profileRemove, self.profileEdit, self.profileCopy, self.copyModsTo))
+                else:
+                    self.menu.addActions((self.profileApply, self.modAdd, self.modRemove, self.copyModsTo))
             
             else:
                 self.menu.addAction(self.profileAdd)

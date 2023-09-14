@@ -1,7 +1,6 @@
 import os
 import subprocess
 import logging
-import PySide6.QtGui
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt

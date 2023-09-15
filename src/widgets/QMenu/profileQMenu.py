@@ -1,9 +1,6 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Self
-import PySide6.QtGui
+from typing import TYPE_CHECKING
 
-import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QEvent, QObject
 import PySide6.QtGui as qtg
 
 from widgets.QMenu.QMenu import ModContextMenu

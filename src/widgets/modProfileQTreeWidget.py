@@ -6,11 +6,11 @@ import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
 from PySide6.QtCore import Qt as qt, Signal
 
-from widgets.contextMenu import ModContextMenu
-from widgets.insertStringQDialog import insertString
-from widgets.announcementQDialog import Notice
-from widgets.modSelectionQDialog import SelectMod
-from widgets.profileSelectionQDialog import SelectProfile
+from widgets.QMenu.profileQMenu import ProfileMenu
+from widgets.QDialog.insertStringQDialog import insertString
+from widgets.QDialog.announcementQDialog import Notice
+from widgets.QDialog.modSelectionQDialog import SelectMod
+from widgets.QDialog.profileSelectionQDialog import SelectProfile
 
 import errorChecking
 from profileManager import ProfileManager
@@ -22,6 +22,12 @@ if TYPE_CHECKING:
 class ProfileList(qtw.QTreeWidget):
 
     applyProfile = Signal(tuple)
+
+    profileRightclicked = Signal()
+
+    modRightclicked = Signal()
+
+    noneRightclicked = Signal()
 
     def __init__(self, parent: modProfile) -> None:
         super().__init__(parent)
@@ -37,31 +43,7 @@ class ProfileList(qtw.QTreeWidget):
 
         self.profileManager = ProfileManager()
 
-        self.menu = ModContextMenu(self)
-
-        self.profileApply = qtg.QAction('Apply Profile')
-        self.profileApply.triggered.connect(lambda: self.__applyProfileEvent())
-
-        self.profileAdd = qtg.QAction('Add Profile')
-        self.profileAdd.triggered.connect(lambda: self.menuAddProfile())
-
-        self.profileRemove = qtg.QAction('Remove Profile')
-        self.profileRemove.triggered.connect(lambda: self.deleteProfile())
-
-        self.profileEdit = qtg.QAction('Change Profile Name')
-        self.profileEdit.triggered.connect(lambda: self.editProfileMenu())
-
-        self.profileCopy = qtg.QAction('Copy Profile')
-        self.profileCopy.triggered.connect(lambda: self.copyProfile())
-
-        self.modAdd = qtg.QAction('Add Mods')
-        self.modAdd.triggered.connect(lambda: self.modAddMenu())
-
-        self.modRemove = qtg.QAction('Remove Mod')
-        self.modRemove.triggered.connect(lambda: self.removeMods())
-
-        self.copyModsTo = qtg.QAction('Copy mod(s) to...')
-        self.copyModsTo.triggered.connect(lambda: self.copyModsToProfileMenu())
+        self.menu = ProfileMenu(self)
 
         self.updateView()
     
@@ -70,6 +52,9 @@ class ProfileList(qtw.QTreeWidget):
     
     def __findProfile(self, profile: str) -> qtw.QTreeWidgetItem:
         return self.findItems(profile, qt.MatchFlag.MatchExactly)[0]
+    
+    def __getParentOfChild(self, child: qtw.QTreeWidgetItem) -> qtw.QTreeWidgetItem:
+        return self.__findProfile(child.data(0, ROLE_PARENT))
     
     def __getMods(self, profile: qtw.QTreeWidgetItem) -> list[qtw.QTreeWidgetItem] | None:
         '''Returns a list of mod names given the profile'''
@@ -89,20 +74,6 @@ class ProfileList(qtw.QTreeWidget):
         
         return mods
     
-    def __applyProfileEvent(self):
-
-        selectedItem = self.__selectedItem()
-
-        if selectedItem is not None:
-
-            if self.isProfile(selectedItem):
-
-                self.applyProfile.emit(tuple(self.profileManager.getMods(selectedItem.text(0))))
-            
-            else:
-                profile = self.__findProfile(selectedItem.data(0, ROLE_PARENT)).text(0)
-                self.applyProfile.emit(tuple(self.profileManager.getMods(profile)))
-    
     def __selectedItem(self) -> qtw.QTreeWidgetItem | None:
         '''Returns the first object selected in `selectedItems()`'''
 
@@ -113,6 +84,20 @@ class ProfileList(qtw.QTreeWidget):
         except IndexError:
 
             return None
+    
+    def applyProfileEvent(self):
+
+        selectedItem = self.__selectedItem()
+
+        if selectedItem is not None:
+
+            if self.isProfile(selectedItem):
+
+                self.applyProfile.emit(tuple(self.profileManager.getMods(selectedItem.text(0))))
+            
+            else:
+                profile = self.__getParentOfChild(selectedItem).text(0)
+                self.applyProfile.emit(tuple(self.profileManager.getMods(profile)))
     
     def checkInstalled(self) -> None:
         '''
@@ -177,7 +162,7 @@ class ProfileList(qtw.QTreeWidget):
 
         # If this function was triggered by selecting a mod, find the profile
         if not self.isProfile(selectedItem):
-            profile = self.__findProfile(selectedItem.data(0, ROLE_PARENT))
+            profile = self.__getParentOfChild(selectedItem)
         else:
             profile = selectedItem
 
@@ -211,7 +196,7 @@ class ProfileList(qtw.QTreeWidget):
 
         mod = self.__selectedItem()
 
-        profile = self.__findProfile(mod.data(0, ROLE_PARENT))
+        profile = self.__getParentOfChild(mod)
 
         self.profileManager.removeMod(profile.text(0), mod.text(0))
 
@@ -373,6 +358,7 @@ class ProfileList(qtw.QTreeWidget):
             toBeUnselected.setSelected(False)
 
 # EVENT OVERRIDES
+
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
 
         if event.button() == qt.MouseButton.RightButton:
@@ -382,16 +368,14 @@ class ProfileList(qtw.QTreeWidget):
             if selectedItem:
 
                 if self.isProfile(selectedItem):
-                    self.menu.addActions((self.profileApply, self.modAdd, self.profileRemove, self.profileEdit, self.profileCopy, self.copyModsTo))
+                    self.profileRightclicked.emit()
                 else:
-                    self.menu.addActions((self.profileApply, self.modAdd, self.modRemove, self.copyModsTo))
+                    self.modRightclicked.emit()
             
             else:
-                self.menu.addAction(self.profileAdd)
+                self.noneRightclicked.emit()
             
             self.menu.exec(qtg.QCursor.pos())
-
-            self.menu.clear()
 
         elif event.button() == qt.MouseButton.LeftButton:
 

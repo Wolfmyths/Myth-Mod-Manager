@@ -2,7 +2,7 @@
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QUrl, Qt as qt
 
-from widgets.QDialog import Dialog
+from widgets.QDialog.QDialog import Dialog
 
 from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, TYPE_MAPS
 

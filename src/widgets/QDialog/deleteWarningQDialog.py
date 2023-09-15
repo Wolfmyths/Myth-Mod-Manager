@@ -1,7 +1,7 @@
 
 import PySide6.QtWidgets as qtw
 
-from widgets.QDialog import Dialog
+from widgets.QDialog.QDialog import Dialog
 
 class DeleteModConfirmation(Dialog):
     def __init__(self, QParent: qtw.QWidget | qtw.QApplication) -> None:

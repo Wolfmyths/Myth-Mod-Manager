@@ -6,13 +6,13 @@ import PySide6.QtGui as qtg
 
 import errorChecking
 
-from widgets.announcementQDialog import Notice
+from widgets.QDialog.announcementQDialog import Notice
 from widgets.progressWidget import StartFileMover
 from widgets.modProfileQTreeWidget import ProfileList
 from save import OptionsManager, Save
 
 if TYPE_CHECKING:
-    from widgets.tableWidget import ModListWidget
+    from widgets.managerQTableWidget import ModListWidget
 
 class modProfile(qtw.QWidget):
     def __init__(self) -> None:

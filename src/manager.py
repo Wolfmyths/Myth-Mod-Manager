@@ -6,8 +6,8 @@ import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt
 import PySide6.QtGui as qtg
 
-from widgets.tableWidget import ModListWidget
-from widgets.announcementQDialog import Notice
+from widgets.managerQTableWidget import ModListWidget
+from widgets.QDialog.announcementQDialog import Notice
 from save import Save, OptionsManager
 import errorChecking
 from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_GAMEPATH, START_PAYDAY_PATH, MOD_TABLE_OBJECT, TYPE_MAPS

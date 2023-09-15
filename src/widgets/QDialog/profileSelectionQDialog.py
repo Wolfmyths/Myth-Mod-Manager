@@ -2,7 +2,7 @@
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt
 
-from widgets.QDialog import Dialog
+from widgets.QDialog.QDialog import Dialog
 
 from profileManager import ProfileManager
 

@@ -6,10 +6,10 @@ import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, QUrl
 
-from widgets.contextMenu import ModContextMenu
+from widgets.QMenu.managerQMenu import ManagerMenu
 from widgets.progressWidget import StartFileMover
-from widgets.deleteWarningQDialog import DeleteModConfirmation
-from widgets.newModQDialog import newModLocation
+from widgets.QDialog.deleteWarningQDialog import DeleteModConfirmation
+from widgets.QDialog.newModQDialog import newModLocation
 from getPath import Pathing
 import errorChecking
 from save import Save, OptionsManager
@@ -53,18 +53,7 @@ class ModListWidget(qtw.QTableWidget):
 
         self.verticalHeader().hide()
 
-        self.contextMenu = ModContextMenu(parent=self)
-
-        self.enable = qtg.QAction('Enable', self)
-        self.enable.triggered.connect(lambda: self.setItemEnabled())
-
-        self.disable = qtg.QAction('Disable', self)
-        self.disable.triggered.connect(lambda: self.setItemDisabled())
-
-        self.delete = qtg.QAction('Delete Mod', self)
-        self.delete.triggered.connect(lambda: self.deleteItem())
-
-        self.contextMenu.addActions((self.enable, self.disable, self.delete))
+        self.contextMenu = ManagerMenu(self)
     
     def getEnabledItem(self, row: int) -> qtw.QTableWidgetItem:
         return self.item(row, 2)

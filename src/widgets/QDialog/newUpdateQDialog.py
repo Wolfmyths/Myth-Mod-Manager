@@ -6,9 +6,9 @@ import PySide6.QtWidgets as qtw
 
 from semantic_version import Version
 
-from widgets.QDialog import Dialog
+from widgets.QDialog.QDialog import Dialog
 from constant_vars import VERSION
-from widgets.announcementQDialog import Notice
+from widgets.QDialog.announcementQDialog import Notice
 
 class updateDetected(Dialog):
     def __init__(self, newVersion: Version) -> None:

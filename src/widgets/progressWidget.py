@@ -4,9 +4,9 @@ import logging
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
 
-from widgets.QDialog import Dialog
+from widgets.QDialog.QDialog import Dialog
 from fileMover import FileMover
-from widgets.announcementQDialog import Notice
+from widgets.QDialog.announcementQDialog import Notice
 
 class StartFileMover(Dialog):
     '''

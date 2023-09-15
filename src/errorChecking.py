@@ -7,7 +7,7 @@ from semantic_version import Version
 
 from getPath import Pathing
 from save import OptionsManager
-from widgets.newUpdateQDialog import updateDetected
+from widgets.QDialog.newUpdateQDialog import updateDetected
 from constant_vars import OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, VERSION, OPTIONS_DISPATH, OPTIONS_SECTION, TYPE_ALL
 
 logging.getLogger(__name__)

@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
+import logging
 
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
@@ -32,14 +33,16 @@ class ProfileList(qtw.QTreeWidget):
     def __init__(self, parent: modProfile) -> None:
         super().__init__(parent)
 
-        self.setHorizontalScrollBarPolicy(qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        logging.getLogger(__name__)
 
-        self.header().setSectionResizeMode(0, qtw.QHeaderView.ResizeMode.Stretch)
-        self.header().setSectionResizeMode(1, qtw.QHeaderView.ResizeMode.Interactive)
+        self.setHorizontalScrollBarPolicy(qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self.setColumnCount(2)
 
         self.setHeaderLabels(('Profile', 'Mod Count'))
+
+        self.header().setSectionResizeMode(0, qtw.QHeaderView.ResizeMode.Stretch)
+        self.header().setSectionResizeMode(1, qtw.QHeaderView.ResizeMode.Interactive)
 
         self.profileManager = ProfileManager()
 
@@ -83,6 +86,8 @@ class ProfileList(qtw.QTreeWidget):
         
         except IndexError:
 
+            logging.warning('IndexError in ProfileList.__selectedItem()')
+
             return None
     
     def applyProfileEvent(self):
@@ -93,10 +98,16 @@ class ProfileList(qtw.QTreeWidget):
 
             if self.isProfile(selectedItem):
 
+                logging.info('Applying mods from %s', selectedItem.text(0))
+
                 self.applyProfile.emit(tuple(self.profileManager.getMods(selectedItem.text(0))))
             
             else:
+
                 profile = self.__getParentOfChild(selectedItem).text(0)
+
+                logging.info('Applying mods from %s', profile)
+
                 self.applyProfile.emit(tuple(self.profileManager.getMods(profile)))
     
     def checkInstalled(self) -> None:
@@ -165,6 +176,8 @@ class ProfileList(qtw.QTreeWidget):
             profile = self.__getParentOfChild(selectedItem)
         else:
             profile = selectedItem
+        
+        logging.info('Adding mods: %s into profile: %s', ' ,'.join(mods), profile.text(0))
 
         profileMods = self.__getMods(profile)
 
@@ -175,6 +188,7 @@ class ProfileList(qtw.QTreeWidget):
             
             # Preventing duplicate mods from being added to the GUI
             if profileMods and mod in profileMods:
+                logging.warning('%s is a duplicate mod in %s, not adding.', mod, profile.text(0))
                 continue
 
             child = qtw.QTreeWidgetItem([mod])
@@ -198,6 +212,8 @@ class ProfileList(qtw.QTreeWidget):
 
         profile = self.__getParentOfChild(mod)
 
+        logging.info('Removing mod %s from profile %s', mod.text(0), profile.text(0))
+
         self.profileManager.removeMod(profile.text(0), mod.text(0))
 
         profile.takeChild(profile.indexOfChild(mod))
@@ -216,6 +232,8 @@ class ProfileList(qtw.QTreeWidget):
         selectedItem = self.__selectedItem()
 
         copyingTo = self.__findProfile(modsDestination)
+
+        logging.info('Copying mods to %s', modsDestination)
 
         selectedItem.setSelected(False)
 
@@ -265,7 +283,10 @@ class ProfileList(qtw.QTreeWidget):
 
         for item in items:
 
+            logging.info('Adding profile %s', item)
+
             if item in profiles:
+                logging.warning('%s is a duplicate profile, not adding.', item)
                 continue
 
             profile = qtw.QTreeWidgetItem([item, '0'])
@@ -282,6 +303,8 @@ class ProfileList(qtw.QTreeWidget):
         '''Deletes an existing profile'''
 
         toBeDeleted = self.__selectedItem()
+
+        logging.info('Deleting profile %s', toBeDeleted.text(0))
 
         self.takeTopLevelItem(self.indexOfTopLevelItem(toBeDeleted))
 
@@ -304,7 +327,10 @@ class ProfileList(qtw.QTreeWidget):
                     self.editProfile(qDialog.userInput)
                     break
                 else:
-                    msg = Notice('A profile with this name already exists.', 
+
+                    logging.warning('A profile with the name %s already exists', qDialog.userInput)
+
+                    msg = Notice(f'A profile named {qDialog.userInput} already exists.', 
                                  'Error: Duplicate profile name')
                     msg.exec()
 
@@ -313,6 +339,8 @@ class ProfileList(qtw.QTreeWidget):
 
         profile = self.__selectedItem()
 
+        logging.info('Editing %s to %s', profile.text(0), name)
+
         self.profileManager.changeProfile(profile.text(0), name)
 
         profile.setText(0, name)
@@ -320,6 +348,8 @@ class ProfileList(qtw.QTreeWidget):
     def copyProfile(self):
 
         profileToCopy = self.__selectedItem()
+
+        logging.info('Copying %s', profileToCopy.text(0))
 
         modsToCopy = [x.text(0) for x in self.__getMods(profileToCopy)]
 
@@ -348,7 +378,10 @@ class ProfileList(qtw.QTreeWidget):
 
                     break
                 else:
-                    msg = Notice('A profile with this name already exists.', 
+                    
+                    logging.warning('A profile with the name %s already exists', qDialog.userInput)
+
+                    msg = Notice(f'A profile named {qDialog.userInput} already exists.', 
                                  'Error: Duplicate profile name')
                     msg.exec()
 

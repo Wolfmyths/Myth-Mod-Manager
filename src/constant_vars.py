@@ -16,6 +16,7 @@ MOD_CONFIG = 'mods.ini'
 OPTIONS_CONFIG = 'config.ini'
 PROFILES_JSON = 'profiles.json'
 START_PAYDAY = 'runGame.bat'
+OLD_EXE = 'Myth Mod Manager.exe (Old)'
 DISABLED_MODS = 'disabled-mods'
 BACKUP_MODS = 'backup mods'
 LOG = 'log.txt'
@@ -66,4 +67,4 @@ LIGHT = 'light'
 
 # Program Info
 PROGRAM_NAME = 'Myth Mod Manager'
-VERSION = semantic_version.Version(major=1, minor=1, patch=0)
+VERSION = semantic_version.Version(major=1, minor=0, patch=0)

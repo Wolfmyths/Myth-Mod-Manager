@@ -138,8 +138,9 @@ def checkUpdate() -> int:
 
         else:
 
-            latestVersion = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest').json()['tag_name']
-            latestVersion = Version.coerce(latestVersion)
+            latestVersionJSON = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest').json()
+
+            latestVersion = Version.coerce(latestVersionJSON['tag_name'])
 
         logging.info('Latest Version: %s', latestVersion)
 
@@ -150,7 +151,7 @@ def checkUpdate() -> int:
 
     if latestVersion > VERSION:
 
-            notice = updateDetected(latestVersion)
+            notice = updateDetected(latestVersion, latestVersionJSON['body'])
             notice.exec()
             result = notice.result()
 

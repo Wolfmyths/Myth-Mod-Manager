@@ -67,4 +67,5 @@ LIGHT = 'light'
 
 # Program Info
 PROGRAM_NAME = 'Myth Mod Manager'
+
 VERSION = semantic_version.Version(major=1, minor=1, patch=0)

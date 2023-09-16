@@ -18,6 +18,8 @@ class Update(QThread):
 
     succeeded = Signal()
 
+    doneCanceling = Signal()
+
     error = Signal(str)
 
     cancel = False
@@ -44,7 +46,7 @@ class Update(QThread):
             
             self.setCurrentProgress.emit(0, 'Fetching latest version release info on github.com')
 
-            if self.cancel: raise Exception('Canceled')
+            self.cancelCheck()
 
             # Get latest release data
             latestRelease = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest')
@@ -54,7 +56,7 @@ class Update(QThread):
 
             self.setCurrentProgress.emit(1, 'Fetching asset data from github.com')
 
-            if self.cancel: raise Exception('Canceled')
+            self.cancelCheck()
 
             # Get asset data
             assetsData: dict = requests.get(assetUrl , headers={'accept':'application/vnd.github+json'}).json()
@@ -83,7 +85,7 @@ class Update(QThread):
 
                     self.setCurrentProgress.emit(1, 'Fetching download for download...')
 
-                    if self.cancel: raise Exception('Canceled')
+                    self.cancelCheck()
 
                     # Get data for download
                     request = session.get(downloadLink, allow_redirects=True, stream=True)
@@ -102,7 +104,7 @@ class Update(QThread):
                     chunk: bytes
                     for chunk in request.iter_content(chunkSize**2):
 
-                        if self.cancel: raise Exception('Canceled')
+                        self.cancelCheck()
 
                         self.setCurrentProgress.emit(1, f'Downloading Myth Mod Manager... {int(currentChunks / totalChunks * 100)}%')
 
@@ -118,7 +120,7 @@ class Update(QThread):
 
             if self.fileName in directory:
                 
-                if self.cancel: raise Exception('Canceled')    
+                self.cancelCheck()    
 
                 self.setCurrentProgress.emit(1, 'Unzipping the new update...')
 
@@ -126,7 +128,7 @@ class Update(QThread):
 
                 if self.exe in directory:
 
-                    if self.cancel: raise Exception('Canceled')
+                    self.cancelCheck()
 
                     self.addTotalProgress.emit(1)
 
@@ -136,7 +138,7 @@ class Update(QThread):
 
                 self.setCurrentProgress.emit(1, 'Moving new version...')
 
-                if self.cancel: raise Exception('Canceled')
+                self.cancelCheck()
 
                 shutil.move(os.path.join(self.folder, self.exe), ROOT_PATH)
 
@@ -152,8 +154,6 @@ class Update(QThread):
 
         except Exception as e:
 
-            logging.error('Error at Update.downloadUpdate():\n%s', str(e))
-
             directory = os.listdir(ROOT_PATH)
 
             if self.folder in directory:
@@ -163,5 +163,13 @@ class Update(QThread):
             if self.fileName in directory:
 
                 os.remove(self.fileName)
+            
+            logging.error('Error at Update.downloadUpdate():\n%s', str(e))
 
             self.error.emit(str(e))
+    
+    def cancelCheck(self):
+
+        if self.cancel:
+
+            self.doneCanceling.emit()

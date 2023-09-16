@@ -15,7 +15,6 @@ from update import Update
 
 class updateDetected(Dialog):
 
-    cancelState = False
     succeededState = False
 
     def __init__(self, newVersion: Version, releaseNotes: str) -> None:
@@ -37,6 +36,7 @@ class updateDetected(Dialog):
         self.message = qtw.QLabel(self, text=f'New update found: {newVersion}\nCurrent Version: {VERSION}\nDo you want to Update?')
 
         self.autoUpdate.succeeded.connect(lambda: self.succeeded())
+        self.autoUpdate.doneCanceling.connect(lambda: self.close())
 
         self.changelog = qtw.QTextBrowser(self)
         self.changelog.setMarkdown(releaseNotes)
@@ -48,9 +48,9 @@ class updateDetected(Dialog):
 
         self.buttonBox = qtw.QDialogButtonBox(self.buttons)
         self.buttonBox.accepted.connect(lambda: self.okButton())
-        self.buttonBox.rejected.connect(lambda: self.close())
+        self.buttonBox.rejected.connect(lambda: self.cancel())
 
-        for widget in (self.progressBar, self.message, self.changelog, self.viewWeb, self.buttonBox):
+        for widget in (self.message, self.progressBar, self.changelog, self.viewWeb, self.buttonBox):
             layout.addWidget(widget)
         
         self.setLayout(layout)
@@ -68,10 +68,6 @@ class updateDetected(Dialog):
             self.progressBar.show()
 
             self.autoUpdate.start()
-
-        elif self.cancelState:
-
-            self.close()
     
     def exec(self) -> int:
         # Hide progress widget until it get activated
@@ -116,15 +112,14 @@ class updateDetected(Dialog):
     
     def closeEvent(self, arg__1: qtg.QCloseEvent) -> None:
 
+        if self.autoUpdate.cancel:
+            self.autoUpdate.terminate()
+
         if not self.succeededState:
             self.setResult(0)
+            return super().closeEvent(arg__1)
         else:
             self.accept()
-
-        if self.autoUpdate.isRunning():
-            self.cancel()
-        else:
-            return super().closeEvent(arg__1)
     
     def cancel(self):
         '''
@@ -135,8 +130,6 @@ class updateDetected(Dialog):
         self.message.setText('Canceling... (Finishing current step)')
 
         self.autoUpdate.cancel = True
-
-        self.cancelState = True
     
     def updateProgressBar(self, x, y):
 

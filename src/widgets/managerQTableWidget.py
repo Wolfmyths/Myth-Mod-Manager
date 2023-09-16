@@ -236,7 +236,7 @@ class ModListWidget(qtw.QTableWidget):
         # Just incase disabled folder doesn't exist
         errorChecking.createDisabledModFolder()
 
-        disModFolder = self.optionsManager.getOption(OPTIONS_DISPATH)
+        disModFolder = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
         disModFolderContents = os.listdir(disModFolder)
 
         # Add mods to the table widget
@@ -309,7 +309,7 @@ class ModListWidget(qtw.QTableWidget):
         else:
             logging.error('The mod_overrides path does not exist:\n%s\nSkipping...', mod_overridePath)
 
-        # mod_override Folder
+        # maps Folder
         if os.path.exists(maps_path):
 
             for mod in os.listdir(maps_path):

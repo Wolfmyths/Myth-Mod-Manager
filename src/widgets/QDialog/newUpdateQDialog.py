@@ -69,17 +69,6 @@ class updateDetected(Dialog):
 
             self.autoUpdate.start()
     
-    def exec(self) -> int:
-        # Hide progress widget until it get activated
-        self.progressBar.hide()
-        return super().exec()
-    
-    def accept(self) -> None:
-
-        self.setResult(1)
-
-        return super().accept()
-    
     def openBrowser(self):
 
         try:
@@ -110,17 +99,6 @@ class updateDetected(Dialog):
 
         self.succeededState = True
     
-    def closeEvent(self, arg__1: qtg.QCloseEvent) -> None:
-
-        if self.autoUpdate.cancel:
-            self.autoUpdate.terminate()
-
-        if not self.succeededState:
-            self.setResult(0)
-            return super().closeEvent(arg__1)
-        else:
-            self.accept()
-    
     def cancel(self):
         '''
         Sets the cancel flag to true in which Update() will exit the function
@@ -137,3 +115,26 @@ class updateDetected(Dialog):
 
         self.message.setText(y)
         self.progressBar.setValue(newValue)
+
+# EVENT OVERRIDES 
+    def closeEvent(self, arg__1: qtg.QCloseEvent) -> None:
+
+        if self.autoUpdate.cancel:
+            self.autoUpdate.terminate()
+
+        if not self.succeededState:
+            self.setResult(0)
+            return super().closeEvent(arg__1)
+        else:
+            self.accept()
+    
+    def exec(self) -> int:
+        # Hide progress widget until it get activated
+        self.progressBar.hide()
+        return super().exec()
+    
+    def accept(self) -> None:
+
+        self.setResult(1)
+
+        return super().accept()

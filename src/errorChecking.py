@@ -5,8 +5,9 @@ import logging
 
 from semantic_version import Version
 
+from getPath import Pathing
 from save import OptionsManager
-from widgets.newUpdateQDialog import updateDetected
+from widgets.QDialog.newUpdateQDialog import updateDetected
 from constant_vars import OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, VERSION, OPTIONS_DISPATH, OPTIONS_SECTION, TYPE_ALL
 
 logging.getLogger(__name__)
@@ -27,6 +28,26 @@ def validGamePath() -> bool:
         logging.info('Gamepath: %s', gamePath)
 
     return os.path.exists(os.path.join(gamePath, 'payday2_win32_release.exe'))
+
+def isInstalled(mod: str) -> bool:
+    '''Checks if the mod is installed on the system'''
+
+    optionsManager = OptionsManager()
+
+    path = Pathing()
+
+    possiblePaths = (path.maps(),
+                     path.mods(), 
+                     path.mod_overrides(), 
+                     optionsManager.getOption(OPTIONS_DISPATH))
+
+    for path in possiblePaths:
+
+        if mod in os.listdir(path):
+            return True
+
+    logging.info('The following mod is not installed: %s', mod)
+    return False
 
 def createDisabledModFolder() -> None:
     '''
@@ -117,8 +138,9 @@ def checkUpdate() -> int:
 
         else:
 
-            latestVersion = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest').json()['tag_name']
-            latestVersion = Version.coerce(latestVersion)
+            latestVersionJSON = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest').json()
+
+            latestVersion = Version.coerce(latestVersionJSON['tag_name'])
 
         logging.info('Latest Version: %s', latestVersion)
 
@@ -129,7 +151,7 @@ def checkUpdate() -> int:
 
     if latestVersion > VERSION:
 
-            notice = updateDetected(latestVersion)
+            notice = updateDetected(latestVersion, latestVersionJSON['body'])
             notice.exec()
             result = notice.result()
 

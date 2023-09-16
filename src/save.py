@@ -1,27 +1,43 @@
 
 import os
 import logging
-from typing import Self
+from typing import Self, Iterable, Any
 
 from configparser import ConfigParser
 
 from constant_vars import MOD_CONFIG, OPTIONS_CONFIG, OPTIONS_SECTION, MOD_ENABLED, MOD_TYPE
 
-class Save(ConfigParser):
-    def __init__(self) -> None:
+class Config(ConfigParser):
+    '''Base class for config managers'''
+
+    file: str = None
+
+    def __init__(self):
         super().__init__()
 
         logging.getLogger(__name__)
 
-        # Ensuring that MOD_CONFIG exists
-        if not os.path.exists(MOD_CONFIG):
-            logging.warning('%s does not exist, creating...', MOD_CONFIG)
-            
+        # Ensuring that file exists
+        if not os.path.exists(self.file):
+            logging.warning('%s does not exist, creating...', self.file)
+        
             # Create a new .ini
-            with open(MOD_CONFIG, 'w') as f:
+            with open(self.file, 'w') as f:
                 pass
             
-        self.read(MOD_CONFIG)
+        self.read(self.file)
+    
+    def writeData(self) -> None:
+        '''Writes data to the file this class is inherited by'''
+
+        with open(self.file, 'w+') as f:
+
+            self.write(f)
+
+        logging.debug('%s has been saved', self.file)
+
+class Save(Config):
+    '''Manages the data of each mod'''
 
     def __new__(cls) -> Self:
 
@@ -30,6 +46,8 @@ class Save(ConfigParser):
             cls.instance = super(Save, cls).__new__(cls)
 
         return cls.instance
+
+    file = MOD_CONFIG
 
     def addMods(self, *mods: tuple[list[str] | str, str]) -> None:
         '''
@@ -95,32 +113,9 @@ class Save(ConfigParser):
 
         self.writeData()
 
-    def writeData(self) -> None:
+class OptionsManager(Config):
+    '''Manages Program's Settings'''
 
-        with open(MOD_CONFIG, 'w') as f:
-
-            self.write(f)
-        
-        logging.debug('%s has been saved', MOD_CONFIG)
-
-class OptionsManager(ConfigParser):
-    def __init__(self) -> None:
-        super().__init__()
-
-        # Ensuring that OPTIONS_CONFIG exists
-        if not os.path.exists(OPTIONS_CONFIG):
-            logging.warning('%s does not exist, creating...', OPTIONS_CONFIG)
-
-            # Create a new .ini
-            with open(OPTIONS_CONFIG, 'w') as f:
-                pass
-        
-        self.read(OPTIONS_CONFIG)
-
-        if not self.has_section(OPTIONS_SECTION):
-            self.add_section(OPTIONS_SECTION)
-            self.writeData()
-    
     def __new__(cls) -> Self:
 
         if not hasattr(cls, 'instance'):
@@ -129,6 +124,8 @@ class OptionsManager(ConfigParser):
 
         return cls.instance
     
+    file = OPTIONS_CONFIG
+
     def setOption(self, value: str, option: str, section: str = OPTIONS_SECTION) -> None:
         '''
         Sets an option to the ini, if the section doesn't exist then it will be created
@@ -142,8 +139,21 @@ class OptionsManager(ConfigParser):
 
         self.writeData()
 
-    def getOption(self, option: str, fallback= None) -> str | None:
-        return self.get(OPTIONS_SECTION, option, fallback=fallback)
+    def getOption(self, option: str, fallback= None, type: str | int | float | bool = str) -> str | None:
+
+        output = None
+
+        if type == str:
+            output = self.get(OPTIONS_SECTION, option, fallback=fallback)
+        elif type == int:
+            output = self.getint(OPTIONS_SECTION, option, fallback=fallback)
+        elif type == float:
+            output = self.getfloat(OPTIONS_SECTION, option, fallback=fallback)
+        elif type == bool:
+            output = self.getboolean(OPTIONS_SECTION, option, fallback=fallback)
+        
+        return output
+
 
     def checkAddSection(self, section: str) -> None:
         '''If a section doesn't exist then add it'''
@@ -151,11 +161,3 @@ class OptionsManager(ConfigParser):
         if not self.has_section(section):
 
             self.add_section(section)
-    
-    def writeData(self) -> None:
-
-        with open(OPTIONS_CONFIG, 'w+') as f:
-
-            self.write(f)
-
-        logging.debug('%s has been saved', OPTIONS_CONFIG)

@@ -1,4 +1,3 @@
-
 import os
 
 import semantic_version
@@ -15,7 +14,9 @@ ICON = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'icon.ico')
 # File names
 MOD_CONFIG = 'mods.ini'
 OPTIONS_CONFIG = 'config.ini'
+PROFILES_JSON = 'profiles.json'
 START_PAYDAY = 'runGame.bat'
+OLD_EXE = 'Myth Mod Manager.exe (Old)'
 DISABLED_MODS = 'disabled-mods'
 BACKUP_MODS = 'backup mods'
 LOG = 'log.txt'
@@ -43,6 +44,16 @@ OPTIONS_SECTION = 'OPTIONS'
 OPTIONS_GAMEPATH = 'game_path'
 OPTIONS_DISPATH = 'disabled-mods'
 OPTIONS_THEME = 'color_theme'
+OPTIONS_WINDOWSIZE_H = 'window_size_h'
+OPTIONS_WINDOWSIZE_W = 'window_size_w'
+
+# Data Values for QTreeWidgetItems
+# These tuples are usually meant to be unpacked as arguments using the * prefix
+ROLE_PARENT = 33 # Role ID for an item's parent
+ROLE_TYPE = 32 # Role ID for an item's type
+ROLE_INSTALLED = 34 # Role ID if a mod is installed or not
+DATA_PROFILE = (0, ROLE_TYPE, 'profile') # Used to label an item as a profile
+DATA_MOD = (0, ROLE_TYPE, 'mod') # Used to label an item as a mod
 
 # Default Disabled Folder
 MODS_DISABLED_PATH_DEFAULT = os.path.join(os.path.abspath(ROOT_PATH), DISABLED_MODS)
@@ -56,4 +67,5 @@ LIGHT = 'light'
 
 # Program Info
 PROGRAM_NAME = 'Myth Mod Manager'
-VERSION = semantic_version.Version(major=1, minor=0, patch=1)
+
+VERSION = semantic_version.Version(major=1, minor=1, patch=0)

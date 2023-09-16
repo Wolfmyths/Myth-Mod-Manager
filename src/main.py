@@ -3,12 +3,11 @@ import logging
 import os
 
 import PySide6.QtWidgets as qtw
-import PySide6.QtGui as qtg
 
 from main_window import MainWindow
 from save import Save, OptionsManager
-from widgets.gamepathQDialog import GamePathNotFound
-from constant_vars import VERSION, PROGRAM_NAME, LOG, IS_SCRIPT, OPTIONS_THEME, LIGHT, ICON
+from widgets.QDialog.gamepathQDialog import GamePathNotFound
+from constant_vars import VERSION, PROGRAM_NAME, LOG, IS_SCRIPT, OPTIONS_THEME, LIGHT, OLD_EXE
 import errorChecking
 from style import StyleManager
 
@@ -16,6 +15,10 @@ from style import StyleManager
 if __name__ == '__main__':
 
     import sys
+
+    # Old exe appears after updating
+    if os.path.exists(OLD_EXE):
+        os.remove(OLD_EXE)
 
     if not os.path.exists('logs'):
         os.mkdir('logs')
@@ -35,8 +38,10 @@ if __name__ == '__main__':
 
     app.setStyleSheet(StyleManager().getStyleSheet(optionsManager.getOption(OPTIONS_THEME, LIGHT)))
 
-    # If the user agrees to update, the program will shutdown
-    if errorChecking.checkUpdate() == 1:
+    # If there's an update a QDialog will pop up
+    # When the user successfully updates the app will shutdown
+    update = errorChecking.checkUpdate()
+    if update == 1:
         app.shutdown()
 
     # Checking game path
@@ -46,9 +51,6 @@ if __name__ == '__main__':
         warning.exec()
 
     window = MainWindow(app)
-    window.setWindowIcon(qtg.QIcon(ICON))
-    window.setWindowTitle(f'{PROGRAM_NAME} {VERSION}')
-    window.setMinimumSize(800, 800)
     window.show()
 
     app.exec()

@@ -3,13 +3,12 @@ import logging
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
 
+from widgets.QDialog.QDialog import Dialog
 from fileMover import FileMover
-from widgets.announcementQDialog import Notice
-from constant_vars import ICON
+from widgets.QDialog.announcementQDialog import Notice
 
-class StartFileMover(qtw.QDialog):
+class StartFileMover(Dialog):
     '''
     This is a QDialog object to show the progress of functions in FileMover()
 
@@ -27,9 +26,6 @@ class StartFileMover(qtw.QDialog):
 
     def __init__(self, mode: int, *args) -> None:
         super().__init__()
-
-        self.setWindowFlag(qt.WindowType.WindowStaysOnTopHint, True)
-        self.setWindowIcon(qtg.QIcon(ICON))
 
         self.mode = mode
 

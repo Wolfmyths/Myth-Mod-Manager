@@ -16,10 +16,14 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 
 # Features
 
-* Disable mods you don't want to use at the moment
+* Disable mods you don't want to use at the moment.
     + *This feature is good for testing out which mod is crashing the game!*
 
-* Delete mods from your computer
+* Search bar to find the installed mod you're looking for in seconds.
+
+* Create profiles to organize your mods.
+
+* Delete mods from your computer.
 
 * Automatic installation by dragging and dropping files into the program.
     + This also includes automatic unzipping.
@@ -28,11 +32,9 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 
 * Easy to access buttons for your game directory, crash logs, and starting the game.
 
-* Search bar to find the installed mod you're looking for in seconds
-
 * Backup all of your mods and package it into a compressed file.
-
-In the future there will be profiles so stay tuned for that 😁
+  
+* Auto detects and installs updates.
 
 **Like all PAYDAY 2 Mods, [Super BLT](https://superblt.znix.xyz/) is required to run mods**
 
@@ -82,7 +84,6 @@ You may download any version of Myth Mod Manager and view changelogs at the [rel
 # Future Plans
 
 + New Icon/Logo
-+ Mod profiles
 + Duplicate mod detection
 + Auto mod type detection
 + Linux support

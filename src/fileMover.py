@@ -162,7 +162,6 @@ class FileMover(QThread):
 
                     self.move(modsDirPath, modDestPath)
 
-
         except Exception as e:
             logging.error('An error occured in changeModType:\n%s', str(e))
             self.error.emit(str(e))
@@ -366,7 +365,6 @@ class FileMover(QThread):
         while True and not self.cancel:
 
             try:
-
                 shutil.move(src, dest)
                 break
 

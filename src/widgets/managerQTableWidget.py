@@ -6,10 +6,10 @@ import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, QUrl
 
-from widgets.contextMenu import ModContextMenu
+from widgets.QMenu.managerQMenu import ManagerMenu
 from widgets.progressWidget import StartFileMover
-from widgets.deleteWarningQDialog import DeleteModConfirmation
-from widgets.newModQDialog import newModLocation
+from widgets.QDialog.deleteWarningQDialog import DeleteModConfirmation
+from widgets.QDialog.newModQDialog import newModLocation
 from getPath import Pathing
 import errorChecking
 from save import Save, OptionsManager
@@ -22,12 +22,12 @@ class ModListWidget(qtw.QTableWidget):
 
         logging.getLogger(__name__)
 
+        self.setObjectName('modlistwidget')
+
         self.saveManager = Save()
         self.optionsManager = OptionsManager()
 
         self.p = Pathing()
-
-        self.setFocusPolicy(qt.FocusPolicy.NoFocus)
 
         self.setSelectionMode(qtw.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.setSelectionBehavior(qtw.QAbstractItemView.SelectionBehavior.SelectRows)
@@ -53,18 +53,7 @@ class ModListWidget(qtw.QTableWidget):
 
         self.verticalHeader().hide()
 
-        self.contextMenu = ModContextMenu(parent=self)
-
-        self.enable = qtg.QAction('Enable', self)
-        self.enable.triggered.connect(lambda: self.setItemEnabled())
-
-        self.disable = qtg.QAction('Disable', self)
-        self.disable.triggered.connect(lambda: self.setItemDisabled())
-
-        self.delete = qtg.QAction('Delete Mod', self)
-        self.delete.triggered.connect(lambda: self.deleteItem())
-
-        self.contextMenu.addActions((self.enable, self.disable, self.delete))
+        self.contextMenu = ManagerMenu(self)
     
     def getEnabledItem(self, row: int) -> qtw.QTableWidgetItem:
         return self.item(row, 2)
@@ -247,7 +236,7 @@ class ModListWidget(qtw.QTableWidget):
         # Just incase disabled folder doesn't exist
         errorChecking.createDisabledModFolder()
 
-        disModFolder = self.optionsManager.getOption(OPTIONS_DISPATH)
+        disModFolder = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
         disModFolderContents = os.listdir(disModFolder)
 
         # Add mods to the table widget
@@ -320,7 +309,7 @@ class ModListWidget(qtw.QTableWidget):
         else:
             logging.error('The mod_overrides path does not exist:\n%s\nSkipping...', mod_overridePath)
 
-        # mod_override Folder
+        # maps Folder
         if os.path.exists(maps_path):
 
             for mod in os.listdir(maps_path):
@@ -374,12 +363,12 @@ class ModListWidget(qtw.QTableWidget):
                 self.setRowHidden(i, False)
 
 
-# EVENTS
+# EVENT OVERRIDES
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
 
         if event.button() == qt.MouseButton.RightButton:
 
-            self.contextMenu.show()
+            self.contextMenu.exec(qtg.QCursor.pos())
 
         return super().mousePressEvent(event)
     

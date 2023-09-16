@@ -73,6 +73,41 @@ class StyleManager():
                 border-top: 3px solid {2};
             }}
 
+            QTreeView {{
+                selection-background-color: {3};
+                border: none;
+            }}
+
+            QTreeView::item {{
+                border-color: {1};
+                padding: 5px;
+            }}
+
+            QTreeView::item:selected {{
+                background: {2};
+            }}
+
+            QTreeView::branch {{
+            }}
+
+            QListView {{
+                selection-background-color: {2};
+                border: none;
+            }}
+
+            QListView::item {{
+                border-color: {1};
+                padding: 5px;
+            }}
+
+            QListView::item:selected {{
+                background: {2};
+            }}
+
+            QAbstractItemView {{
+                outline: 0;
+            }}
+
             QScrollArea {{
                 border: None;
             }}

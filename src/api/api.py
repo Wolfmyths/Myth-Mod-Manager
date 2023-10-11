@@ -13,15 +13,17 @@ def __loadXML(modPath: str) -> et.ElementTree | None:
 
     xmlPath = os.path.join(modPath, xmlName)
 
+    xml = None
+
     logging.debug('Checking xml file of %s', os.path.basename(modPath))
     
     try:
         if os.path.exists(xmlPath):
             xml = et.parse(xmlPath)
-            return xml
     except Exception as e:
         logging.error('Something went wrong parsing an xml file in %s:\n%s', os.path.basename(modPath), str(e))
-        return None
+    
+    return xml
 
 def __parseVersion(version: str) -> Version | None:
 

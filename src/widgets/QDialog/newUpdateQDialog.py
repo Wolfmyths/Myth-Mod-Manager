@@ -46,6 +46,7 @@ class updateDetected(Dialog):
 
         self.changelog = qtw.QTextBrowser(self)
         self.changelog.setMarkdown(releaseNotes)
+        self.changelog.setOpenExternalLinks(True)
 
         self.viewWeb = qtw.QPushButton(text='View Release Notes on github.com', parent=self)
         self.viewWeb.clicked.connect(lambda: openWebPage('https://github.com/Wolfmyths/Myth-Mod-Manager/releases/latest'))

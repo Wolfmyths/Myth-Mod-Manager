@@ -33,9 +33,9 @@ class BackupMods(FileMover):
 
             bundledMapsPath = os.path.join(bundledFilePath, 'Maps')
 
-            outputPathDict = {ModType.maps : bundledOverridePath, ModType.maps : bundledModsPath, ModType.maps : bundledMapsPath}
+            outputPathDict = {ModType.mods_override : bundledOverridePath, ModType.mods : bundledModsPath, ModType.maps : bundledMapsPath}
 
-            srcPathDict = {ModType.maps : mod_overridePath, ModType.maps : modPath, ModType.maps : maps_path}
+            srcPathDict = {ModType.mods_override : mod_overridePath, ModType.mods : modPath, ModType.maps : maps_path}
 
             # Define error msg
 
@@ -47,6 +47,7 @@ class BackupMods(FileMover):
 
                 # Every mod
                 mods = list([x for x in os.listdir(modPath) if x not in MODSIGNORE] + os.listdir(mod_overridePath) + os.listdir(disPath) + os.listdir(maps_path))
+                print(mods)
 
                 self.setTotalProgress.emit(len(mods) + 3) # Add 3 for the extra steps that aren't the list length
 
@@ -71,7 +72,7 @@ class BackupMods(FileMover):
 
                     self.setCurrentProgress.emit(1, f'Copying {mod} to {BACKUP_MODS}')
 
-                    modType = self.saveManager.get(mod, MOD_TYPE)
+                    modType = self.saveManager.getType(mod)
 
                     # If the mod is disabled then the src will go to the disabled mods directory
                     src = os.path.join(srcPathDict[modType], mod) if self.saveManager.isEnabled(mod) else os.path.join(disPath, mod)

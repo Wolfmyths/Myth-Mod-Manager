@@ -2,16 +2,15 @@ import json
 import logging
 import os
 
-from PySide6.QtCore import QObject, QUrl
+from PySide6.QtCore import QObject, QUrl, QCoreApplication
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-import PySide6.QtWidgets as qtw
 
 from semantic_version import Version
 
 from widgets.QDialog.newUpdateQDialog import updateDetected
 
 from errorChecking import isPrerelease
-from constant_vars import VERSION
+from constant_vars import VERSION, ROOT_PATH
 
 class checkUpdate(QObject):
     '''
@@ -64,8 +63,8 @@ class checkUpdate(QObject):
             notice.exec()
             
             if notice.result():
-                os.startfile('Myth Mod Manager.exe')
-                qtw.QApplication.instance().shutdown()
+                os.startfile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
+                QCoreApplication.quit()
 
         self.deleteLater()
                 

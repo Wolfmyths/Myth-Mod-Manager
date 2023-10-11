@@ -2,6 +2,7 @@ import logging
 
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
+from PySide6.QtCore import Qt as qt
 
 from semantic_version import Version
 
@@ -10,11 +11,13 @@ from constant_vars import VERSION
 from widgets.QDialog.announcementQDialog import Notice
 from errorChecking import openWebPage
 
-from threaded.update import Update
+from api.update import Update
 
 class updateDetected(Dialog):
 
     succeededState = False
+    downloadState = False
+    lastIterBytes = 0
 
     def __init__(self, newVersion: Version, releaseNotes: str) -> None:
         super().__init__()
@@ -28,14 +31,17 @@ class updateDetected(Dialog):
         self.autoUpdate = Update()
 
         self.progressBar = qtw.QProgressBar()
+        self.progressBar.setAlignment(qt.AlignmentFlag.AlignTop)
+
         self.autoUpdate.setTotalProgress.connect(lambda x: self.progressBar.setMaximum(x))
         self.autoUpdate.setCurrentProgress.connect(lambda x, y: self.updateProgressBar(x, y))
+        self.autoUpdate.downloading.connect(lambda x, y: self.downloadStarted(x, y))
         self.autoUpdate.addTotalProgress.connect(lambda x: self.progressBar.setMaximum(self.progressBar.maximum() + x))
-
-        self.message = qtw.QLabel(self, text=f'New update found: {newVersion}\nCurrent Version: {VERSION}\nDo you want to Update?')
-
+        self.autoUpdate.error.connect(lambda x: self.errorRaised(x))
         self.autoUpdate.succeeded.connect(lambda: self.succeeded())
         self.autoUpdate.doneCanceling.connect(lambda: self.close())
+
+        self.message = qtw.QLabel(self, text=f'New update found: {newVersion}\nCurrent Version: {VERSION}\nDo you want to Update?')
 
         self.changelog = qtw.QTextBrowser(self)
         self.changelog.setMarkdown(releaseNotes)
@@ -60,7 +66,7 @@ class updateDetected(Dialog):
 
             self.accept()
 
-        elif not self.autoUpdate.isRunning():
+        else:
 
             self.changelog.hide()
 
@@ -76,13 +82,11 @@ class updateDetected(Dialog):
         self.close()
 
     def succeeded(self):
-        
-        self.autoUpdate.terminate()
 
         self.progressBar.hide()
 
         self.progressBar.setValue(self.progressBar.maximum())
-        self.message.setText('Installed!\nClick ok to restart and update Myth Mod Manager')
+        self.message.setText('Installed!\nClick ok to exit and update Myth Mod Manager')
 
         self.succeededState = True
     
@@ -96,18 +100,27 @@ class updateDetected(Dialog):
 
         self.autoUpdate.cancel = True
     
-    def updateProgressBar(self, x, y):
+    def downloadStarted(self, current: int, total: int) -> None:
+        if not self.downloadState:
+            self.progressBar.setMaximum(self.progressBar.maximum() + total)
+            self.downloadState = True
+            
+        self.updateProgressBar(current - self.lastIterBytes)
 
-        newValue = x + self.progressBar.value()
+        self.lastIterBytes = current
+        
+    
+    def updateProgressBar(self, value: int, step: str = '') -> None:
 
-        self.message.setText(y)
+        newValue = value + self.progressBar.value()
+
+        if step:
+            self.message.setText(step)
+
         self.progressBar.setValue(newValue)
 
 # EVENT OVERRIDES 
     def closeEvent(self, arg__1: qtg.QCloseEvent) -> None:
-
-        if self.autoUpdate.cancel:
-            self.autoUpdate.terminate()
 
         if not self.succeededState:
             self.setResult(0)

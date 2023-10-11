@@ -2,11 +2,10 @@
 import os
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QTimer
 
 from widgets.QDialog.QDialog import Dialog
 from save import OptionsManager
-from constant_vars import OPTIONS_SECTION, OPTIONS_GAMEPATH
+from constant_vars import OPTIONS_GAMEPATH
 
 class GamePathNotFound(Dialog):
     def __init__(self, QParent: qtw.QWidget | qtw.QApplication) -> None:
@@ -18,9 +17,6 @@ class GamePathNotFound(Dialog):
 
         self.optionsManager = OptionsManager()
 
-        self.timeout = QTimer()
-        self.timeout.timeout.connect(lambda: self.setGamePathTimeout())
-
         layout = qtw.QFormLayout()
         layout.setRowWrapPolicy(qtw.QFormLayout.RowWrapPolicy.WrapAllRows)
 
@@ -31,11 +27,13 @@ class GamePathNotFound(Dialog):
 
         self.gameDir = qtw.QLineEdit(self)
         self.gameDir.setText(self.optionsManager.getOption(OPTIONS_GAMEPATH))
-        self.gameDir.textChanged.connect(lambda: self.setGamePath())
+        self.gameDir.textChanged.connect(self.checkGamePath)
 
-        buttons = qtw.QDialogButtonBox.Ok | qtw.QDialogButtonBox.Cancel
+        buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(buttons)
+        self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok).setEnabled(False)
+
         self.buttonBox.accepted.connect(lambda: self.accept())
         self.buttonBox.rejected.connect(lambda: self.reject())
 
@@ -47,31 +45,14 @@ class GamePathNotFound(Dialog):
         
         self.setLayout(layout)
     
-    def setGamePath(self):
-        '''
-        QTimer is started so the save data function isn't called everytime the user changes a single character
-
-        setGamePathTimeout() is the function that actually saves the gamePath
-        '''
-
-        self.noticeLabelDesc.setText('Validating Game Path...')
-
-        if not self.timeout.isActive():
-
-            self.timeout.start(1000)
-
-        else:
-
-            self.timeout.stop()
-            self.timeout.start(1000)
-    
-    def setGamePathTimeout(self):
-
-        self.timeout.stop()
+    def checkGamePath(self):
 
         gamePath = self.gameDir.text()
+        okButton = self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok)
 
         if os.path.exists(os.path.join(gamePath, 'payday2_win32_release.exe')):
+
+            okButton.setEnabled(True)
 
             self.noticeLabel.setText('Success:')
             self.noticeLabelDesc.setText('Game Path is valid')
@@ -79,6 +60,8 @@ class GamePathNotFound(Dialog):
             self.optionsManager.setOption(gamePath, OPTIONS_GAMEPATH)
 
         else:
+
+            okButton.setEnabled(False)
 
             self.noticeLabel.setText('Error:')
             self.noticeLabelDesc.setText('Game Path is not valid')

@@ -10,7 +10,7 @@ from widgets.managerQTableWidget import ModListWidget
 from widgets.QDialog.announcementQDialog import Notice
 from save import Save, OptionsManager
 import errorChecking
-from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_GAMEPATH, START_PAYDAY_PATH, MOD_TABLE_OBJECT, TYPE_MAPS
+from constant_vars import OPTIONS_GAMEPATH, START_PAYDAY_PATH, MOD_TABLE_OBJECT, ModType
 
 class ModManager(qtw.QWidget):
 
@@ -22,7 +22,7 @@ class ModManager(qtw.QWidget):
         selectAllShortCut.activated.connect(lambda: self.modsTable.selectAll())
 
         deselectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+D"), self)
-        deselectAllShortCut.activated.connect(lambda: self.deselectAllShortcut())
+        deselectAllShortCut.activated.connect(self.deselectAllShortcut)
 
         self.saveManager = Save()
         self.optionsManager = OptionsManager()
@@ -38,7 +38,7 @@ class ModManager(qtw.QWidget):
         self.openGameDir.clicked.connect(lambda: os.startfile(self.optionsManager.getOption(OPTIONS_GAMEPATH)))
 
         self.startGame = qtw.QPushButton('Start PAYDAY 2', self)
-        self.startGame.clicked.connect(lambda: self.startPayday())
+        self.startGame.clicked.connect(self.startPayday)
 
         modLabelLayout = qtw.QHBoxLayout()
         modLabelLayout.setSpacing(100)
@@ -64,7 +64,7 @@ class ModManager(qtw.QWidget):
         self.search.textChanged.connect(lambda x: self.modsTable.search(x))
 
         self.modsTable = ModListWidget()
-        self.modsTable.itemChanged.connect(lambda: self.updateModCount())
+        self.modsTable.itemChanged.connect(self.updateModCount)
         
         self.modsTable.setObjectName(MOD_TABLE_OBJECT)
 
@@ -79,24 +79,25 @@ class ModManager(qtw.QWidget):
 
         self.totalModsLabel.setText(f'Total Mods: {self.modsTable.rowCount()}')
 
-        self.modsLabel.setText(f'Mods: {self.modsTable.getModTypeCount(TYPE_MODS)}')
+        self.modsLabel.setText(f'Mods: {self.modsTable.getModTypeCount(ModType.mods)}')
 
-        self.overrideLabel.setText(f'Mod_Overrides: {self.modsTable.getModTypeCount(TYPE_MODS_OVERRIDE)}')
+        self.overrideLabel.setText(f'Mod_Overrides: {self.modsTable.getModTypeCount(ModType.mods_override)}')
 
-        self.mapsLabel.setText(f'Maps: {self.modsTable.getModTypeCount(TYPE_MAPS)}')
+        self.mapsLabel.setText(f'Maps: {self.modsTable.getModTypeCount(ModType.maps)}')
 
     def startPayday(self):
 
         if errorChecking.validGamePath():
 
-            gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH)
+            gamePath: str = self.optionsManager.getOption(OPTIONS_GAMEPATH)
 
-            drive = gamePath[0].lower()
+            drive: str = gamePath[0].lower()
 
             # Starts START_PAYDAY.bat
             # First argument is to change the directory to the game's directory
             # Second argument the drive for the cd command
             # Third argument is the exe name
+            # Fourth argument is extra arguments for payday 2
             subprocess.call([START_PAYDAY_PATH, gamePath, drive, 'payday2_win32_release.exe'])
         else:
             

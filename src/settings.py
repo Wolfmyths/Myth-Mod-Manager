@@ -1,12 +1,14 @@
 import os
+import logging
 
 import PySide6.QtWidgets as qtw
-import PySide6.QtCore as qt
 
-from widgets.progressWidget import StartFileMover
+from widgets.progressWidget import ProgressWidget
+from threaded.backupMods import BackupMods
 from save import OptionsManager
 from getPath import Pathing
 from style import StyleManager
+from widgets.ignoredModsQListWidget import IgnoredMods
 from constant_vars import OPTIONS_SECTION, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, DARK, LIGHT, OPTIONS_THEME
 
 class Options(qtw.QWidget):
@@ -14,34 +16,26 @@ class Options(qtw.QWidget):
     def __init__(self) -> None:
         super().__init__()
 
-        self.optionsManager = OptionsManager()
-
-        self.gamePathTimeout = qt.QTimer(self)
-        self.gamePathTimeout.setObjectName('gamePathTimeout')
-        self.gamePathTimeout.timeout.connect(lambda: self.setGamePathTimeout())
-
-        self.disPathTimeout = qt.QTimer(self)
-        self.disPathTimeout.setObjectName('disPathTimeout')
-        self.disPathTimeout.timeout.connect(lambda: self.setDisPathTimeout())
+        logging.getLogger(__file__)
 
         layout = qtw.QFormLayout()
         layout.setContentsMargins(40, 40, 40, 20)
+        layout.setVerticalSpacing(10)
         layout.setRowWrapPolicy(qtw.QFormLayout.RowWrapPolicy.WrapAllRows)
 
-        self.noticeLabel = qtw.QLabel(self)
-        self.noticeLabelDesc = qtw.QLabel(self)
+        self.optionsManager = OptionsManager()
 
         self.gameDirLabel = qtw.QLabel(self, text='Payday 2 Game Path:')
 
         self.gameDir = qtw.QLineEdit(self)
         self.gameDir.setText(self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback=''))
-        self.gameDir.textChanged.connect(lambda: self.setPath(self.gamePathTimeout.objectName()))
+        self.gameDir.textChanged.connect(lambda x: self.setGamePath(x))
 
         self.disabledModLabel = qtw.QLabel(self, text='Disabled Mods Path')
 
         self.disabledModDir = qtw.QLineEdit(self)
-        self.disabledModDir.setText(self.optionsManager.getOption(self.disabledModDir.text(), fallback=MODS_DISABLED_PATH_DEFAULT))
-        self.disabledModDir.textChanged.connect(lambda: self.setPath(self.disPathTimeout.objectName()))
+        self.disabledModDir.setText(self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT))
+        self.disabledModDir.textChanged.connect(lambda x: self.setDisPath(x))
 
         gbLayout = qtw.QHBoxLayout()
 
@@ -73,96 +67,66 @@ class Options(qtw.QWidget):
         else:
             self.colorThemeDark.setChecked(True)
 
+        # Ignored mods list
+        self.ignoredModsListWidget = IgnoredMods(self)
+        self.ignoredModsListWidget.itemsChanged.connect(self.updateModIgnoreLabel)
+
+        self.ignoredModsLabel = qtw.QLabel()
+
         self.backupModsLabel = qtw.QLabel(self, text='This will backup all of your mods and compress it into a zip file.')
 
         self.backupMods = qtw.QPushButton(parent=self, text='Backup Mods')
-        self.backupMods.clicked.connect(lambda: self.startBackupMods())
+        self.backupMods.clicked.connect(self.startBackupMods)
 
         self.log = qtw.QPushButton(parent=self, text='Crash Logs')
-        self.log.clicked.connect(lambda: os.startfile(os.path.join('C:', 'Users', os.environ['USERNAME'], 'AppData', 'Local', 'PAYDAY 2')))
+        self.log.clicked.connect(self.openCrashLogs)
 
         self.modLog = qtw.QPushButton(parent=self, text='Mod Crash Logs')
         self.modLog.clicked.connect(lambda: self.openCrashLogBLT())
 
-        for row in ( (self.noticeLabel, self.noticeLabelDesc),
-                     (self.gameDirLabel, self.gameDir),
+        for row in ( (self.gameDirLabel, self.gameDir),
                      (self.disabledModLabel, self.disabledModDir),
+                     (self.ignoredModsLabel, self.ignoredModsListWidget),
                      (self.backupModsLabel, self.backupMods),
                      (qtw.QLabel(), self.buttonFrame),
                      (qtw.QLabel(), self.log),
                      (qtw.QLabel(), self.modLog) ):
 
             layout.addRow(row[0], row[1])
-        
+
         self.setLayout(layout)
-    
-    def setPath(self, mode: str):
-        '''
-        QTimer is started so the save data function isn't called everytime the user changes a single character
-        on a QLineEdit
-        '''
 
-        timeout: qt.QTimer = self.findChild(qt.QTimer, mode)
-
-        if timeout.objectName() == self.gamePathTimeout.objectName():
-
-            self.noticeLabelDesc.setText('Validating Game Path...')
-        
-        else:
-
-            self.noticeLabelDesc.setText('Saving disabled games path... do not turn off')
-
-        if not timeout.isActive():
-
-            timeout.start(1000)
-
-        else:
-
-            timeout.stop()
-            timeout.start(1000)
-    
-    def openCrashLogBLT(self):
+    def openCrashLogBLT(self) -> None:
         modPath = Pathing().mods()
 
         os.startfile(os.path.join(modPath, 'logs'))
+    
+    def openCrashLogs(self) -> None:
+        os.startfile(os.path.join('C:', 'Users', os.environ['USERNAME'], 'AppData', 'Local', 'PAYDAY 2'))
+
             
     
-    def setGamePathTimeout(self):
+    def setGamePath(self, path: str) -> None:
 
-        self.gamePathTimeout.stop()
+        if os.path.exists(os.path.join(path, 'payday2_win32_release.exe')):
 
-        gamePath = self.gameDir.text()
+            logging.info('Changed game path to: %s', path)
 
-        if os.path.exists(os.path.join(gamePath, 'payday2_win32_release.exe')):
-
-            self.noticeLabel.setText('Success:')
-            self.noticeLabelDesc.setText('Game Path is valid')
-
-            self.optionsManager[OPTIONS_SECTION][OPTIONS_GAMEPATH] = gamePath
+            self.optionsManager[OPTIONS_SECTION][OPTIONS_GAMEPATH] = path
 
             self.optionsManager.writeData()
-
-        else:
-
-            self.noticeLabel.setText('Error:')
-            self.noticeLabelDesc.setText('Game Path is not valid, did not save.')
     
-    def setDisPathTimeout(self):
+    def setDisPath(self, path: str) -> None:
 
-        self.disPathTimeout.stop()
+        logging.info('Changed disabled mod folder path to: %s', path)
 
-        disPath = self.disabledModDir.text()
-
-        self.optionsManager[OPTIONS_SECTION][OPTIONS_DISPATH] = disPath
+        self.optionsManager[OPTIONS_SECTION][OPTIONS_DISPATH] = path
 
         self.optionsManager.writeData()
-
-        self.noticeLabel.setText('Success:')
-        self.noticeLabelDesc.setText('Progress has been saved.\n(Remember to move your disabled mods)')
     
     def startBackupMods(self) -> None:
         
-        startFileMover = StartFileMover(5)
+        startFileMover = ProgressWidget(BackupMods())
         startFileMover.exec()
     
     def changeColorTheme(self, theme: str):
@@ -173,3 +137,6 @@ class Options(qtw.QWidget):
         app.setStyleSheet(StyleManager().getStyleSheet(theme))
 
         self.optionsManager.writeData()
+    
+    def updateModIgnoreLabel(self) -> None:
+        self.ignoredModsLabel.setText(f'Hidden Mods: {self.ignoredModsListWidget.count()}')

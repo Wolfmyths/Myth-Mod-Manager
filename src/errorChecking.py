@@ -1,16 +1,28 @@
 import os
 import stat
-import requests
 import logging
+import webbrowser
 
 from semantic_version import Version
 
+from widgets.QDialog.announcementQDialog import Notice
+
 from getPath import Pathing
 from save import OptionsManager
-from widgets.QDialog.newUpdateQDialog import updateDetected
-from constant_vars import OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, VERSION, OPTIONS_DISPATH, OPTIONS_SECTION, TYPE_ALL
+from constant_vars import OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, OPTIONS_DISPATH, OPTIONS_SECTION, ModType
 
 logging.getLogger(__name__)
+
+def openWebPage(link: str) -> None:
+        '''`webbrowser.open_new_tab()` but with some exception handling'''
+        try:
+            webbrowser.open_new_tab(link)
+        except Exception as e:
+
+            logging.error('Could not open web browser:\n%s', str(e))
+
+            notice = Notice(f'Could not connect to {link}:\n{e}', 'Error:')
+            notice.exec()
 
 def validGamePath() -> bool:
     '''Gets the gamepath from OPTIONS_CONFIG and checks if the paths contains the PAYDAY 2 exe'''
@@ -32,18 +44,13 @@ def validGamePath() -> bool:
 def isInstalled(mod: str) -> bool:
     '''Checks if the mod is installed on the system'''
 
-    optionsManager = OptionsManager()
-
     path = Pathing()
 
-    possiblePaths = (path.maps(),
-                     path.mods(), 
-                     path.mod_overrides(), 
-                     optionsManager.getOption(OPTIONS_DISPATH))
+    possiblePaths = (*path.mod(ModType.all_types(), mod), OptionsManager().getOption(OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, str))
 
     for path in possiblePaths:
 
-        if mod in os.listdir(path):
+        if os.path.exists(path):
             return True
 
     logging.info('The following mod is not installed: %s', mod)
@@ -120,49 +127,8 @@ def getFileType(filePath: str) -> str | bool:
 def isPrerelease(version: Version) -> bool:
     return len(version.prerelease) != 0
 
-def checkUpdate() -> int:
-    '''
-    Checks for latest update and returns the result value of the updateDetected() QDialog Widget
-
-    If the request.get() raises an exception, return 0
-    '''
-
-    try:
-        # If the version is a pre-release, then look for latest pre-release updates as well
-        # If there is an error raised here in the code's execution then it's because this version does not have a release page yet
-        if isPrerelease(VERSION):
-
-            data = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases').json()
-
-            latestVersion = Version.coerce(data[0]['tag_name'])
-
-        else:
-
-            latestVersionJSON = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest').json()
-
-            latestVersion = Version.coerce(latestVersionJSON['tag_name'])
-
-        logging.info('Latest Version: %s', latestVersion)
-
-    except Exception as e:
-        logging.error('Issue in errorChecking.checkUpdate():\n%s', str(e))
-
-        return 0
-
-    if latestVersion > VERSION:
-
-            notice = updateDetected(latestVersion, latestVersionJSON['body'])
-            notice.exec()
-            result = notice.result()
-
-    else:
-
-        result = 0
-
-    return result
-
-def isTypeMod(type: str):
-    return type in TYPE_ALL
+def isTypeMod(type: ModType) -> bool:
+    return type.value in ModType.all_types()
 
 def permissionCheck(src: str) -> int:
     '''

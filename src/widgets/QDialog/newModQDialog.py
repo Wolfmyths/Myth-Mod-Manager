@@ -1,10 +1,9 @@
-
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QUrl, Qt as qt
 
 from widgets.QDialog.QDialog import Dialog
 
-from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, TYPE_MAPS
+from constant_vars import ModType
 
 class newModLocation(Dialog):
 
@@ -42,18 +41,18 @@ class newModLocation(Dialog):
             group = qtw.QGroupBox(f'{mod}')
             group.setObjectName(mod)
 
-            radioButtonMod = qtw.QRadioButton(TYPE_MODS, group)
-            radioButtonMod.setObjectName(f'{mod} {TYPE_MODS}')
+            radioButtonMod = qtw.QRadioButton(ModType.mods, group)
+            radioButtonMod.setObjectName(f'{mod} {ModType.mods}')
             radioButtonMod.setChecked(False)
             radioButtonMod.clicked.connect(lambda: self.isAllChecked())
 
-            radioButtonOverride = qtw.QRadioButton(TYPE_MODS_OVERRIDE, group)
-            radioButtonOverride.setObjectName(f'{mod} {TYPE_MODS_OVERRIDE}')
+            radioButtonOverride = qtw.QRadioButton(ModType.mods_override, group)
+            radioButtonOverride.setObjectName(f'{mod} {ModType.mods_override}')
             radioButtonOverride.clicked.connect(lambda: self.isAllChecked())
             radioButtonOverride.setChecked(False)
 
-            radioButtonMaps = qtw.QRadioButton(TYPE_MAPS, group)
-            radioButtonMaps.setObjectName(f'{mod} {TYPE_MAPS}')
+            radioButtonMaps = qtw.QRadioButton(ModType.maps, group)
+            radioButtonMaps.setObjectName(f'{mod} {ModType.maps}')
             radioButtonMaps.clicked.connect(lambda: self.isAllChecked())
             radioButtonMaps.setChecked(False)
 
@@ -68,7 +67,7 @@ class newModLocation(Dialog):
 
         frame.setLayout(frameLayout)
 
-        buttons = qtw.QDialogButtonBox.Ok | qtw.QDialogButtonBox.Cancel
+        buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(buttons)
         self.changeOkButtonState(False)
@@ -113,14 +112,14 @@ class newModLocation(Dialog):
 
             if buttons[0].isChecked():
 
-                self.typeDict[modName] = TYPE_MODS
+                self.typeDict[modName] = ModType.mods
             elif buttons[1].isChecked():
 
-                self.typeDict[modName] = TYPE_MODS_OVERRIDE
+                self.typeDict[modName] = ModType.mods_override
             
             elif buttons[2].isChecked():
 
-                self.typeDict[modName] = TYPE_MAPS
+                self.typeDict[modName] = ModType.maps
 
             count += 1
 

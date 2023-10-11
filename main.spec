@@ -2,12 +2,17 @@
 
 block_cipher = None
 
+DATA = [
+    ('src/icon.ico', '.'), 
+    ('src/graphics', 'graphics')
+    ]
+
 
 a = Analysis(
     ['src\\main.py'],
     pathex=[],
     binaries=[('src\\runGame.bat', '.')],
-    datas=[('src\\icon.ico', '.')],
+    datas=DATA,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

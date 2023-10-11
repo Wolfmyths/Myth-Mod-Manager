@@ -7,8 +7,10 @@ import PySide6.QtGui as qtg
 import errorChecking
 
 from widgets.QDialog.announcementQDialog import Notice
-from widgets.progressWidget import StartFileMover
+from widgets.progressWidget import ProgressWidget
 from widgets.modProfileQTreeWidget import ProfileList
+from threaded.moveToDisabledDir import MoveToDisabledDir
+from threaded.moveToEnabledDir import MoveToEnabledModDir
 from save import OptionsManager, Save
 
 if TYPE_CHECKING:
@@ -38,16 +40,16 @@ class modProfile(qtw.QWidget):
 
     def applyMods(self, mods: list[str]):
 
-        enableMods = StartFileMover(1, *[x for x in mods if errorChecking.isInstalled(x)])
+        enableMods = ProgressWidget(MoveToEnabledModDir(*[x for x in mods if errorChecking.isInstalled(x)]))
         enableMods.exec()
 
-        disableMods = StartFileMover(0, *[x for x in self.saveManager.sections() if errorChecking.isInstalled(x) and x not in mods])
+        disableMods = ProgressWidget(MoveToDisabledDir(*[x for x in self.saveManager.sections() if errorChecking.isInstalled(x) and x not in mods]))
         disableMods.exec()
 
         # Refresh table so it is updated after all of this is done
         widget: ModListWidget
         for widget in qtw.QApplication.allWidgets():
-            if str(widget.__class__) == "<class 'widgets.tableWidget.ModListWidget'>":
+            if str(widget.__class__) == "<class 'widgets.managerQTableWidget.ModListWidget'>":
                 widget.refreshMods()
                 break
 

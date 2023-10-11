@@ -2,17 +2,17 @@
 
 block_cipher = None
 
+DATA = [
+    ('src/icon.ico', '.'), 
+    ('src/graphics', 'graphics')
+    ]
+
 
 a = Analysis(
     ['src\\main.py'],
     pathex=[],
     binaries=[('src\\runGame.bat', '.')],
-    datas=[('src\\icon.ico', '.'), 
-    (src\\graphics\\mws_logo_black, '.\\graphics'), 
-    (src\\graphics\\mws_logo_white, '.\\graphics'),
-    (src\\graphics\\github_mark.svg, '.\\graphics'),
-    (src\\graphics\\github_mark_white.svg, '.\\graphics'),
-    (src\\graphics\\kofi_s_logo_nolabel.webp, '.\\graphics')],
+    datas=DATA,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

@@ -34,7 +34,7 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 
 * Backup all of your mods and package it into a compressed file.
   
-* Auto detects and installs updates.
+* Auto detects and installs Myth Mod Manager's updates.
 
 **Like all PAYDAY 2 Mods, [Super BLT](https://superblt.znix.xyz/) is required to run mods**
 

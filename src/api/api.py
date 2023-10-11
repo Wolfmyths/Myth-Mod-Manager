@@ -7,14 +7,21 @@ from semantic_version import Version
 
 logging.getLogger(__file__)
 
-def __loadXML(modPath: str) -> et.ElementTree:
+def __loadXML(modPath: str) -> et.ElementTree | None:
 
     xmlName = 'main.xml'
 
     xmlPath = os.path.join(modPath, xmlName)
 
-    if os.path.exists(xmlPath):
-        return et.parse(xmlPath)
+    logging.debug('Checking xml file of %s', os.path.basename(modPath))
+    
+    try:
+        if os.path.exists(xmlPath):
+            xml = et.parse(xmlPath)
+            return xml
+    except Exception as e:
+        logging.error('Something went wrong parsing an xml file in %s:\n%s', os.path.basename(modPath), str(e))
+        return None
 
 def __parseVersion(version: str) -> Version | None:
 

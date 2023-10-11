@@ -10,13 +10,13 @@ if TYPE_CHECKING:
 class ModContextMenu(qtw.QMenu):
     '''Base class for QMenu Objects'''
 
-    lastClicked: int = None
-    lastReleased: int = None
+    lastClicked: qt.MouseButton = None
+    lastReleased: qt.MouseButton = None
     def __init__(self, parent: qtw.QWidget) -> None:
         super().__init__(parent)
     
     def wasLastClickLMB(self) -> bool:
-        '''For ignoring right click inputs'''
+        '''For ignoring right click inputs when the menu is open'''
         return self.lastClicked == qt.MouseButton.LeftButton and self.lastReleased == qt.MouseButton.LeftButton
 
 # EVENT OVERRIDES

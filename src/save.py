@@ -1,11 +1,10 @@
-
 import os
 import logging
-from typing import Self, Iterable, Any
+from typing import Self, Any
 
 from configparser import ConfigParser
 
-from constant_vars import MOD_CONFIG, OPTIONS_CONFIG, OPTIONS_SECTION, MOD_ENABLED, MOD_TYPE
+from constant_vars import MOD_CONFIG, OPTIONS_CONFIG, OPTIONS_SECTION, MOD_ENABLED, MOD_TYPE, ModType
 
 class Config(ConfigParser):
     '''Base class for config managers'''
@@ -49,13 +48,11 @@ class Save(Config):
 
     file = MOD_CONFIG
 
-    def addMods(self, *mods: tuple[list[str] | str, str]) -> None:
+    def addMods(self, *mods: tuple[list[str] | str, ModType]) -> None:
         '''
         Saves new mods to the config file
 
         It takes both singular and lists of mods
-
-        The 1st index of the tuple is the type
         '''
 
         for arg in mods:
@@ -64,26 +61,35 @@ class Save(Config):
 
                 for mod in arg[0]:
 
-                    self.newMod(mod, arg[1])
+                    self.__newMod(mod, arg[1])
 
             else:
 
-                self.newMod(arg[0], arg[1])
+                self.__newMod(arg[0], arg[1])
+        
+        self.writeData()
     
     def isEnabled(self, mod: str) -> bool:
         '''Returns if the mod is enabled or not'''
         return self.getboolean(mod, MOD_ENABLED, fallback=False)
     
-    def getType(self, mod: str) -> str | None:
+    def getType(self, mod: str) -> ModType | None:
         '''Returns the mod's type, if the mod doesn't exist then returns None'''
-        return self.get(mod, MOD_TYPE, fallback=None)
+
+        modType = self.get(mod, MOD_TYPE, fallback=None)
+
+        if modType is not None:
+            return ModType(modType)
+        else:
+            return None
     
-    def newMod(self, mod: str, type: str) -> None:
+    def __newMod(self, mod: str, type: ModType) -> None:
             '''
             Adds a new mod to config.ini
+
+            This function is mostly for `addMods()`
             
-            This function is in-scope with addMods() to make an attempt at
-            making an overloaded function
+            **Does not save progress**
             '''
 
             if not self.has_section(mod):
@@ -91,9 +97,7 @@ class Save(Config):
                 self.add_section(mod)
                 self[mod][MOD_ENABLED] = 'True'
             
-            self[mod][MOD_TYPE] = type
-
-            self.writeData()
+            self[mod][MOD_TYPE] = type.value
 
     def removeMods(self, *mods: str) -> None:
         '''Removes mods from MOD_CONFIG'''
@@ -139,7 +143,7 @@ class OptionsManager(Config):
 
         self.writeData()
 
-    def getOption(self, option: str, fallback= None, type: str | int | float | bool = str) -> str | None:
+    def getOption(self, option: str, fallback= None, type: str | int | float | bool = str) -> Any:
 
         output = None
 

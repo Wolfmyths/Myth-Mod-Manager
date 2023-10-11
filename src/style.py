@@ -1,4 +1,3 @@
-
 import logging
 
 from constant_vars import LIGHT, DARK
@@ -18,9 +17,30 @@ class StyleManager():
                 font-family: Bahnschrift;
             }}
 
+            QMenu {{
+                background-color: {1};
+            }}
+
+            QMenu::item {{
+                padding: 5px 25px 5px 20px;
+                border: 1px solid transparent;
+            }}
+
             QMenu::item:selected {{
                 background: {2};
                 color: {1};
+            }}
+
+            QMenu::item:disabled {{
+                background: {1};
+                color: {0};
+            }}
+
+            QMenu::separator {{
+                height: 2px;
+                background: {2};
+                margin-left: 5px;
+                margin-right: 5px;
             }}
 
             QLineEdit {{
@@ -39,6 +59,11 @@ class StyleManager():
             QPushButton:pressed, QPushButton::checked {{
                 border-color: {1};
                 background: {2};
+                color: {1};
+            }}
+
+            QPushButton::disabled {{
+                background: {0};
                 color: {1};
             }}
 
@@ -74,12 +99,12 @@ class StyleManager():
             }}
 
             QTreeView {{
-                selection-background-color: {3};
+                alternate-background-color: {2};
                 border: none;
             }}
 
             QTreeView::item {{
-                border-color: {1};
+                border: none;
                 padding: 5px;
             }}
 
@@ -87,12 +112,11 @@ class StyleManager():
                 background: {2};
             }}
 
-            QTreeView::branch {{
-            }}
-
             QListView {{
                 selection-background-color: {2};
-                border: none;
+                background-color: {1};
+                border-color: {0};
+                border-width: 2px;
             }}
 
             QListView::item {{

@@ -4,25 +4,11 @@ import logging
 
 import requests
 
-from PySide6.QtCore import QThread, Signal
+from threaded.QThread import Thread
 
 from constant_vars import ROOT_PATH
 
-class Update(QThread):
-
-    setTotalProgress = Signal(int)
-
-    addTotalProgress = Signal(int)
-
-    setCurrentProgress = Signal(int, str)
-
-    succeeded = Signal()
-
-    doneCanceling = Signal()
-
-    error = Signal(str)
-
-    cancel = False
+class Update(Thread):
 
     fileName = 'Myth-Mod-Manager.zip'
     exe = 'Myth Mod Manager.exe' 
@@ -42,7 +28,7 @@ class Update(QThread):
 
         try:
 
-            self.setTotalProgress.emit(7)
+            self.setTotalProgress.emit(6)
             
             self.setCurrentProgress.emit(0, 'Fetching latest version release info on github.com')
 
@@ -80,8 +66,10 @@ class Update(QThread):
                 # Instance a session
                 session = requests.Session()
 
+                downloadDir = os.path.join(os.environ['%TEMP%'], self.fileName)
+
                 # Creating a new file in 'write in binary' mode
-                with open(self.fileName, 'wb') as f:
+                with open(downloadDir, 'wb') as f:
 
                     self.setCurrentProgress.emit(1, 'Fetching download for download...')
 
@@ -116,17 +104,17 @@ class Update(QThread):
 
             # Installation
 
-            directory = os.listdir(ROOT_PATH)
+            installDir = os.listdir(ROOT_PATH)
 
-            if self.fileName in directory:
+            if self.fileName in installDir:
                 
                 self.cancelCheck()    
 
                 self.setCurrentProgress.emit(1, 'Unzipping the new update...')
 
-                shutil.unpack_archive(self.fileName)
+                shutil.unpack_archive(downloadDir)
 
-                if self.exe in directory:
+                if self.exe in installDir:
 
                     self.cancelCheck()
 
@@ -140,29 +128,13 @@ class Update(QThread):
 
                 self.cancelCheck()
 
-                shutil.move(os.path.join(self.folder, self.exe), ROOT_PATH)
-
-                self.setCurrentProgress.emit(1, 'Clean up...')
-
-                os.remove(self.fileName)
-
-                os.rmdir(self.folder)
+                shutil.move(os.path.join(downloadDir, self.exe), ROOT_PATH)
 
                 logging.info('Done')
 
                 self.succeeded.emit()
 
         except Exception as e:
-
-            directory = os.listdir(ROOT_PATH)
-
-            if self.folder in directory:
-
-                shutil.rmtree(self.folder)
-            
-            if self.fileName in directory:
-
-                os.remove(self.fileName)
             
             logging.error('Error at Update.downloadUpdate():\n%s', str(e))
 

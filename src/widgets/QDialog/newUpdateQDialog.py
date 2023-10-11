@@ -1,5 +1,3 @@
-
-import webbrowser
 import logging
 
 import PySide6.QtWidgets as qtw
@@ -10,8 +8,9 @@ from semantic_version import Version
 from widgets.QDialog.QDialog import Dialog
 from constant_vars import VERSION
 from widgets.QDialog.announcementQDialog import Notice
+from errorChecking import openWebPage
 
-from update import Update
+from threaded.update import Update
 
 class updateDetected(Dialog):
 
@@ -42,9 +41,9 @@ class updateDetected(Dialog):
         self.changelog.setMarkdown(releaseNotes)
 
         self.viewWeb = qtw.QPushButton(text='View Release Notes on github.com', parent=self)
-        self.viewWeb.clicked.connect(lambda: self.openBrowser())
+        self.viewWeb.clicked.connect(lambda: openWebPage('https://github.com/Wolfmyths/Myth-Mod-Manager/releases/latest'))
 
-        self.buttons = qtw.QDialogButtonBox.Ok | qtw.QDialogButtonBox.Cancel
+        self.buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(self.buttons)
         self.buttonBox.accepted.connect(lambda: self.okButton())
@@ -69,18 +68,6 @@ class updateDetected(Dialog):
 
             self.autoUpdate.start()
     
-    def openBrowser(self):
-
-        try:
-            webbrowser.open_new_tab('https://github.com/Wolfmyths/Myth-Mod-Manager/releases/latest')
-        except Exception as e:
-
-            logging.error('Could not open web browser:\n%s', str(e))
-
-            notice = Notice(f'Could not connect to webpage:\n{e}', 'Error:')
-            notice.exec()
-
-    
     def errorRaised(self, message: str):
         error = Notice(message, headline='Error')
         error.exec()
@@ -95,7 +82,7 @@ class updateDetected(Dialog):
         self.progressBar.hide()
 
         self.progressBar.setValue(self.progressBar.maximum())
-        self.message.setText('Installed!\nThe next time Myth Mod Manager starts up it will delete the old version')
+        self.message.setText('Installed!\nClick ok to restart and update Myth Mod Manager')
 
         self.succeededState = True
     

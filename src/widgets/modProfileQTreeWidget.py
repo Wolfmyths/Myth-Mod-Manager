@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 from typing import TYPE_CHECKING
 import logging
@@ -15,7 +14,7 @@ from widgets.QDialog.profileSelectionQDialog import SelectProfile
 
 import errorChecking
 from profileManager import ProfileManager
-from constant_vars import DATA_PROFILE, DATA_MOD, ROLE_TYPE, ROLE_PARENT, ROLE_INSTALLED
+from constant_vars import DATA_PROFILE, DATA_MOD, ProfileRole
 
 if TYPE_CHECKING:
     from profiles import modProfile
@@ -57,7 +56,7 @@ class ProfileList(qtw.QTreeWidget):
         return self.findItems(profile, qt.MatchFlag.MatchExactly)[0]
     
     def __getParentOfChild(self, child: qtw.QTreeWidgetItem) -> qtw.QTreeWidgetItem:
-        return self.__findProfile(child.data(0, ROLE_PARENT))
+        return self.__findProfile(child.data(0, ProfileRole.parent))
     
     def __getMods(self, profile: qtw.QTreeWidgetItem) -> list[qtw.QTreeWidgetItem] | None:
         '''Returns a list of mod names given the profile'''
@@ -128,9 +127,9 @@ class ProfileList(qtw.QTreeWidget):
             for mod in modsWidget:
 
                 if errorChecking.isInstalled(mod.text(0)):
-                    mod.setData(0, ROLE_INSTALLED, True)
+                    mod.setData(0, ProfileRole.installed, True)
                 else:
-                    mod.setData(0, ROLE_INSTALLED, False)
+                    mod.setData(0, ProfileRole.installed, False)
 
     def updateView(self) -> None:
         '''Refreshes the whole widget'''
@@ -193,8 +192,8 @@ class ProfileList(qtw.QTreeWidget):
 
             child = qtw.QTreeWidgetItem([mod])
             child.setData(*DATA_MOD)
-            child.setData(0, ROLE_PARENT, profile.text(0))
-            child.setData(0, ROLE_INSTALLED, True)
+            child.setData(0, ProfileRole.parent, profile.text(0))
+            child.setData(0, ProfileRole.installed, True)
 
             profile.addChild(child)
 
@@ -297,7 +296,7 @@ class ProfileList(qtw.QTreeWidget):
             self.profileManager.addProfile(*items)
     
     def isProfile(self, itemInQuestion: qtw.QTreeWidgetItem) -> bool:
-        return itemInQuestion.data(0, ROLE_TYPE) == DATA_PROFILE[2]
+        return itemInQuestion.data(0, ProfileRole.type) == DATA_PROFILE[2]
 
     def deleteProfile(self):
         '''Deletes an existing profile'''
@@ -395,6 +394,9 @@ class ProfileList(qtw.QTreeWidget):
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
 
         if event.button() == qt.MouseButton.RightButton:
+            
+            self.clearSelection()
+            self.itemAt(event.pos()).setSelected(True)
 
             selectedItem = self.__selectedItem()
 

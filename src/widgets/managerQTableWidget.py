@@ -1,4 +1,3 @@
-
 import os
 import logging
 
@@ -7,13 +6,19 @@ import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, QUrl
 
 from widgets.QMenu.managerQMenu import ManagerMenu
-from widgets.progressWidget import StartFileMover
+from widgets.progressWidget import ProgressWidget
 from widgets.QDialog.deleteWarningQDialog import DeleteModConfirmation
 from widgets.QDialog.newModQDialog import newModLocation
+from threaded.moveToDisabledDir import MoveToDisabledDir
+from threaded.moveToEnabledDir import MoveToEnabledModDir
+from threaded.changeModType import ChangeModType
+from threaded.deleteMod import DeleteMod
+from threaded.unZipMod import UnZipMod
 from getPath import Pathing
 import errorChecking
 from save import Save, OptionsManager
-from constant_vars import MOD_ENABLED, TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_DISPATH, MODSIGNORE, MODS_DISABLED_PATH_DEFAULT, TYPE_MAPS
+from constant_vars import MOD_ENABLED, OPTIONS_DISPATH, MODSIGNORE, MODS_DISABLED_PATH_DEFAULT, ModType, MOD_MODWORKSHOP_ASSET_ID, MOD_IGNORED, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, OPTIONS_THEME, LIGHT
+from api.api import findModworkshopAssetID, findModVersion
 
 class ModListWidget(qtw.QTableWidget):
 
@@ -33,13 +38,14 @@ class ModListWidget(qtw.QTableWidget):
         self.setSelectionBehavior(qtw.QAbstractItemView.SelectionBehavior.SelectRows)
         self.setAcceptDrops(True)
 
-        self.setColumnCount(3)
+        self.setColumnCount(4)
 
         self.setColumnWidth(0, 400)
-        self.setColumnWidth(1, 150)
+        self.setColumnWidth(1, 125)
         self.setColumnWidth(2, 100)
+        self.setColumnWidth(3, 100)
 
-        self.setHorizontalHeaderLabels(('Name', 'Type', 'Enabled'))
+        self.setHorizontalHeaderLabels(('Name', 'Type', 'Enabled', 'Version'))
 
         self.sortState = {'col' : 0, 'ascending': True}
 
@@ -48,6 +54,7 @@ class ModListWidget(qtw.QTableWidget):
         self.horizontalHeader().setSectionResizeMode(0, qtw.QHeaderView.ResizeMode.Stretch)
         self.horizontalHeader().setSectionResizeMode(1, qtw.QHeaderView.ResizeMode.Interactive)
         self.horizontalHeader().setSectionResizeMode(2, qtw.QHeaderView.ResizeMode.Interactive)
+        self.horizontalHeader().setSectionResizeMode(3, qtw.QHeaderView.ResizeMode.Interactive)
 
         self.setHorizontalScrollBarPolicy(qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
@@ -67,16 +74,14 @@ class ModListWidget(qtw.QTableWidget):
     def getSelectedNameItems(self) -> list[qtw.QTableWidgetItem]:
         return self.selectedItems()[::self.columnCount()]
     
-    def getModTypeCount(self, modType: str) -> int | None:
+    def getModTypeCount(self, modType: ModType) -> int | None:
         '''
         Returns the specified modtype count in the table,
         if an invalid parameter is passed then return None
-
-        Only mod types are allowed
         '''
 
         if errorChecking.isTypeMod(modType):
-            return len(self.findItems(modType, qt.MatchFlag.MatchExactly))
+            return len(self.findItems(modType.value, qt.MatchFlag.MatchExactly))
     
     def changeSortState(self, header: int) -> None:
         '''
@@ -94,7 +99,7 @@ class ModListWidget(qtw.QTableWidget):
 
         self.sort()
     
-    def sort(self):
+    def sort(self) -> None:
         '''Sorts the table widget based on the sort state, see changeSortState()'''
 
         if self.sortState['ascending']:
@@ -105,18 +110,18 @@ class ModListWidget(qtw.QTableWidget):
         
         logging.debug('Sorting items by col: %s, ascending: %s', self.sortState.get('col'), self.sortState.get('ascending'))
 
-
         self.sortItems(self.sortState['col'], sortType)
     
-    def addMod(self, **kwargs: str | bool) -> None:
+    def addMod(self, **kwargs: str | ModType | bool) -> None:
         '''
         Adds a new mod to the table (Not in the save manager)
 
         Accepted kwargs:
 
         + name : str
-        + type : str
+        + type : ModType
         + enabled : bool
+        + version: str
 
         If there is any other kwarg, then it will return
         '''
@@ -128,15 +133,31 @@ class ModListWidget(qtw.QTableWidget):
             match key:
 
                 case 'name':
-                    self.setItem(self.rowCount() - 1, 0, qtw.QTableWidgetItem(value))
+                    item = qtw.QTableWidgetItem(value)
+
+                    if self.saveManager.get(value, MOD_MODWORKSHOP_ASSET_ID):
+
+                        color = MODWORKSHOP_LOGO_B if self.optionsManager.getOption(OPTIONS_THEME, LIGHT) == LIGHT else MODWORKSHOP_LOGO_W
+
+                        item.setIcon(qtg.QIcon(os.path.join(UI_GRAPHICS_PATH, color)))
+
+                    self.setItem(self.rowCount() - 1, 0, item)
+
 
                 case 'type':
-                    self.setItem(self.rowCount() - 1, 1, qtw.QTableWidgetItem(value))
+                    self.setItem(self.rowCount() - 1, 1, qtw.QTableWidgetItem(value.value))
 
                 case 'enabled': # The key to this value should be a boolean
 
                     value = 'Enabled' if value else 'Disabled'
                     self.setItem(self.rowCount() - 1, 2, qtw.QTableWidgetItem(value))
+                
+                case 'version':
+
+                    if value == 'None':
+                        value = '1.0.0'
+
+                    self.setItem(self.rowCount() - 1, 3, qtw.QTableWidgetItem(value))
 
                 case _:
                     continue
@@ -151,7 +172,7 @@ class ModListWidget(qtw.QTableWidget):
 
         items = self.getSelectedNameItems()
 
-        startFileMover = StartFileMover(0, *[x.text() for x in items])
+        startFileMover = ProgressWidget(MoveToDisabledDir(*[x.text() for x in items]))
         startFileMover.exec()
 
         for item in items:
@@ -164,14 +185,12 @@ class ModListWidget(qtw.QTableWidget):
 
                 self.saveManager[modName][MOD_ENABLED] = 'False'
 
-                self.saveManager.writeData()
-
                 self.getEnabledItem(row).setText('Disabled')
-
-                StartFileMover(0, modName)
 
             else:
                 logging.info('%s is already disabled in the save file', modName)
+        
+        self.saveManager.writeData()
 
     def deleteItem(self) -> None:
         '''
@@ -186,7 +205,7 @@ class ModListWidget(qtw.QTableWidget):
 
             items = self.getSelectedNameItems()
 
-            startFileMover = StartFileMover(4, *[x.text() for x in items])
+            startFileMover = ProgressWidget(DeleteMod(*[x.text() for x in items]))
             startFileMover.exec()
 
             for item in items:
@@ -202,7 +221,7 @@ class ModListWidget(qtw.QTableWidget):
 
         items = self.getSelectedNameItems()
 
-        startFileMover = StartFileMover(1, *[x.text() for x in items])
+        startFileMover = ProgressWidget(MoveToEnabledModDir(*[x.text() for x in items]))
         startFileMover.exec()
 
         for item in items:
@@ -231,7 +250,7 @@ class ModListWidget(qtw.QTableWidget):
         mods = self.getMods()
 
         # Save mods into .ini
-        self.saveManager.addMods((mods[0], TYPE_MODS_OVERRIDE), (mods[1], TYPE_MODS), (mods[2], TYPE_MAPS))
+        self.saveManager.addMods((mods[0], ModType.mods_override), (mods[1], ModType.mods), (mods[2], ModType.maps))
 
         # Just incase disabled folder doesn't exist
         errorChecking.createDisabledModFolder()
@@ -241,18 +260,34 @@ class ModListWidget(qtw.QTableWidget):
 
         # Add mods to the table widget
         for mod in (x for x in mods[0] + mods[1] + mods[2]):
+            
+            # Checking if the mod is ignored
+            if self.saveManager.getboolean(mod, MOD_IGNORED, fallback=False):
+                continue
 
             type = self.saveManager.getType(mod)
+            modPath = self.p.mod(type, mod)
+            version = str(findModVersion(modPath))
             isEnabled = mod not in disModFolderContents
+
+            if not self.saveManager.get(mod, MOD_MODWORKSHOP_ASSET_ID, fallback=None):
+                modworkshop = findModworkshopAssetID(modPath)
+            else:
+                modworkshop = self.saveManager.get(mod, MOD_MODWORKSHOP_ASSET_ID)
 
             if isEnabled:
                 self.saveManager[mod][MOD_ENABLED] = 'True'
             else:
                 self.saveManager[mod][MOD_ENABLED] = 'False'
             
-            logging.debug('Adding mod to table, %s|%s|%s', mod, type, isEnabled)
+            if modworkshop is not None:
+                self.saveManager[mod][MOD_MODWORKSHOP_ASSET_ID] = modworkshop
+            else:
+                self.saveManager[mod][MOD_MODWORKSHOP_ASSET_ID] = ''
+            
+            logging.debug('Adding mod to table, %s|%s|%s|%s|%s', mod, type, isEnabled, version, modworkshop)
 
-            self.addMod(name=mod, type=type, enabled=isEnabled)
+            self.addMod(name=mod, type=type, enabled=isEnabled, version=version)
 
         # Save changes
         self.saveManager.writeData()
@@ -333,21 +368,52 @@ class ModListWidget(qtw.QTableWidget):
 
                     modType = self.saveManager.getType(mod)
                     
-                    if modType == TYPE_MODS:
+                    if modType == ModType.mods:
 
                         mods.append(mod)
                     
-                    elif modType == TYPE_MODS_OVERRIDE:
+                    elif modType == ModType.mods_override:
 
                         mod_override.append(mod)
                     
-                    elif modType == TYPE_MAPS:
+                    elif modType == ModType.maps:
 
                         maps.append(mod)
                 else:
                     logging.error('%s needs to be installed first before becoming disabled', mod)
 
         return [mod_override, mods, maps]
+    
+    def visitModPage(self) -> None:
+
+        if not len(self.getSelectedNameItems()) <= 0:
+            selectedItem = self.getSelectedNameItems()[0]
+
+            assetID = self.saveManager.get(selectedItem.text(), MOD_MODWORKSHOP_ASSET_ID, fallback=None)
+
+            errorChecking.openWebPage(f'https://modworkshop.net/mod/{assetID}')
+    
+    def openModDir(self) -> None:
+            if not len(self.getSelectedNameItems()) <= 0:
+                selectedItem = self.getSelectedNameItems()[0]
+
+                modName = self.getNameItem(self.row(selectedItem)).text()
+                modType = self.getTypeItem(self.row(selectedItem)).text()
+
+                path = self.p.mod(ModType(modType), modName)
+
+                if os.path.exists(path):
+                    os.startfile(path)
+
+    def hideMod(self) -> None:
+        items = self.getSelectedNameItems()
+        for item in items:
+            modName = item.text()
+            self.saveManager[modName][MOD_IGNORED] = 'True'
+            self.removeRow(item.row())
+        self.saveManager.writeData()
+
+        self.itemChanged.emit(items[0])
     
     def search(self, input: str) -> None:
 
@@ -361,13 +427,27 @@ class ModListWidget(qtw.QTableWidget):
                 self.setRowHidden(i, True)
             else:
                 self.setRowHidden(i, False)
+    
+    def swapIcons(self) -> None:
+
+        newIcon = MODWORKSHOP_LOGO_W if self.optionsManager.getOption(OPTIONS_THEME, LIGHT) == LIGHT else MODWORKSHOP_LOGO_B
+
+        reverseDict = {MODWORKSHOP_LOGO_B : MODWORKSHOP_LOGO_W, MODWORKSHOP_LOGO_W : MODWORKSHOP_LOGO_B}
+
+        for i in range(0, self.rowCount() - 1):
+            item = self.getNameItem(i)
+
+            if not item.icon().isNull():
+                item.setIcon(qtg.QIcon(os.path.join(UI_GRAPHICS_PATH, reverseDict[newIcon])))
 
 
 # EVENT OVERRIDES
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
 
         if event.button() == qt.MouseButton.RightButton:
-
+            
+            if len(self.getSelectedNameItems()) <= 1:
+                self.selectRow(self.itemAt(event.pos()).row())
             self.contextMenu.exec(qtg.QCursor.pos())
 
         return super().mousePressEvent(event)
@@ -436,7 +516,7 @@ class ModListWidget(qtw.QTableWidget):
                     for dir in dirs:
                         dirTuple.append((dir, dict_.get( dir.fileName() )))
 
-                    startFileMover = StartFileMover(2, *dirTuple)
+                    startFileMover = ProgressWidget(ChangeModType(*dirTuple))
                     startFileMover.exec()
 
                 if zips:
@@ -446,10 +526,10 @@ class ModListWidget(qtw.QTableWidget):
                     for zip in zips:
                         zipsTuple.append((zip, dict_.get( zip.fileName() )))
 
-                    startFileMover = StartFileMover(3, *zipsTuple)
+                    startFileMover = ProgressWidget(UnZipMod(*zipsTuple))
                     startFileMover.exec()
-                
-                self.refreshMods()
+            
+            self.itemChanged.emit()
 
         except Exception as e:
 

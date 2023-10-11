@@ -41,6 +41,8 @@ class Update(QObject):
         
         self.setCurrentProgress.emit(1, 'Getting asset_URL')
 
+        self.__cancelCheck()
+
         reply = self.network.get(request)
 
         reply.finished.connect(self.__handle_assetURL_fetch)
@@ -62,6 +64,8 @@ class Update(QObject):
 
         self.setCurrentProgress.emit(1, 'Getting asset data')
 
+        self.__cancelCheck()
+
         assetReply = self.network.get(QNetworkRequest(QUrl(assetUrl)))
         assetReply.finished.connect(self.__download_assets)
     
@@ -70,6 +74,8 @@ class Update(QObject):
         self.__replyErrorCheck()
 
         logging.info('Fetching asset data complete')
+
+        self.__cancelCheck()
 
         reply: QNetworkReply = self.sender()
 
@@ -101,6 +107,8 @@ class Update(QObject):
 
         self.__replyErrorCheck()
 
+        self.__cancelCheck()
+
         reply: QNetworkReply = self.sender()
 
         downloadDir = os.path.join(os.environ['TEMP'], self.fileName)
@@ -115,6 +123,8 @@ class Update(QObject):
         logging.info('Unzipping')
 
         self.setCurrentProgress.emit(1, 'Unzipping...')
+
+        self.__cancelCheck()
         
         shutil.unpack_archive(downloadDir, os.environ['TEMP'])
 

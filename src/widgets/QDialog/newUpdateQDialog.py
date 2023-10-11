@@ -3,6 +3,7 @@ import logging
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
 from PySide6.QtCore import Qt as qt
+from PySide6.QtNetwork import QNetworkReply
 
 from semantic_version import Version
 
@@ -101,6 +102,11 @@ class updateDetected(Dialog):
         self.autoUpdate.cancel = True
     
     def downloadStarted(self, current: int, total: int) -> None:
+
+        if self.autoUpdate.cancel:
+            reply: QNetworkReply = self.autoUpdate.network.sender()
+            reply.abort()
+
         if not self.downloadState:
             self.progressBar.setMaximum(self.progressBar.maximum() + total)
             self.downloadState = True

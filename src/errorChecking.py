@@ -39,22 +39,32 @@ def validGamePath() -> bool:
     else:
         logging.info('Gamepath: %s', gamePath)
 
-    return os.path.exists(os.path.join(gamePath, 'payday2_win32_release.exe'))
+    return 'payday2_win32_release.exe' in os.listdir(gamePath)
+
+def createModDirs() -> None:
+    path = Pathing()
+
+    for modDir in (path.maps(), path.mod_overrides(), path.mods()):
+        if not os.path.isdir(modDir):
+            os.mkdir(modDir)
 
 def isInstalled(mod: str) -> bool:
     '''Checks if the mod is installed on the system'''
 
+    installed = False
+
     path = Pathing()
 
-    possiblePaths = (*path.mod(ModType.all_types(), mod), OptionsManager().getOption(OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, str))
+    possiblePaths = (path.maps(), path.mod_overrides(), path.mods(), OptionsManager().getOption(OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, str))
 
     for path in possiblePaths:
 
-        if os.path.exists(path):
-            return True
+        if mod in os.listdir(path):
+            installed = True
+            break
 
-    logging.info('The following mod is not installed: %s', mod)
-    return False
+    logging.debug('errorChecking.isInstalled(): %s, %s', mod, installed)
+    return installed
 
 def createDisabledModFolder() -> None:
     '''
@@ -70,7 +80,7 @@ def createDisabledModFolder() -> None:
 
     path = optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
-    if not os.path.exists(path):
+    if not os.path.isdir(path):
         logging.debug('Disabled Mod Folder does not exist')
 
         try:
@@ -85,7 +95,7 @@ def createDisabledModFolder() -> None:
 
             optionsManager.writeData()
 
-            if not os.path.exists(MODS_DISABLED_PATH_DEFAULT):
+            if not os.path.isdir(MODS_DISABLED_PATH_DEFAULT):
                 logging.warning('Default disabled mod path was not found, creating new one...')
                 
                 os.mkdir(MODS_DISABLED_PATH_DEFAULT)

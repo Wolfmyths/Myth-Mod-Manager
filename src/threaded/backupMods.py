@@ -3,7 +3,7 @@ import shutil
 import logging
 
 from threaded.file_mover import FileMover
-from constant_vars import ModType, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, BACKUP_MODS, MODSIGNORE, MOD_TYPE
+from constant_vars import ModType, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, BACKUP_MODS, MODSIGNORE, MOD_CONFIG
 
 class BackupMods(FileMover):
     def run(self) -> None:
@@ -39,40 +39,42 @@ class BackupMods(FileMover):
 
             # Define error msg
 
-            taskCanceledError = 'Task was canceled'
-
             try:
 
                 # Step 4: Create Folders
 
                 # Every mod
                 mods = list([x for x in os.listdir(modPath) if x not in MODSIGNORE] + os.listdir(mod_overridePath) + os.listdir(disPath) + os.listdir(maps_path))
-                print(mods)
 
-                self.setTotalProgress.emit(len(mods) + 3) # Add 3 for the extra steps that aren't the list length
+                self.setTotalProgress.emit(len(mods) + 3)
 
                 self.setCurrentProgress.emit(1, f'Validating backup folder paths')
 
                 # Creating backup environment
                 for path in (bundledFilePath, bundledModsPath, bundledMapsPath):
 
-                    if not os.path.exists(path):
+                    if not os.path.isdir(path):
 
                         os.mkdir(path)
 
                 # Because this dir is a nested one, needs os.makedirs unlike the others
-                if not os.path.exists(bundledOverridePath):
+                if not os.path.isdir(bundledOverridePath):
 
                     os.makedirs(bundledOverridePath)
 
                 # Step 5: Copy each mod into the backup folder
                 for mod in (x for x in mods):
 
-                    if self.cancel: raise Exception(taskCanceledError)
+                    self.cancelCheck()
 
                     self.setCurrentProgress.emit(1, f'Copying {mod} to {BACKUP_MODS}')
 
                     modType = self.saveManager.getType(mod)
+
+                    # In the case this file is not a mod
+                    if modType is None:
+                        logging.warning('File %s is not a mod or does not have an entry in %s. Skipping...', mod, MOD_CONFIG)
+                        continue
 
                     # If the mod is disabled then the src will go to the disabled mods directory
                     src = os.path.join(srcPathDict[modType], mod) if self.saveManager.isEnabled(mod) else os.path.join(disPath, mod)
@@ -88,7 +90,7 @@ class BackupMods(FileMover):
 
                     shutil.copytree(src, output)
                 
-                if self.cancel: raise Exception(taskCanceledError)
+                self.cancelCheck()
 
                 # Step 6: Zip Backup folder
                 self.setCurrentProgress.emit(1, f'Zipping to {bundledFilePath}\nThis might take some time...')
@@ -113,4 +115,6 @@ class BackupMods(FileMover):
 
                 if not self.cancel:
                     logging.error('Something went wrong in FileSaver.backupMods():\n%s', str(e))
-                    self.error.emit(str(e))
+                    self.error.emit(f'Something went wrong in FileSaver.backupMods():\n{e}')
+                
+                    self.cancel = True

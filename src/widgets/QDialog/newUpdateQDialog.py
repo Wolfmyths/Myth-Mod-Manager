@@ -97,6 +97,10 @@ class updateDetected(Dialog):
         Sets the cancel flag to true in which Update() will exit the function
         '''
 
+        # Hidden implies that the download hasn't started
+        if self.progressBar.isHidden():
+            self.reject()
+
         logging.info('Task %s was canceled...')
         self.message.setText('Canceling... (Finishing current step)')
 

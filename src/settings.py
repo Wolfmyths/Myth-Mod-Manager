@@ -102,9 +102,7 @@ class Options(qtw.QWidget):
         os.startfile(os.path.join(modPath, 'logs'))
     
     def openCrashLogs(self) -> None:
-        os.startfile(os.path.join('C:', 'Users', os.environ['USERNAME'], 'AppData', 'Local', 'PAYDAY 2'))
-
-            
+        os.startfile(os.path.join('C:', 'Users', os.environ['USERNAME'], 'AppData', 'Local', 'PAYDAY 2'))            
     
     def setGamePath(self, path: str) -> None:
 

@@ -511,33 +511,30 @@ class ModListWidget(qtw.QTableWidget):
                 # Combine the mod location and URL into a Tuple
                 if dirs:
 
-                    dirTuple: list[tuple[QUrl, str]] = []
+                    dirTuple: list[tuple[QUrl, ModType]] = []
 
                     for dir in dirs:
-                        dirTuple.append((dir, dict_.get( dir.fileName() )))
+                        dirTuple.append((dir, dict_[dir.fileName()]))
 
                     startFileMover = ProgressWidget(ChangeModType(*dirTuple))
                     startFileMover.exec()
 
                 if zips:
 
-                    zipsTuple: list[tuple[QUrl, str]] = []
+                    zipsTuple: list[tuple[QUrl, ModType]] = []
 
                     for zip in zips:
-                        zipsTuple.append((zip, dict_.get( zip.fileName() )))
+                        zipsTuple.append((zip, dict_[zip.fileName()]))
 
                     startFileMover = ProgressWidget(UnZipMod(*zipsTuple))
                     startFileMover.exec()
             
-            self.itemChanged.emit()
+            self.itemChanged.emit(qtw.QTableWidgetItem())
 
         except Exception as e:
 
             if str(e) == 'canceled':
-                logging.info('''
-                             Table widget drop event has been canceled:
-                             Not all mods were given a destination
-                             ''')
+                logging.info('Table widget drop event has been canceled:\nNot all mods were given a destination')
 
             else:
                 logging.error('An error occured in the table widget drop event:\n%s', str(e))

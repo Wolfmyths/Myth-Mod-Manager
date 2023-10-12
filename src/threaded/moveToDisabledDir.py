@@ -25,19 +25,27 @@ class MoveToDisabledDir(FileMover):
 
         errorChecking.createDisabledModFolder()
 
-        for mod in mods:
+        try:
 
-            if self.cancel: break
+            for mod in mods:
 
-            self.setCurrentProgress.emit(1, f'Disabling {mod}')
+                self.cancelCheck()
 
-            # Checking if the mod is already in the disabled mods folder
-            if not mod in os.listdir(disabledModsPath):
+                self.setCurrentProgress.emit(1, f'Disabling {mod}')
 
-                modPath = self.p.mod(self.saveManager.getType(mod), mod)
+                # Checking if the mod is already in the disabled mods folder
+                if not mod in os.listdir(disabledModsPath):
 
-                self.move(modPath, os.path.join(disabledModsPath, mod))
-            else:
-                logging.info('%s is already in the disabled directory', mod)
+                    modPath = self.p.mod(self.saveManager.getType(mod), mod)
+
+                    self.move(modPath, os.path.join(disabledModsPath, mod))
+                else:
+                    logging.info('%s is already in the disabled directory', mod)
+            
+            self.succeeded.emit()
         
-        self.succeeded.emit()
+        except Exception as e:
+            logging.error('An error occured while disabling a mod:\n%s', str(e))
+            self.error.emit(f'An error occured while disabling a mod:\n{e}')
+
+            self.cancel = True

@@ -348,9 +348,14 @@ class ProfileList(qtw.QTreeWidget):
 
         profileToCopy = self.__selectedItem()
 
+        mods = self.__getMods(profileToCopy)
+
+        if mods is None:
+            return
+
         logging.info('Copying %s', profileToCopy.text(0))
 
-        modsToCopy = [x.text(0) for x in self.__getMods(profileToCopy)]
+        modsToCopy = [x.text(0) for x in mods]
 
         qDialog = insertString('New profile name:')
 
@@ -396,11 +401,12 @@ class ProfileList(qtw.QTreeWidget):
         if event.button() == qt.MouseButton.RightButton:
             
             self.clearSelection()
-            self.itemAt(event.pos()).setSelected(True)
 
-            selectedItem = self.__selectedItem()
+            selectedItem = self.itemAt(event.pos())
 
             if selectedItem:
+
+                selectedItem.setSelected(True)
 
                 if self.isProfile(selectedItem):
                     self.profileRightclicked.emit()

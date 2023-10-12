@@ -25,7 +25,7 @@ class DeleteMod(FileMover):
         try: 
             for modName in mods:
 
-                if self.cancel: raise Exception('cancel')
+                self.cancelCheck()
 
                 self.setCurrentProgress.emit(1, f'Deleting {modName}')
 
@@ -45,10 +45,6 @@ class DeleteMod(FileMover):
             self.succeeded.emit()
 
         except Exception as e:
-
-            if str(e) == 'cancel':
-                logging.info('Canceled deleteMod()')
-
-            else:
-                logging.error('An error has occured in deleteMod():\n%s', str(e))
-                self.error.emit(str(e))
+            logging.error('An error has occured in deleteMod():\n%s', str(e))
+            self.error.emit(str(e))
+            self.cancel = True

@@ -16,9 +16,9 @@ class ProfileMenu(ModContextMenu):
 
         self.qParent = qParent
 
-        qParent.profileRightclicked.connect(lambda: self.profileRightClicked())
-        qParent.modRightclicked.connect(lambda: self.modRightClicked())
-        qParent.noneRightclicked.connect(lambda: self.noneRightClicked())
+        qParent.profileRightclicked.connect(self.profileRightClicked)
+        qParent.modRightclicked.connect(self.modRightClicked)
+        qParent.noneRightclicked.connect(self.noneRightClicked)
 
         self.profileApply = qtg.QAction('Apply Profile', self)
         self.profileAdd = qtg.QAction('Add Profile', self)
@@ -29,23 +29,16 @@ class ProfileMenu(ModContextMenu):
         self.modRemove = qtg.QAction('Remove Mod', self)
         self.copyModsTo = qtg.QAction('Copy mod(s) to...', self)
 
-        self.profileApply.triggered.connect(lambda: self.profileApplyPressed())
+        self.profileApply.triggered.connect(self.profileApplyPressed)
+        self.profileAdd.triggered.connect(self.profileAddPressed)
+        self.profileRemove.triggered.connect(self.profileRemovePressed)
+        self.profileEdit.triggered.connect(self.profileEditPressed)
+        self.profileCopy.triggered.connect(self.profileCopyPressed)
+        self.modAdd.triggered.connect(self.modAddPressed)
+        self.modRemove.triggered.connect(self.modRemovePressed)
+        self.copyModsTo.triggered.connect(self.copyModsToPressed)
 
-        self.profileAdd.triggered.connect(lambda: self.profileAddPressed())
-
-        self.profileRemove.triggered.connect(lambda: self.profileRemovePressed())
-
-        self.profileEdit.triggered.connect(lambda: self.profileEditPressed())
-
-        self.profileCopy.triggered.connect(lambda: self.profileCopyPressed())
-
-        self.modAdd.triggered.connect(lambda: self.modAddPressed())
-
-        self.modRemove.triggered.connect(lambda: self.modRemovePressed())
-
-        self.copyModsTo.triggered.connect(lambda: self.copyModsToPressed())
-
-        self.profileButtons = (self.profileApply, self.modAdd, self.profileRemove, self.profileEdit, self.profileCopy, self.copyModsTo)
+        self.profileButtons = (self.profileApply, self.modAdd, self.profileAdd, self.profileRemove, self.profileEdit, self.profileCopy, self.copyModsTo)
         self.modButtons = (self.profileApply, self.modAdd, self.modRemove, self.copyModsTo)
 
         action: qtg.QAction

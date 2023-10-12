@@ -19,24 +19,32 @@ class MoveToEnabledModDir(FileMover):
     def moveToEnableModDir(self, *mods: str) -> None:
         '''Returns a mod to their respective directory'''
 
-        self.setTotalProgress.emit(len(mods))
+        try:
 
-        disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+            self.setTotalProgress.emit(len(mods))
 
-        errorChecking.createDisabledModFolder()
+            disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
 
-        for mod in mods:
+            errorChecking.createDisabledModFolder()
 
-            if self.cancel: break
+            for mod in mods:
 
-            self.setCurrentProgress.emit(1, f'Enabling {mod}')
+                self.cancelCheck()
 
-            if mod in os.listdir(disabledModsPath):
+                self.setCurrentProgress.emit(1, f'Enabling {mod}')
 
-                modDestPath = self.p.mod(self.saveManager.getType(mod), mod)
+                if mod in os.listdir(disabledModsPath):
 
-                self.move(os.path.join(disabledModsPath, mod), modDestPath)
-            else:
-                logging.warning('%s was not found in:\n%s\nIgnoring...', mod, disabledModsPath)
-        
-        self.succeeded.emit()
+                    modDestPath = self.p.mod(self.saveManager.getType(mod), mod)
+
+                    self.move(os.path.join(disabledModsPath, mod), modDestPath)
+                else:
+                    logging.warning('%s was not found in:\n%s\nIgnoring...', mod, disabledModsPath)
+            
+            self.succeeded.emit()
+
+        except Exception as e:
+            logging.error('An error occured while enabling a mod:\n%s', str(e))
+            self.error.emit(f'An error occured while enabling a mod:\n{e}')
+
+            self.cancel = True            

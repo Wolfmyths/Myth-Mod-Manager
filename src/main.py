@@ -45,6 +45,10 @@ if __name__ == '__main__':
 
         warning = GamePathNotFound(app)
         warning.exec()
+    
+    # Checking neccessary directories
+    errorChecking.createDisabledModFolder()
+    errorChecking.createModDirs()
 
     window = MainWindow(app)
     window.show()

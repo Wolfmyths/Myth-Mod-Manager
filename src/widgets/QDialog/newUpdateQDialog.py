@@ -46,6 +46,7 @@ class updateDetected(Dialog):
 
         self.changelog = qtw.QTextBrowser(self)
         self.changelog.setMarkdown(releaseNotes)
+        self.changelog.setOpenExternalLinks(True)
 
         self.viewWeb = qtw.QPushButton(text='View Release Notes on github.com', parent=self)
         self.viewWeb.clicked.connect(lambda: openWebPage('https://github.com/Wolfmyths/Myth-Mod-Manager/releases/latest'))
@@ -95,6 +96,10 @@ class updateDetected(Dialog):
         '''
         Sets the cancel flag to true in which Update() will exit the function
         '''
+
+        # Hidden implies that the download hasn't started
+        if self.progressBar.isHidden():
+            self.reject()
 
         logging.info('Task %s was canceled...')
         self.message.setText('Canceling... (Finishing current step)')

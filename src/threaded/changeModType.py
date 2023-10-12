@@ -28,7 +28,7 @@ class ChangeModType(FileMover):
             
             for mod in mods:
 
-                if self.cancel: break
+                self.cancelCheck()
 
                 modURL = mod[0]
                 ChosenDir = mod[1]
@@ -45,9 +45,10 @@ class ChangeModType(FileMover):
                     modDestPath = self.p.mod(ChosenDir, mod)
 
                     self.move(modsDirPath, modDestPath)
+            
+            self.succeeded.emit()
 
         except Exception as e:
             logging.error('An error occured in changeModType:\n%s', str(e))
             self.error.emit(str(e))
-        
-        self.succeeded.emit()
+            self.cancel = True

@@ -22,6 +22,11 @@ class FileMover(Thread):
         self.optionsManager = OptionsManager()
 
         self.p = Pathing()
+    
+    def cancelCheck(self) -> None:
+        logging.info('%s was canceled', self.__class__)
+        if self.cancel:
+            self.doneCanceling.emit()
 
     def onError(self, func, path, exc_info):
         """Used for `shutil.rmtree()`s `onerror` kwarg"""
@@ -69,7 +74,7 @@ class FileMover(Thread):
                     self.setCurrentProgress.emit(1, f'Checking folder permissions of {root}')
                     errorChecking.permissionCheck(root)
 
-                self.setCurrentProgress.emit(1, f'Fixing install for {src.split("/")[-1]}')
+                self.setCurrentProgress.emit(1, f'Fixing install for {os.path.basename(src)}')
                 # If shutil.move made a partial dir of the mod delete it
                 if os.path.exists(dest):
                     shutil.rmtree(dest, onerror=self.onError)

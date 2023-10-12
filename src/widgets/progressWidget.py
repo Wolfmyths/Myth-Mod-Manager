@@ -21,8 +21,6 @@ class ProgressWidget(Dialog):
 
         self.setWindowTitle('Myth Mod Manager Task')
 
-        self.mode.error.connect(lambda x: self.errorRaised(x))
-
         layout = qtw.QVBoxLayout()
 
         self.warningLabel = qtw.QLabel(self)
@@ -31,6 +29,7 @@ class ProgressWidget(Dialog):
         self.mode.setTotalProgress.connect(lambda x: self.progressBar.setMaximum(x))
         self.mode.setCurrentProgress.connect(lambda x, y: self.updateProgressBar(x, y))
         self.mode.addTotalProgress.connect(lambda x: self.progressBar.setMaximum(self.progressBar.maximum() + x))
+        self.mode.error.connect(lambda x: self.errorRaised(x))
 
         self.mode.succeeded.connect(lambda: self.succeeded())
 
@@ -50,11 +49,7 @@ class ProgressWidget(Dialog):
         return super().exec()
     
     def errorRaised(self, message: str):
-        error = Notice(message, headline='Error')
-        error.exec()
-
-        self.cancel()
-        self.close()
+        self.warningLabel.setText(message)
 
     def succeeded(self):
         self.progressBar.setValue(self.progressBar.maximum())
@@ -78,10 +73,15 @@ class ProgressWidget(Dialog):
         after it's done a step and pass the success signal
         '''
 
+        isModeCanceled = self.mode.cancel
+
+        if isModeCanceled:
+            self.reject()
+
         logging.info('Task %s was canceled...', str(self.mode))
         self.warningLabel.setText('Canceling... (Finishing current step)')
 
-        self.mode.cancel = True
+        isModeCanceled = True
     
     def updateProgressBar(self, x, y):
 

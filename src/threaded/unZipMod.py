@@ -9,7 +9,7 @@ from threaded.file_mover import FileMover
 from constant_vars import ModType
 
 class UnZipMod(FileMover):
-    def __init__(self, *mods: tuple[QUrl, str]):
+    def __init__(self, *mods: tuple[QUrl, ModType]):
         super().__init__()
 
         self.mods = mods
@@ -18,12 +18,12 @@ class UnZipMod(FileMover):
         self.unZipMod(*self.mods)
         return super().run()
 
-    def unZipMod(self, *mods: tuple[QUrl, str]) -> None:
+    def unZipMod(self, *mods: tuple[QUrl, ModType]) -> None:
         '''Extracts a mod and puts it into a destination based off the type given'''
 
         self.setTotalProgress.emit(len(mods))
 
-        modDestDict = {ModType.maps : self.p.mods(), ModType.maps : self.p.mod_overrides(), ModType.maps : self.p.maps()}
+        modDestDict = {ModType.mods : self.p.mods(), ModType.mods_override : self.p.mod_overrides(), ModType.maps : self.p.maps()}
 
         try:
 
@@ -35,20 +35,32 @@ class UnZipMod(FileMover):
 
                 mod = url.fileName()
 
-                type = modURL[1]
+                modType = modURL[1]
 
-                if self.cancel: break
+                self.cancelCheck()
 
                 self.setCurrentProgress.emit(1, f"Unpacking {mod}")
 
+                logging.info('Unzipping %s to %s', src, modDestDict[modType])
+
                 if os.path.exists(src):
 
-                    patoolib.extract_archive(src, outdir=modDestDict[type])
+                    patoolib.extract_archive(src, outdir=modDestDict[modType])
+                
+                logging.warning('%s does not exist', src)
+
+            self.succeeded.emit()
+        
+        except patoolib.util.PatoolError as e:
+
+            logging.error('An error was raised in FileMover.unZipMod():\n%s\nTry extracting the mod manually first', str(e))
+            self.error.emit(f'An error was raised in FileMover.unZipMod():\n{e}\nTry extracting the mod manually first')
+
+            self.cancel = True
 
         except Exception as e:
 
             logging.error('An error was raised in FileMover.unZipMod():\n%s', str(e))
+            self.error.emit(f'An error was raised in FileMover.unZipMod():\n{e}')
 
-            self.error.emit(str(e))
-        
-        self.succeeded.emit()
+            self.cancel = True

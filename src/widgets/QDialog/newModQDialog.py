@@ -7,7 +7,7 @@ from constant_vars import ModType
 
 class newModLocation(Dialog):
 
-    typeDict = {}
+    typeDict: dict[str : ModType] = {}
     
     def __init__(self, *modName: QUrl) -> None:
         super().__init__()
@@ -41,17 +41,17 @@ class newModLocation(Dialog):
             group = qtw.QGroupBox(f'{mod}')
             group.setObjectName(mod)
 
-            radioButtonMod = qtw.QRadioButton(ModType.mods, group)
+            radioButtonMod = qtw.QRadioButton(ModType.mods.value, group)
             radioButtonMod.setObjectName(f'{mod} {ModType.mods}')
             radioButtonMod.setChecked(False)
             radioButtonMod.clicked.connect(lambda: self.isAllChecked())
 
-            radioButtonOverride = qtw.QRadioButton(ModType.mods_override, group)
+            radioButtonOverride = qtw.QRadioButton(ModType.mods_override.value, group)
             radioButtonOverride.setObjectName(f'{mod} {ModType.mods_override}')
             radioButtonOverride.clicked.connect(lambda: self.isAllChecked())
             radioButtonOverride.setChecked(False)
 
-            radioButtonMaps = qtw.QRadioButton(ModType.maps, group)
+            radioButtonMaps = qtw.QRadioButton(ModType.maps.value, group)
             radioButtonMaps.setObjectName(f'{mod} {ModType.maps}')
             radioButtonMaps.clicked.connect(lambda: self.isAllChecked())
             radioButtonMaps.setChecked(False)
@@ -71,8 +71,8 @@ class newModLocation(Dialog):
 
         self.buttonBox = qtw.QDialogButtonBox(buttons)
         self.changeOkButtonState(False)
-        self.buttonBox.accepted.connect(lambda: self.accept())
-        self.buttonBox.rejected.connect(lambda: self.reject())
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
 
         for widget in (self.label, scrollArea, self.buttonBox):
             layout.addWidget(widget)

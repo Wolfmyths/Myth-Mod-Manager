@@ -2,9 +2,9 @@ import logging
 
 from PySide6.QtCore import QUrl
 
-import errorChecking
-from threaded.file_mover import FileMover
-from constant_vars import ModType
+import src.errorChecking as errorChecking
+from src.threaded.file_mover import FileMover
+from src.constant_vars import ModType
 
 class ChangeModType(FileMover):
     def __init__(self, *mods: tuple[QUrl, ModType]):

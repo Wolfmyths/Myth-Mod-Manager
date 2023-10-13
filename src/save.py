@@ -4,7 +4,7 @@ from typing import Self, Any
 
 from configparser import ConfigParser
 
-from constant_vars import MOD_CONFIG, OPTIONS_CONFIG, OPTIONS_SECTION, MOD_ENABLED, MOD_TYPE, ModType
+from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG, OPTIONS_SECTION, MOD_ENABLED, MOD_TYPE, ModType
 
 class Config(ConfigParser):
     '''Base class for config managers'''

@@ -5,11 +5,11 @@ import webbrowser
 
 from semantic_version import Version
 
-from widgets.QDialog.announcementQDialog import Notice
+from src.widgets.QDialog.announcementQDialog import Notice
 
-from getPath import Pathing
-from save import OptionsManager
-from constant_vars import OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, OPTIONS_DISPATH, OPTIONS_SECTION, ModType
+from src.getPath import Pathing
+from src.save import OptionsManager
+from src.constant_vars import OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, OPTIONS_DISPATH, OPTIONS_SECTION, ModType
 
 logging.getLogger(__name__)
 

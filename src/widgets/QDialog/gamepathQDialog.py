@@ -3,9 +3,9 @@ import os
 
 import PySide6.QtWidgets as qtw
 
-from widgets.QDialog.QDialog import Dialog
-from save import OptionsManager
-from constant_vars import OPTIONS_GAMEPATH
+from src.widgets.QDialog.QDialog import Dialog
+from src.save import OptionsManager
+from src.constant_vars import OPTIONS_GAMEPATH
 
 class GamePathNotFound(Dialog):
     def __init__(self, QParent: qtw.QWidget | qtw.QApplication) -> None:

@@ -3,12 +3,13 @@ from typing import TYPE_CHECKING
 
 import PySide6.QtGui as qtg
 
-from widgets.QMenu.QMenu import ModContextMenu
-from save import Save
-from constant_vars import MOD_MODWORKSHOP_ASSET_ID
+from src.widgets.QMenu.QMenu import ModContextMenu
+
+from src.save import Save
+from src.constant_vars import MOD_MODWORKSHOP_ASSET_ID
 
 if TYPE_CHECKING:
-    from widgets.managerQTableWidget import ModListWidget
+    from src.widgets.managerQTableWidget import ModListWidget
 
 class ManagerMenu(ModContextMenu):
     def __init__(self, qParent: ModListWidget) -> None:

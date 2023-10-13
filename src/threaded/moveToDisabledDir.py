@@ -1,9 +1,9 @@
 import os
 import logging
 
-import errorChecking
-from threaded.file_mover import FileMover
-from constant_vars import OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT
+import src.errorChecking as errorChecking
+from src.threaded.file_mover import FileMover
+from src.constant_vars import OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT
 
 
 class MoveToDisabledDir(FileMover):

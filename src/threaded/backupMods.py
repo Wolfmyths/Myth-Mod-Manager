@@ -2,8 +2,8 @@ import os
 import shutil
 import logging
 
-from threaded.file_mover import FileMover
-from constant_vars import ModType, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, BACKUP_MODS, MODSIGNORE, MOD_CONFIG
+from src.threaded.file_mover import FileMover
+from src.constant_vars import ModType, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, BACKUP_MODS, MODSIGNORE, MOD_CONFIG
 
 class BackupMods(FileMover):
     def run(self) -> None:

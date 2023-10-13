@@ -4,17 +4,17 @@ from typing import TYPE_CHECKING
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
 
-import errorChecking
+import src.errorChecking as errorChecking
 
-from widgets.QDialog.announcementQDialog import Notice
-from widgets.progressWidget import ProgressWidget
-from widgets.modProfileQTreeWidget import ProfileList
-from threaded.moveToDisabledDir import MoveToDisabledDir
-from threaded.moveToEnabledDir import MoveToEnabledModDir
-from save import OptionsManager, Save
+from src.widgets.QDialog.announcementQDialog import Notice
+from src.widgets.progressWidget import ProgressWidget
+from src.widgets.modProfileQTreeWidget import ProfileList
+from src.threaded.moveToDisabledDir import MoveToDisabledDir
+from src.threaded.moveToEnabledDir import MoveToEnabledModDir
+from src.save import OptionsManager, Save
 
 if TYPE_CHECKING:
-    from widgets.managerQTableWidget import ModListWidget
+    from src.widgets.managerQTableWidget import ModListWidget
 
 class modProfile(qtw.QWidget):
     def __init__(self) -> None:

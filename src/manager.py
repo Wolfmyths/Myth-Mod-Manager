@@ -6,11 +6,11 @@ import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt
 import PySide6.QtGui as qtg
 
-from widgets.managerQTableWidget import ModListWidget
-from widgets.QDialog.announcementQDialog import Notice
-from save import Save, OptionsManager
-import errorChecking
-from constant_vars import OPTIONS_GAMEPATH, START_PAYDAY_PATH, MOD_TABLE_OBJECT, ModType
+from src.widgets.managerQTableWidget import ModListWidget
+from src.widgets.QDialog.announcementQDialog import Notice
+from src.save import Save, OptionsManager
+import src.errorChecking as errorChecking
+from src.constant_vars import OPTIONS_GAMEPATH, START_PAYDAY_PATH, MOD_TABLE_OBJECT, ModType
 
 class ModManager(qtw.QWidget):
 

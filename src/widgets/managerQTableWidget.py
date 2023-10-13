@@ -5,20 +5,22 @@ import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, QUrl
 
-from widgets.QMenu.managerQMenu import ManagerMenu
-from widgets.progressWidget import ProgressWidget
-from widgets.QDialog.deleteWarningQDialog import DeleteModConfirmation
-from widgets.QDialog.newModQDialog import newModLocation
-from threaded.moveToDisabledDir import MoveToDisabledDir
-from threaded.moveToEnabledDir import MoveToEnabledModDir
-from threaded.changeModType import ChangeModType
-from threaded.deleteMod import DeleteMod
-from threaded.unZipMod import UnZipMod
-from getPath import Pathing
-import errorChecking
-from save import Save, OptionsManager
-from constant_vars import MOD_ENABLED, OPTIONS_DISPATH, MODSIGNORE, MODS_DISABLED_PATH_DEFAULT, ModType, MOD_MODWORKSHOP_ASSET_ID, MOD_IGNORED, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, OPTIONS_THEME, LIGHT
-from api.api import findModworkshopAssetID, findModVersion
+from src.widgets.QMenu.managerQMenu import ManagerMenu
+from src.widgets.progressWidget import ProgressWidget
+from src.widgets.QDialog.deleteWarningQDialog import DeleteModConfirmation
+from src.widgets.QDialog.newModQDialog import newModLocation
+
+from src.threaded.moveToDisabledDir import MoveToDisabledDir
+from src.threaded.moveToEnabledDir import MoveToEnabledModDir
+from src.threaded.changeModType import ChangeModType
+from src.threaded.deleteMod import DeleteMod
+from src.threaded.unZipMod import UnZipMod
+
+from src.getPath import Pathing
+import src.errorChecking as errorChecking
+from src.save import Save, OptionsManager
+from src.constant_vars import MOD_ENABLED, OPTIONS_DISPATH, MODSIGNORE, MODS_DISABLED_PATH_DEFAULT, ModType, MOD_MODWORKSHOP_ASSET_ID, MOD_IGNORED, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, OPTIONS_THEME, LIGHT
+from src.api.api import findModworkshopAssetID, findModVersion
 
 class ModListWidget(qtw.QTableWidget):
 

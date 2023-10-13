@@ -1,10 +1,9 @@
-
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt
 
-from widgets.QDialog.QDialog import Dialog
+from src.widgets.QDialog.QDialog import Dialog
 
-from profileManager import ProfileManager
+from src.profileManager import ProfileManager
 
 class SelectProfile(Dialog):
 

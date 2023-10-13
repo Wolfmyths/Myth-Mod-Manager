@@ -3,13 +3,13 @@ import logging
 
 import PySide6.QtWidgets as qtw
 
-from widgets.progressWidget import ProgressWidget
-from threaded.backupMods import BackupMods
-from save import OptionsManager
-from getPath import Pathing
-from style import StyleManager
-from widgets.ignoredModsQListWidget import IgnoredMods
-from constant_vars import OPTIONS_SECTION, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, DARK, LIGHT, OPTIONS_THEME
+from src.widgets.progressWidget import ProgressWidget
+from src.threaded.backupMods import BackupMods
+from src.save import OptionsManager
+from src.getPath import Pathing
+from src.style import StyleManager
+from src.widgets.ignoredModsQListWidget import IgnoredMods
+from src.constant_vars import OPTIONS_SECTION, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, DARK, LIGHT, OPTIONS_THEME
 
 class Options(qtw.QWidget):
 

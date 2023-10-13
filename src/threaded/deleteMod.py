@@ -2,8 +2,8 @@ import logging
 import os
 import shutil
 
-from threaded.file_mover import FileMover
-from constant_vars import OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT
+from src.threaded.file_mover import FileMover
+from src.constant_vars import OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT
 
 class DeleteMod(FileMover):
     def __init__(self, *mods: str):

@@ -7,12 +7,12 @@ from PySide6.QtNetwork import QNetworkReply
 
 from semantic_version import Version
 
-from widgets.QDialog.QDialog import Dialog
-from constant_vars import VERSION
-from widgets.QDialog.announcementQDialog import Notice
-from errorChecking import openWebPage
+from src.widgets.QDialog.QDialog import Dialog
+from src.constant_vars import VERSION
+from src.widgets.QDialog.announcementQDialog import Notice
+from src.errorChecking import openWebPage
 
-from api.update import Update
+from src.api.update import Update
 
 class updateDetected(Dialog):
 
@@ -81,7 +81,7 @@ class updateDetected(Dialog):
         error.exec()
 
         self.cancel()
-        self.close()
+        self.reject()
 
     def succeeded(self):
 

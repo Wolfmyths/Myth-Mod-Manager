@@ -1,16 +1,16 @@
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
 
-from manager import ModManager
-from settings import Options
-from profiles import modProfile
-from widgets.aboutQWidget import About
-from save import OptionsManager
+from src.manager import ModManager
+from src.settings import Options
+from src.profiles import modProfile
+from src.widgets.aboutQWidget import About
+from src.save import OptionsManager
 
-from constant_vars import OPTIONS_WINDOWSIZE_W, OPTIONS_WINDOWSIZE_H, ICON, PROGRAM_NAME, VERSION
+from src.constant_vars import OPTIONS_WINDOWSIZE_W, OPTIONS_WINDOWSIZE_H, ICON, PROGRAM_NAME, VERSION
 
 class MainWindow(qtw.QMainWindow):
-    def __init__(self, app: qtw.QApplication) -> None:
+    def __init__(self, app: qtw.QApplication | None = None) -> None:
         super().__init__()
 
         self.optionsManager = OptionsManager()

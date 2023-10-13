@@ -1,7 +1,7 @@
 import os
 
-from save import OptionsManager
-from constant_vars import OPTIONS_GAMEPATH, ModType
+from src.save import OptionsManager
+from src.constant_vars import OPTIONS_GAMEPATH, ModType
 
 class Pathing():
     '''Getter functions that shorten the process of obtaining mod paths'''

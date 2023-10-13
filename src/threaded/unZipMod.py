@@ -5,8 +5,8 @@ import patoolib
 
 from PySide6.QtCore import QUrl
 
-from threaded.file_mover import FileMover
-from constant_vars import ModType
+from src.threaded.file_mover import FileMover
+from src.constant_vars import ModType
 
 class UnZipMod(FileMover):
     def __init__(self, *mods: tuple[QUrl, ModType]):

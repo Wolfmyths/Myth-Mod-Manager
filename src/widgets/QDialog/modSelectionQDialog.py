@@ -1,10 +1,10 @@
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt
 
-from widgets.QDialog.QDialog import Dialog
-import errorChecking
+from src.widgets.QDialog.QDialog import Dialog
 
-from save import Save
+import src.errorChecking as errorChecking
+from src.save import Save
 
 class SelectMod(Dialog):
 

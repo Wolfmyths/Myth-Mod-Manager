@@ -3,7 +3,7 @@ import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
 from PySide6.QtCore import Qt as qt
 
-from constant_vars import ICON
+from src.constant_vars import ICON
 
 class Dialog(qtw.QDialog):
     '''This is the qtw.QDialog Base Class for Myth Mod Manager'''

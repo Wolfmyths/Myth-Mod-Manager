@@ -1,9 +1,9 @@
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QUrl, Qt as qt
 
-from widgets.QDialog.QDialog import Dialog
+from src.widgets.QDialog.QDialog import Dialog
 
-from constant_vars import ModType
+from src.constant_vars import ModType
 
 class newModLocation(Dialog):
 

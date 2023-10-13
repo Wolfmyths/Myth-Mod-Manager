@@ -3,9 +3,9 @@ import logging
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
 
-from widgets.QDialog.QDialog import Dialog
-from widgets.QDialog.announcementQDialog import Notice
-from threaded.file_mover import FileMover
+from src.widgets.QDialog.QDialog import Dialog
+
+from src.threaded.file_mover import FileMover
 
 class ProgressWidget(Dialog):
     '''

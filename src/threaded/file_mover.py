@@ -2,10 +2,10 @@ import shutil
 import os
 import logging
 
-from save import Save, OptionsManager
-from getPath import Pathing
-import errorChecking
-from threaded.QThread import Thread
+from src.save import Save, OptionsManager
+from src.getPath import Pathing
+import src.errorChecking as errorChecking
+from src.threaded.QThread import Thread
 
 
 class FileMover(Thread):

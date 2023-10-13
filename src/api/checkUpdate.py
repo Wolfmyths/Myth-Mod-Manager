@@ -7,10 +7,10 @@ from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkRe
 
 from semantic_version import Version
 
-from widgets.QDialog.newUpdateQDialog import updateDetected
+from src.widgets.QDialog.newUpdateQDialog import updateDetected
 
-from errorChecking import isPrerelease
-from constant_vars import VERSION, ROOT_PATH
+from src.errorChecking import isPrerelease
+from src.constant_vars import VERSION, ROOT_PATH
 
 class checkUpdate(QObject):
     '''

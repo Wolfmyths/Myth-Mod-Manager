@@ -5,13 +5,13 @@ import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
 from PySide6.QtCore import Signal, Qt as qt
 
-from widgets.QMenu.ignoreModListQMenu import IgnoredModsQMenu
+from src.widgets.QMenu.ignoreModListQMenu import IgnoredModsQMenu
 
-from constant_vars import MOD_IGNORED
-from save import Save
+from src.constant_vars import MOD_IGNORED
+from src.save import Save
 
 if TYPE_CHECKING:
-    from settings import Options
+    from src.settings import Options
 
 class IgnoredMods(qtw.QListWidget):
 

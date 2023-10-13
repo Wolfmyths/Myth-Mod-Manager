@@ -1,7 +1,7 @@
 from typing import Self
 import json
 
-from constant_vars import PROFILES_JSON
+from src.constant_vars import PROFILES_JSON
 
 class ProfileManager():
     file: dict[str:list[str]] = None

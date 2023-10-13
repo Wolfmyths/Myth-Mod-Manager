@@ -99,10 +99,9 @@ There are plans to add a CONTRIBUTING.md and maybe even a wiki.
 
 ### Things to know when contributing
 
-+ `main.py` is the script that starts the program
++ `start_MMM.bat` is the script that starts the program
 + The program auto-adjusts paths if running via script or EXE
-+ Test your code through the EXE before submitting a PR, sometimes code will behave differently.
-+ If you want to run the program through the EXE, run `createEXE.bat`
++ If you want to compile an exe on your system, run `createEXE.bat`
 + Variables that are used throughout the project are stored in `constant_vars.py`
 + Please keep your code formatting consistent with the rest of the project
 + **Use the other branch which includes the next update when submitting commits and PRs**

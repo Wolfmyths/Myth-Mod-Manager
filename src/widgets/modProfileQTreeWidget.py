@@ -6,18 +6,18 @@ import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
 from PySide6.QtCore import Qt as qt, Signal
 
-from widgets.QMenu.profileQMenu import ProfileMenu
-from widgets.QDialog.insertStringQDialog import insertString
-from widgets.QDialog.announcementQDialog import Notice
-from widgets.QDialog.modSelectionQDialog import SelectMod
-from widgets.QDialog.profileSelectionQDialog import SelectProfile
+from src.widgets.QMenu.profileQMenu import ProfileMenu
+from src.widgets.QDialog.insertStringQDialog import insertString
+from src.widgets.QDialog.announcementQDialog import Notice
+from src.widgets.QDialog.modSelectionQDialog import SelectMod
+from src.widgets.QDialog.profileSelectionQDialog import SelectProfile
 
-import errorChecking
-from profileManager import ProfileManager
-from constant_vars import DATA_PROFILE, DATA_MOD, ProfileRole
+import src.errorChecking as errorChecking
+from src.profileManager import ProfileManager
+from src.constant_vars import DATA_PROFILE, DATA_MOD, ProfileRole
 
 if TYPE_CHECKING:
-    from profiles import modProfile
+    from src.profiles import modProfile
 
 class ProfileList(qtw.QTreeWidget):
 

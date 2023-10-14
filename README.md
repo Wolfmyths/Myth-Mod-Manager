@@ -67,12 +67,15 @@ If you still are suspicious, you can build the executable yourself with these st
 
 ### Reguarding OS
 
-At the moment this is only supported on windows due to some dependencies
-and their features being windows exclusive
+Windows:
 
-There are plans to release on Linux
++ It is recommended to use windows 10 or higher
++ Windows 7 is not supported
 
-See more about it in [this issue here](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/18)
+Linux/MacOS:
+
++ There are plans to add support for Linux/MacOS
+    - If you are experienced with either OS, help is wanted at this github issue: https://github.com/Wolfmyths/Myth-Mod-Manager/issues/18
 
 ### Reguarding Storefront
 

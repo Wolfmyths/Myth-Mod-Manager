@@ -3,7 +3,7 @@ import shutil
 import logging
 
 from src.threaded.file_mover import FileMover
-from src.constant_vars import ModType, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, BACKUP_MODS, MODSIGNORE, MOD_CONFIG
+from src.constant_vars import ModType, BACKUP_MODS, MODSIGNORE, MOD_CONFIG
 
 class BackupMods(FileMover):
     def run(self) -> None:
@@ -15,7 +15,7 @@ class BackupMods(FileMover):
 
             # Step 1: Gather Options
 
-            disPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+            disPath = self.optionsManager.getDispath()
 
             # Step 2: Set Paths
 
@@ -77,7 +77,7 @@ class BackupMods(FileMover):
                         continue
 
                     # If the mod is disabled then the src will go to the disabled mods directory
-                    src = os.path.join(srcPathDict[modType], mod) if self.saveManager.isEnabled(mod) else os.path.join(disPath, mod)
+                    src = os.path.join(srcPathDict[modType], mod) if self.saveManager.getEnabled(mod) else os.path.join(disPath, mod)
 
                     output = os.path.join(outputPathDict[modType], mod)
 

@@ -47,23 +47,27 @@ def __parseVersion(version: str) -> Version | None:
     
     return version
 
-def findModworkshopAssetID(modPath: str) -> str | None:
+def findModworkshopAssetID(modPath: str) -> str:
     '''Finds the AssetID of a modworkshop mod if it can'''
+
+    assetID = ''
 
     xml = __loadXML(modPath)
 
     if xml is None:
-        return
+        return assetID
 
     assetUpdates = xml.find('AssetUpdates')
 
     if assetUpdates is not None:
 
         modworkshop = assetUpdates.attrib.get('provider') == 'modworkshop'
-        assetID = assetUpdates.attrib.get('id')
+        assetID = assetUpdates.attrib.get('id', '')
 
         if modworkshop and assetID:
             return assetID
+    
+    return assetID
 
 def findModVersion(modPath: str) -> Version | None:
     '''Finds the mod version if it can by parsing `main.xml` and `mod.txt`'''

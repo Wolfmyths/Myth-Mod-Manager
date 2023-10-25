@@ -7,7 +7,7 @@ from src.main_window import MainWindow
 from src.save import Save, OptionsManager
 from src.widgets.QDialog.gamepathQDialog import GamePathNotFound
 from src.api.checkUpdate import checkUpdate
-from src.constant_vars import VERSION, PROGRAM_NAME, LOG, IS_SCRIPT, OPTIONS_THEME, LIGHT, OLD_EXE, ROOT_PATH
+from src.constant_vars import VERSION, PROGRAM_NAME, LOG, IS_SCRIPT, OLD_EXE, ROOT_PATH
 import src.errorChecking as errorChecking
 from src.style import StyleManager
 
@@ -32,22 +32,23 @@ if __name__ == '__main__':
     logging.info('\nSTARTING: %s\nVERSION: %s\nEXE PATH: %s', PROGRAM_NAME, VERSION, ROOT_PATH)
 
     app = qtw.QApplication(sys.argv)
+    app.setApplicationName('MMM')
+    app.setOrganizationName('Wolfmyths @ github')
 
     run_checkUpdate = checkUpdate()
 
     save = Save()
     optionsManager = OptionsManager()
 
-    app.setStyleSheet(StyleManager().getStyleSheet(optionsManager.getOption(OPTIONS_THEME, LIGHT)))
+    app.setStyleSheet(StyleManager().getStyleSheet(optionsManager.getTheme()))
 
     # Checking game path
     if not errorChecking.validGamePath():
 
         warning = GamePathNotFound(app)
         warning.exec()
-    
+
     # Checking neccessary directories
-    errorChecking.createDisabledModFolder()
     errorChecking.createModDirs()
 
     window = MainWindow(app)

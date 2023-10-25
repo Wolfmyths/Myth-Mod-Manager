@@ -6,7 +6,6 @@ import PySide6.QtGui as qtg
 from src.widgets.QMenu.QMenu import ModContextMenu
 
 from src.save import Save
-from src.constant_vars import MOD_MODWORKSHOP_ASSET_ID
 
 if TYPE_CHECKING:
     from src.widgets.managerQTableWidget import ModListWidget
@@ -69,7 +68,7 @@ class ManagerMenu(ModContextMenu):
             event.accept()
             return
 
-        if Save().get(selectedItems[0].text(), MOD_MODWORKSHOP_ASSET_ID, fallback=''):
+        if Save().getModworkshopAssetID(selectedItems[0].text()):
             self.visitModPage.setEnabled(True)
         else:
             self.visitModPage.setEnabled(False)

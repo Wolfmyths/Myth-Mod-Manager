@@ -9,11 +9,11 @@ from src.save import OptionsManager
 from src.getPath import Pathing
 from src.style import StyleManager
 from src.widgets.ignoredModsQListWidget import IgnoredMods
-from src.constant_vars import OPTIONS_SECTION, OPTIONS_GAMEPATH, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, DARK, LIGHT, OPTIONS_THEME
+from src.constant_vars import DARK, LIGHT, OPTIONS_CONFIG
 
 class Options(qtw.QWidget):
 
-    def __init__(self) -> None:
+    def __init__(self, optionsPath = OPTIONS_CONFIG) -> None:
         super().__init__()
 
         logging.getLogger(__file__)
@@ -23,18 +23,18 @@ class Options(qtw.QWidget):
         layout.setVerticalSpacing(10)
         layout.setRowWrapPolicy(qtw.QFormLayout.RowWrapPolicy.WrapAllRows)
 
-        self.optionsManager = OptionsManager()
+        self.optionsManager = OptionsManager(optionsPath)
 
         self.gameDirLabel = qtw.QLabel(self, text='Payday 2 Game Path:')
 
         self.gameDir = qtw.QLineEdit(self)
-        self.gameDir.setText(self.optionsManager.getOption(OPTIONS_GAMEPATH, fallback=''))
+        self.gameDir.setText(self.optionsManager.getGamepath())
         self.gameDir.textChanged.connect(lambda x: self.setGamePath(x))
 
         self.disabledModLabel = qtw.QLabel(self, text='Disabled Mods Path')
 
         self.disabledModDir = qtw.QLineEdit(self)
-        self.disabledModDir.setText(self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT))
+        self.disabledModDir.setText(self.optionsManager.getDispath())
         self.disabledModDir.textChanged.connect(lambda x: self.setDisPath(x))
 
         gbLayout = qtw.QHBoxLayout()
@@ -62,7 +62,7 @@ class Options(qtw.QWidget):
         self.colorThemeBG.addButton(self.colorThemeDark, 1)
 
         # Setting color theme buttons' checked state
-        if self.optionsManager.getOption(OPTIONS_THEME, LIGHT) == LIGHT:
+        if self.optionsManager.getTheme() == LIGHT:
             self.colorThemeLight.setChecked(True)
         else:
             self.colorThemeDark.setChecked(True)
@@ -106,35 +106,29 @@ class Options(qtw.QWidget):
     
     def setGamePath(self, path: str) -> None:
 
-        if os.path.exists(os.path.join(path, 'payday2_win32_release.exe')):
+        if os.path.isfile(os.path.join(path, 'payday2_win32_release.exe')):
 
             logging.info('Changed game path to: %s', path)
 
-            self.optionsManager[OPTIONS_SECTION][OPTIONS_GAMEPATH] = path
-
-            self.optionsManager.writeData()
+            self.optionsManager.setGamepath(path)
     
     def setDisPath(self, path: str) -> None:
 
         logging.info('Changed disabled mod folder path to: %s', path)
 
-        self.optionsManager[OPTIONS_SECTION][OPTIONS_DISPATH] = path
-
-        self.optionsManager.writeData()
+        self.optionsManager.setDispath(path)
     
     def startBackupMods(self) -> None:
         
         startFileMover = ProgressWidget(BackupMods())
         startFileMover.exec()
     
-    def changeColorTheme(self, theme: str):
+    def changeColorTheme(self, theme: str) -> None:
 
-        self.optionsManager[OPTIONS_SECTION][OPTIONS_THEME] = theme
+        self.optionsManager.setTheme(theme)
 
         app: qtw.QApplication = qtw.QApplication.instance()
         app.setStyleSheet(StyleManager().getStyleSheet(theme))
-
-        self.optionsManager.writeData()
     
     def updateModIgnoreLabel(self) -> None:
         self.ignoredModsLabel.setText(f'Hidden Mods: {self.ignoredModsListWidget.count()}')

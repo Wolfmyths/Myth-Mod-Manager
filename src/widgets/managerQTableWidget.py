@@ -19,22 +19,22 @@ from src.threaded.unZipMod import UnZipMod
 from src.getPath import Pathing
 import src.errorChecking as errorChecking
 from src.save import Save, OptionsManager
-from src.constant_vars import MOD_ENABLED, OPTIONS_DISPATH, MODSIGNORE, MODS_DISABLED_PATH_DEFAULT, ModType, MOD_MODWORKSHOP_ASSET_ID, MOD_IGNORED, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, OPTIONS_THEME, LIGHT
+from src.constant_vars import MODSIGNORE, ModType, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, LIGHT, MOD_CONFIG, OPTIONS_CONFIG
 from src.api.api import findModworkshopAssetID, findModVersion
 
 class ModListWidget(qtw.QTableWidget):
 
-    def __init__(self) -> None:
+    def __init__(self, savePath: str = MOD_CONFIG, optionsPath: str = OPTIONS_CONFIG) -> None:
         super().__init__()
 
         logging.getLogger(__name__)
 
         self.setObjectName('modlistwidget')
 
-        self.saveManager = Save()
-        self.optionsManager = OptionsManager()
+        self.saveManager = Save(savePath)
+        self.optionsManager = OptionsManager(optionsPath)
 
-        self.p = Pathing()
+        self.p = Pathing(optionsPath)
 
         self.setSelectionMode(qtw.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.setSelectionBehavior(qtw.QAbstractItemView.SelectionBehavior.SelectRows)
@@ -72,6 +72,9 @@ class ModListWidget(qtw.QTableWidget):
     
     def getTypeItem(self, row: int) -> qtw.QTableWidgetItem:
         return self.item(row, 1)
+    
+    def getVersionItem(self, row: int) -> qtw.QTableWidgetItem:
+        return self.item(row, 3)
     
     def getSelectedNameItems(self) -> list[qtw.QTableWidgetItem]:
         return self.selectedItems()[::self.columnCount()]
@@ -137,9 +140,9 @@ class ModListWidget(qtw.QTableWidget):
                 case 'name':
                     item = qtw.QTableWidgetItem(value)
 
-                    if self.saveManager.get(value, MOD_MODWORKSHOP_ASSET_ID):
+                    if self.saveManager.getModworkshopAssetID(value):
 
-                        color = MODWORKSHOP_LOGO_B if self.optionsManager.getOption(OPTIONS_THEME, LIGHT) == LIGHT else MODWORKSHOP_LOGO_W
+                        color = MODWORKSHOP_LOGO_B if self.optionsManager.getTheme() == LIGHT else MODWORKSHOP_LOGO_W
 
                         item.setIcon(qtg.QIcon(os.path.join(UI_GRAPHICS_PATH, color)))
 
@@ -183,16 +186,13 @@ class ModListWidget(qtw.QTableWidget):
 
             modName = item.text()
 
-            if self.saveManager.isEnabled(modName):
+            if self.saveManager.getEnabled(modName):
 
-                self.saveManager[modName][MOD_ENABLED] = 'False'
-
+                self.saveManager.setEnabled(modName, False)
                 self.getEnabledItem(row).setText('Disabled')
 
             else:
                 logging.info('%s is already disabled in the save file', modName)
-        
-        self.saveManager.writeData()
 
     def deleteItem(self) -> None:
         '''
@@ -232,11 +232,9 @@ class ModListWidget(qtw.QTableWidget):
 
             modName = item.text()
 
-            self.saveManager[modName][MOD_ENABLED] = 'True'
+            self.saveManager.setEnabled(modName, True)
 
             self.getEnabledItem(row).setText('Enabled')
-
-        self.saveManager.writeData()
 
     # This isn't used anywhere, might be removed later
     def isMultipleSelected(self) -> bool:
@@ -254,17 +252,14 @@ class ModListWidget(qtw.QTableWidget):
         # Save mods into .ini
         self.saveManager.addMods((mods[0], ModType.mods_override), (mods[1], ModType.mods), (mods[2], ModType.maps))
 
-        # Just incase disabled folder doesn't exist
-        errorChecking.createDisabledModFolder()
-
-        disModFolder = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+        disModFolder = self.optionsManager.getDispath()
         disModFolderContents = os.listdir(disModFolder)
 
         # Add mods to the table widget
         for mod in (x for x in mods[0] + mods[1] + mods[2]):
             
             # Checking if the mod is ignored
-            if self.saveManager.getboolean(mod, MOD_IGNORED, fallback=False):
+            if self.saveManager.getIgnored(mod):
                 continue
 
             type = self.saveManager.getType(mod)
@@ -272,27 +267,18 @@ class ModListWidget(qtw.QTableWidget):
             version = str(findModVersion(modPath))
             isEnabled = mod not in disModFolderContents
 
-            if not self.saveManager.get(mod, MOD_MODWORKSHOP_ASSET_ID, fallback=None):
-                modworkshop = findModworkshopAssetID(modPath)
-            else:
-                modworkshop = self.saveManager.get(mod, MOD_MODWORKSHOP_ASSET_ID)
+            assetID = self.saveManager.getModworkshopAssetID(mod)
 
-            if isEnabled:
-                self.saveManager[mod][MOD_ENABLED] = 'True'
-            else:
-                self.saveManager[mod][MOD_ENABLED] = 'False'
+            if not assetID:
+                assetID = findModworkshopAssetID(modPath)
+
+            self.saveManager.setEnabled(mod, isEnabled)
             
-            if modworkshop is not None:
-                self.saveManager[mod][MOD_MODWORKSHOP_ASSET_ID] = modworkshop
-            else:
-                self.saveManager[mod][MOD_MODWORKSHOP_ASSET_ID] = ''
+            self.saveManager.setModWorkshopAssetID(mod, assetID)
             
-            logging.debug('Adding mod to table, %s|%s|%s|%s|%s', mod, type, isEnabled, version, modworkshop)
+            logging.debug('Adding mod to table, %s|%s|%s|%s|%s', mod, type, isEnabled, version, assetID)
 
             self.addMod(name=mod, type=type, enabled=isEnabled, version=version)
-
-        # Save changes
-        self.saveManager.writeData()
 
         # Clear selections from the disabled mod check
         self.clearSelection()
@@ -318,7 +304,7 @@ class ModListWidget(qtw.QTableWidget):
 
         maps_path = self.p.maps()
 
-        disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+        disabledModsPath = self.optionsManager.getDispath()
 
         # Mods Folder
         if os.path.exists(modsPath):
@@ -359,8 +345,6 @@ class ModListWidget(qtw.QTableWidget):
         else:
             logging.error('The modded maps path does not exist:\n%s\nSkipping...', maps_path)
 
-        errorChecking.createDisabledModFolder()
-
         # Disabled Mods Folder
         if os.path.exists(disabledModsPath):
             
@@ -391,7 +375,7 @@ class ModListWidget(qtw.QTableWidget):
         if not len(self.getSelectedNameItems()) <= 0:
             selectedItem = self.getSelectedNameItems()[0]
 
-            assetID = self.saveManager.get(selectedItem.text(), MOD_MODWORKSHOP_ASSET_ID, fallback=None)
+            assetID = self.saveManager.getModworkshopAssetID(selectedItem.text())
 
             errorChecking.openWebPage(f'https://modworkshop.net/mod/{assetID}')
     
@@ -411,9 +395,8 @@ class ModListWidget(qtw.QTableWidget):
         items = self.getSelectedNameItems()
         for item in items:
             modName = item.text()
-            self.saveManager[modName][MOD_IGNORED] = 'True'
+            self.saveManager.setIgnored(modName, True)
             self.removeRow(item.row())
-        self.saveManager.writeData()
 
         self.itemChanged.emit(items[0])
     
@@ -432,7 +415,7 @@ class ModListWidget(qtw.QTableWidget):
     
     def swapIcons(self) -> None:
 
-        newIcon = MODWORKSHOP_LOGO_W if self.optionsManager.getOption(OPTIONS_THEME, LIGHT) == LIGHT else MODWORKSHOP_LOGO_B
+        newIcon = MODWORKSHOP_LOGO_W if self.optionsManager.getTheme() == LIGHT else MODWORKSHOP_LOGO_B
 
         reverseDict = {MODWORKSHOP_LOGO_B : MODWORKSHOP_LOGO_W, MODWORKSHOP_LOGO_W : MODWORKSHOP_LOGO_B}
 

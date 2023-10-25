@@ -1,27 +1,18 @@
-from typing import Self
 import json
 
 from src.constant_vars import PROFILES_JSON
 
 class ProfileManager():
     file: dict[str:list[str]] = None
-
-    def __init__(self) -> None:
+    def __init__(self, path: str = PROFILES_JSON) -> None:
+        self.path = path
         try:
             self.__loadJSON()
         except (json.decoder.JSONDecodeError, FileNotFoundError):
-            with open(PROFILES_JSON, 'w') as f:
+            with open(self.path, 'w') as f:
                 f.write(json.dumps({}))
             
             self.__loadJSON()
-    
-    def __new__(cls) -> Self:
-
-        if not hasattr(cls, 'instance'):
-
-            cls.instance = super(ProfileManager, cls).__new__(cls)
-
-        return cls.instance
 
     def __str__(self) -> str:
 
@@ -38,7 +29,7 @@ class ProfileManager():
         return list(list_set)
 
     def __loadJSON(self):
-        with open(PROFILES_JSON, 'r') as f:
+        with open(self.path, 'r') as f:
             self.file = json.loads(f.read())
 
     def __saveJSON(self):

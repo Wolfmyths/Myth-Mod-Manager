@@ -5,20 +5,21 @@ from src.manager import ModManager
 from src.settings import Options
 from src.profiles import modProfile
 from src.widgets.aboutQWidget import About
-from src.save import OptionsManager
+from src.save import OptionsManager, Save
 
-from src.constant_vars import OPTIONS_WINDOWSIZE_W, OPTIONS_WINDOWSIZE_H, ICON, PROGRAM_NAME, VERSION
+from src.constant_vars import ICON, PROGRAM_NAME, VERSION, MOD_CONFIG, OPTIONS_CONFIG
 
 class MainWindow(qtw.QMainWindow):
-    def __init__(self, app: qtw.QApplication | None = None) -> None:
+    def __init__(self, app: qtw.QApplication | None = None, savePath = MOD_CONFIG, optionsPath = OPTIONS_CONFIG) -> None:
         super().__init__()
 
-        self.optionsManager = OptionsManager()
+        self.optionsManager = OptionsManager(optionsPath)
+        self.save = Save(savePath)
 
         self.setWindowIcon(qtg.QIcon(ICON))
         self.setWindowTitle(f'{PROGRAM_NAME} {VERSION}')
         self.setMinimumSize(800, 800)
-        self.resize(self.optionsManager.getOption(OPTIONS_WINDOWSIZE_W, fallback=800, type=int), self.optionsManager.getOption(OPTIONS_WINDOWSIZE_H, fallback=800, type=int))
+        self.resize(self.optionsManager.getWindowSize())
 
         self.app = app
 
@@ -48,7 +49,5 @@ class MainWindow(qtw.QMainWindow):
         self.setCentralWidget(self.tab)
     
     def close(self) -> bool:
-        self.optionsManager.setOption(self.width(), OPTIONS_WINDOWSIZE_W)
-        self.optionsManager.setOption(self.height(), OPTIONS_WINDOWSIZE_H)
-
+        self.optionsManager.setWindowSize(self.size())
         return super().close()

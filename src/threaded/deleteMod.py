@@ -3,7 +3,6 @@ import os
 import shutil
 
 from src.threaded.file_mover import FileMover
-from src.constant_vars import OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT
 
 class DeleteMod(FileMover):
     def __init__(self, *mods: str):
@@ -20,7 +19,7 @@ class DeleteMod(FileMover):
 
         self.setTotalProgress.emit(len(mods))
 
-        disPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+        disPath = self.optionsManager.getDispath()
 
         try: 
             for modName in mods:
@@ -29,7 +28,7 @@ class DeleteMod(FileMover):
 
                 self.setCurrentProgress.emit(1, f'Deleting {modName}')
 
-                enabled = self.saveManager.isEnabled(modName)
+                enabled = self.saveManager.getEnabled(modName)
 
                 type = self.saveManager.getType(modName) if enabled else 'disabled'
 

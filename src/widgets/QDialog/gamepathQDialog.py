@@ -5,16 +5,17 @@ import PySide6.QtWidgets as qtw
 
 from src.widgets.QDialog.QDialog import Dialog
 from src.save import OptionsManager
+from src.constant_vars import OPTIONS_CONFIG
 
 class GamePathNotFound(Dialog):
-    def __init__(self, QParent: qtw.QWidget | qtw.QApplication) -> None:
+    def __init__(self, QParent: qtw.QWidget | qtw.QApplication, optionsPath: str = OPTIONS_CONFIG) -> None:
         super().__init__()
 
         self.QParent = QParent
 
         self.setWindowTitle('Gamepath Not Found')
 
-        self.optionsManager = OptionsManager()
+        self.optionsManager = OptionsManager(optionsPath)
 
         layout = qtw.QFormLayout()
         layout.setRowWrapPolicy(qtw.QFormLayout.RowWrapPolicy.WrapAllRows)
@@ -67,5 +68,6 @@ class GamePathNotFound(Dialog):
 
     def reject(self) -> None:
 
-        if type(self.QParent) == qtw.QApplication:
+        if type(self.QParent) is qtw.QApplication:
             self.QParent.shutdown()
+        return super().reject()

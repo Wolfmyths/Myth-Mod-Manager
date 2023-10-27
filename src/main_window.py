@@ -1,13 +1,19 @@
+import os
+
+
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
+from PySide6.QtCore import QCoreApplication
 
 from src.manager import ModManager
 from src.settings import Options
 from src.profiles import modProfile
 from src.widgets.aboutQWidget import About
+from src.widgets.QDialog.newUpdateQDialog import updateDetected
 from src.save import OptionsManager, Save
+from src.api.checkUpdate import checkUpdate
 
-from src.constant_vars import ICON, PROGRAM_NAME, VERSION, MOD_CONFIG, OPTIONS_CONFIG
+from src.constant_vars import ICON, PROGRAM_NAME, VERSION, MOD_CONFIG, OPTIONS_CONFIG, ROOT_PATH
 
 class MainWindow(qtw.QMainWindow):
     def __init__(self, app: qtw.QApplication | None = None, savePath = MOD_CONFIG, optionsPath = OPTIONS_CONFIG) -> None:
@@ -47,6 +53,17 @@ class MainWindow(qtw.QMainWindow):
             self.tab.addTab(page[0], page[1])
 
         self.setCentralWidget(self.tab)
+
+        run_checkUpdate = checkUpdate()
+        run_checkUpdate.updateDetected.connect(lambda x, y: self.updateDetected(x, y))
+    
+    def updateDetected(latestVersion: str, changelog: str) -> None:
+        notice = updateDetected(latestVersion, changelog)
+        notice.exec()
+        
+        if notice.result():
+            os.startfile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
+            QCoreApplication.quit()
     
     def close(self) -> bool:
         self.optionsManager.setWindowSize(self.size())

@@ -64,11 +64,13 @@ def test_testOptions(createTemp_Config_ini: str, getDir: str) -> None:
 
     options = OptionsManager(createTemp_Config_ini)
 
+    game_path = os.path.join(getDir, 'game_path')
+
     assert options.has_section(OptionKeys.section.value)
     assert options.has_option(OptionKeys.section.value, OptionKeys.game_path.value)
-    assert options.getGamepath() == getDir
+    assert options.getGamepath() == game_path
     assert options.has_option(OptionKeys.section.value, OptionKeys.dispath.value)
-    assert options.getDispath() == os.path.join(getDir, 'disabledMods')
+    assert options.getDispath() == os.path.join(game_path, 'disabledMods')
 
 def test_OptionsMethods(createTemp_Config_ini: str) -> None:
 

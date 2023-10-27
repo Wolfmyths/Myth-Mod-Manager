@@ -12,7 +12,7 @@ class ModContextMenu(qtw.QMenu):
 
     lastClicked: qt.MouseButton = None
     lastReleased: qt.MouseButton = None
-    def __init__(self, parent: qtw.QWidget) -> None:
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
         super().__init__(parent)
     
     def wasLastClickLMB(self) -> bool:

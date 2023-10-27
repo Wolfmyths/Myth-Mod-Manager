@@ -5,12 +5,13 @@ from src.widgets.QDialog.QDialog import Dialog
 
 import src.errorChecking as errorChecking
 from src.save import Save
+from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG
 
 class SelectMod(Dialog):
 
     mods: list[str] = None
 
-    def __init__(self) -> None:
+    def __init__(self, savePath: str = MOD_CONFIG, optionsPath: str = OPTIONS_CONFIG) -> None:
         super().__init__()
 
         self.setWindowTitle('Mods to be added:')
@@ -26,15 +27,15 @@ class SelectMod(Dialog):
         self.searchBar.setPlaceholderText('Search...')
         self.searchBar.textChanged.connect(lambda x: self.search(x))
 
-        saveManager = Save()
+        self.saveManager = Save(savePath)
 
         buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(buttons)
-        self.buttonBox.accepted.connect(lambda: self.accept())
-        self.buttonBox.rejected.connect(lambda: self.reject())
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
 
-        self.modList.addItems([x for x in sorted(saveManager.sections()) if errorChecking.isInstalled(x)])
+        self.modList.addItems(sorted([x for x in self.saveManager.sections() if errorChecking.isInstalled(x, optionsPath)]))
 
         for widget in (self.searchBar, self.modList, self.buttonBox):
             layout.addWidget(widget)

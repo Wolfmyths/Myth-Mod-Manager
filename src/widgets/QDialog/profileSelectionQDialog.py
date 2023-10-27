@@ -4,12 +4,13 @@ from PySide6.QtCore import Qt as qt
 from src.widgets.QDialog.QDialog import Dialog
 
 from src.profileManager import ProfileManager
+from src.constant_vars import PROFILES_JSON
 
 class SelectProfile(Dialog):
 
     profile: str = None
 
-    def __init__(self) -> None:
+    def __init__(self, profilePath: str = PROFILES_JSON) -> None:
         super().__init__()
 
         self.setWindowTitle('Profile to copy mod(s) to:')
@@ -25,13 +26,13 @@ class SelectProfile(Dialog):
         self.searchBar.setPlaceholderText('Search...')
         self.searchBar.textChanged.connect(lambda x: self.search(x))
 
-        profileManager = ProfileManager()
+        profileManager = ProfileManager(profilePath)
 
         buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(buttons)
-        self.buttonBox.accepted.connect(lambda: self.accept())
-        self.buttonBox.rejected.connect(lambda: self.reject())
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
 
         self.profileList.addItems(list(profileManager.getJSON().keys()))
 

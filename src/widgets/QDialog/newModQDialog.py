@@ -44,16 +44,16 @@ class newModLocation(Dialog):
             radioButtonMod = qtw.QRadioButton(ModType.mods.value, group)
             radioButtonMod.setObjectName(f'{mod} {ModType.mods}')
             radioButtonMod.setChecked(False)
-            radioButtonMod.clicked.connect(lambda: self.isAllChecked())
+            radioButtonMod.clicked.connect(self.isAllChecked)
 
             radioButtonOverride = qtw.QRadioButton(ModType.mods_override.value, group)
             radioButtonOverride.setObjectName(f'{mod} {ModType.mods_override}')
-            radioButtonOverride.clicked.connect(lambda: self.isAllChecked())
+            radioButtonOverride.clicked.connect(self.isAllChecked)
             radioButtonOverride.setChecked(False)
 
             radioButtonMaps = qtw.QRadioButton(ModType.maps.value, group)
             radioButtonMaps.setObjectName(f'{mod} {ModType.maps}')
-            radioButtonMaps.clicked.connect(lambda: self.isAllChecked())
+            radioButtonMaps.clicked.connect(self.isAllChecked)
             radioButtonMaps.setChecked(False)
 
             h1 = qtw.QHBoxLayout()
@@ -80,7 +80,7 @@ class newModLocation(Dialog):
         self.setLayout(layout)
     
     def changeOkButtonState(self, bool: bool) -> None:
-        self.buttonBox.buttons()[0].setEnabled(bool)
+        self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok).setEnabled(bool)
     
     def isAllChecked(self):
 

@@ -5,7 +5,7 @@ import pytest
 from src.constant_vars import ModType
 from src.getPath import Pathing
 
-DIR = os.path.abspath('tests')
+DIR = os.path.abspath(os.path.join('tests', 'game_path'))
 
 EXPECTED_OUTCOME = {
     0 : os.path.join(DIR, 'Maps', 'map mod'),
@@ -24,9 +24,11 @@ ARGS = [
 def test_getPath_ModDirs(createTemp_Config_ini: str, getDir: str):
     path = Pathing(createTemp_Config_ini)
 
-    assert path.maps() == os.path.join(getDir, 'Maps')
-    assert path.mods() == os.path.join(getDir, 'mods')
-    assert path.mod_overrides() == os.path.join(getDir, 'assets', 'mod_overrides')
+    game_path = os.path.join(getDir, 'game_path')
+
+    assert path.maps() == os.path.join(game_path, 'Maps')
+    assert path.mods() == os.path.join(game_path, 'mods')
+    assert path.mod_overrides() == os.path.join(game_path, 'assets', 'mod_overrides')
 
 @pytest.mark.parametrize(PARAMETERS, ARGS)
 def test_getPath_Mod(type: str, modName: str, expected_outcome: str, createTemp_Config_ini: str):

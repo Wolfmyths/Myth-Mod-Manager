@@ -60,7 +60,7 @@ def isInstalled(mod: str, optionsPath: str = OPTIONS_CONFIG) -> bool:
 
     for path in possiblePaths:
 
-        if mod in os.listdir(path):
+        if os.path.isdir(os.path.join(path, mod)):
             installed = True
             break
 

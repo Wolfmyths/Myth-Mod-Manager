@@ -27,7 +27,7 @@ class Config(ConfigParser):
         self.read(self.file)
 
     def writeData(self) -> None:
-        with (self.file, 'w') as f:
+        with open(self.file, 'w') as f:
             f: TextIO
             self.write(f)
 

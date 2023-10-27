@@ -1,16 +1,13 @@
 import json
 import logging
-import os
 
-from PySide6.QtCore import QObject, QUrl, QCoreApplication
+from PySide6.QtCore import QObject, QUrl, Signal
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 from semantic_version import Version
 
-from src.widgets.QDialog.newUpdateQDialog import updateDetected
-
 from src.errorChecking import isPrerelease
-from src.constant_vars import VERSION, ROOT_PATH
+from src.constant_vars import VERSION
 
 class checkUpdate(QObject):
     '''
@@ -19,6 +16,9 @@ class checkUpdate(QObject):
 
     `checkUpdate` will delete itself after it's finished.
     '''
+
+    updateDetected = Signal(str, str)
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -30,8 +30,8 @@ class checkUpdate(QObject):
         network = QNetworkAccessManager(self)
         request = QNetworkRequest(QUrl(link))
         
-        reply = network.get(request)
-        reply.finished.connect(self.__reply_handler)
+        self.reply = network.get(request)
+        self.reply.finished.connect(self.__reply_handler)
     
     def __reply_handler(self) -> None:
         reply: QNetworkReply = self.sender()
@@ -58,13 +58,7 @@ class checkUpdate(QObject):
         logging.info('Latest Version: %s', latestVersion)
 
         if latestVersion > VERSION:
-
-            notice = updateDetected(latestVersion, data['body'])
-            notice.exec()
-            
-            if notice.result():
-                os.startfile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
-                QCoreApplication.quit()
+            self.updateDetected.emit(latestVersion, data['body'])
 
         self.deleteLater()
                 

@@ -39,8 +39,8 @@ class updateDetected(Dialog):
         self.autoUpdate.downloading.connect(lambda x, y: self.downloadStarted(x, y))
         self.autoUpdate.addTotalProgress.connect(lambda x: self.progressBar.setMaximum(self.progressBar.maximum() + x))
         self.autoUpdate.error.connect(lambda x: self.errorRaised(x))
-        self.autoUpdate.succeeded.connect(lambda: self.succeeded())
-        self.autoUpdate.doneCanceling.connect(lambda: self.close())
+        self.autoUpdate.succeeded.connect(self.succeeded)
+        self.autoUpdate.doneCanceling.connect(self.close)
 
         self.message = qtw.QLabel(self, text=f'New update found: {newVersion}\nCurrent Version: {VERSION}\nDo you want to Update?')
 
@@ -54,8 +54,8 @@ class updateDetected(Dialog):
         self.buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(self.buttons)
-        self.buttonBox.accepted.connect(lambda: self.okButton())
-        self.buttonBox.rejected.connect(lambda: self.cancel())
+        self.buttonBox.accepted.connect(self.okButton)
+        self.buttonBox.rejected.connect(self.cancel)
 
         for widget in (self.message, self.progressBar, self.changelog, self.viewWeb, self.buttonBox):
             layout.addWidget(widget)

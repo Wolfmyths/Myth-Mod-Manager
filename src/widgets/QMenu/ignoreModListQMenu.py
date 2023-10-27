@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from src.widgets.ignoredModsQListWidget import IgnoredMods
 
 class IgnoredModsQMenu(ModContextMenu):
-    def __init__(self, parent) -> None:
+    def __init__(self, parent = None) -> None:
         super().__init__(parent)
         self.qParent: IgnoredMods = parent
 

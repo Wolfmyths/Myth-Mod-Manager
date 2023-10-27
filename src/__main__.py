@@ -35,8 +35,6 @@ if __name__ == '__main__':
     app.setApplicationName('MMM')
     app.setOrganizationName('Wolfmyths @ github')
 
-    run_checkUpdate = checkUpdate()
-
     save = Save()
     optionsManager = OptionsManager()
 

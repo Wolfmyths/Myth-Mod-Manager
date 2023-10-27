@@ -75,4 +75,4 @@ def begin_testing_createModDirs(createTemp_Config_ini) -> None:
                                  )
                         )
 def test_createModDirs(begin_testing_createModDirs: None, getDir: str, path: str):
-    assert os.path.isdir(os.path.join(getDir, path)) == True
+    assert os.path.isdir(os.path.join(getDir, 'game_path', path)) == True

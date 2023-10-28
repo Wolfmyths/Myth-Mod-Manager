@@ -6,8 +6,7 @@ import PySide6.QtWidgets as qtw
 from src.main_window import MainWindow
 from src.save import Save, OptionsManager
 from src.widgets.QDialog.gamepathQDialog import GamePathNotFound
-from src.api.checkUpdate import checkUpdate
-from src.constant_vars import VERSION, PROGRAM_NAME, LOG, IS_SCRIPT, OLD_EXE, ROOT_PATH
+from src.constant_vars import VERSION, PROGRAM_NAME, LOG, IS_SCRIPT, OLD_EXE, ROOT_PATH, ICON
 import src.errorChecking as errorChecking
 from src.style import StyleManager
 
@@ -32,8 +31,6 @@ if __name__ == '__main__':
     logging.info('\nSTARTING: %s\nVERSION: %s\nEXE PATH: %s', PROGRAM_NAME, VERSION, ROOT_PATH)
 
     app = qtw.QApplication(sys.argv)
-    app.setApplicationName('MMM')
-    app.setOrganizationName('Wolfmyths @ github')
 
     save = Save()
     optionsManager = OptionsManager()

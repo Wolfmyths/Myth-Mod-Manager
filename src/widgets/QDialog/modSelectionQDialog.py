@@ -35,7 +35,7 @@ class SelectMod(Dialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        self.modList.addItems(sorted([x for x in self.saveManager.sections() if errorChecking.isInstalled(x, optionsPath)]))
+        self.modList.addItems(sorted([x for x in self.saveManager.mods() if errorChecking.isInstalled(x, optionsPath)]))
 
         for widget in (self.searchBar, self.modList, self.buttonBox):
             layout.addWidget(widget)

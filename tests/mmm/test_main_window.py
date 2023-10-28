@@ -6,7 +6,7 @@ from PySide6.QtCore import QSize
 from src.main_window import MainWindow
 from src.constant_vars import PROGRAM_NAME, VERSION
 
-def test_main_window(qtbot: QtBot, createTemp_Config_ini, createTemp_Mod_ini):
+def test_main_window(qtbot: QtBot, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> None:
     widget = MainWindow(optionsPath=createTemp_Config_ini, savePath=createTemp_Mod_ini)
     qtbot.addWidget(widget)
 

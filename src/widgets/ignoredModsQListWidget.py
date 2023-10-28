@@ -29,7 +29,7 @@ class IgnoredMods(qtw.QListWidget):
 
     def refreshList(self) -> None:
         self.clear()
-        items = [x for x in self.saveManager.sections() if self.saveManager.getIgnored(x)]
+        items = [x for x in self.saveManager.mods() if self.saveManager.getIgnored(x)]
         self.addItems(items)
         self.itemsChanged.emit()
 
@@ -54,6 +54,8 @@ class IgnoredMods(qtw.QListWidget):
             index = itemsInList.index(item)
             self.takeItem(index)
             itemsInList.pop(index)
+        
+        self.saveManager.writeData()
 
         self.itemsRemoved.emit()
         self.itemsChanged.emit()

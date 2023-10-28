@@ -31,7 +31,7 @@ class MainWindow(qtw.QMainWindow):
 
         self.tab = qtw.QTabWidget(self)
 
-        self.manager = ModManager()
+        self.manager = ModManager(savePath, optionsPath)
         self.profile = modProfile()
         self.options = Options()
         self.about = About()
@@ -67,4 +67,5 @@ class MainWindow(qtw.QMainWindow):
     
     def close(self) -> bool:
         self.optionsManager.setWindowSize(self.size())
+        self.optionsManager.writeData()
         return super().close()

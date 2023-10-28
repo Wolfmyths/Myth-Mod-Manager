@@ -3,13 +3,11 @@ import logging
 
 import patoolib
 
-from PySide6.QtCore import QUrl
-
 from src.threaded.file_mover import FileMover
 from src.constant_vars import ModType
 
 class UnZipMod(FileMover):
-    def __init__(self, *mods: tuple[QUrl, ModType]):
+    def __init__(self, *mods: tuple[str, ModType]):
         super().__init__()
 
         self.mods = mods
@@ -18,7 +16,7 @@ class UnZipMod(FileMover):
         self.unZipMod(*self.mods)
         return super().run()
 
-    def unZipMod(self, *mods: tuple[QUrl, ModType]) -> None:
+    def unZipMod(self, *mods: tuple[str, ModType]) -> None:
         '''Extracts a mod and puts it into a destination based off the type given'''
 
         self.setTotalProgress.emit(len(mods))
@@ -29,11 +27,9 @@ class UnZipMod(FileMover):
 
             for modURL in mods:
 
-                url = modURL[0]
+                src = modURL[0]
 
-                src = url.toLocalFile()
-
-                mod = url.fileName()
+                mod = os.path.basename(src)
 
                 modType = modURL[1]
 
@@ -43,11 +39,11 @@ class UnZipMod(FileMover):
 
                 logging.info('Unzipping %s to %s', src, modDestDict[modType])
 
-                if os.path.exists(src):
-
+                if os.path.isfile(src):
                     patoolib.extract_archive(src, outdir=modDestDict[modType])
-                
-                logging.warning('%s does not exist', src)
+
+                else:
+                    logging.warning('%s does not exist', src)
 
             self.succeeded.emit()
         

@@ -111,12 +111,14 @@ class Options(qtw.QWidget):
             logging.info('Changed game path to: %s', path)
 
             self.optionsManager.setGamepath(path)
+            self.optionsManager.writeData()
     
     def setDisPath(self, path: str) -> None:
 
         logging.info('Changed disabled mod folder path to: %s', path)
 
         self.optionsManager.setDispath(path)
+        self.optionsManager.writeData()
     
     def startBackupMods(self) -> None:
         

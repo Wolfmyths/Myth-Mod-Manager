@@ -17,11 +17,10 @@ def create_mod_dirs(createTemp_Mod_ini: str) -> str:
     parser.read(createTemp_Mod_ini)
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        os.mkdir(os.path.join(tmp_dir, 'mods'))
+        os.makedirs(os.path.join(tmp_dir, 'mods', 'make game easy mod'))
+        os.makedirs(os.path.join(tmp_dir, 'assets', 'mod_overrides', 'best mod ever'))
+        os.makedirs(os.path.join(tmp_dir, 'maps', 'super fun mod'))
         os.mkdir(os.path.join(tmp_dir, 'disabledMods'))
-
-        for mod in parser.sections():
-            os.mkdir(os.path.join(tmp_dir, 'mods', mod))
         
         yield tmp_dir
 
@@ -42,6 +41,8 @@ def createTemp_Mod_ini() -> str:
 
         config.set(mod[0], ModKeys.type.value, mod[1])
         config.set(mod[0], ModKeys.modworkshopid.value, mod[2])
+        config.set(mod[0], ModKeys.enabled.value, 'true')
+        config.set(mod[0], ModKeys.ignored.value, 'false')
 
     with open(tmp_filename, 'w') as f:
         config.write(f)

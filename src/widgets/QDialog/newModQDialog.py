@@ -1,5 +1,7 @@
+import os
+
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QUrl, Qt as qt
+from PySide6.QtCore import Qt as qt
 
 from src.widgets.QDialog.QDialog import Dialog
 
@@ -9,7 +11,7 @@ class newModLocation(Dialog):
 
     typeDict: dict[str : ModType] = {}
     
-    def __init__(self, *modName: QUrl) -> None:
+    def __init__(self, *modName: str) -> None:
         super().__init__()
 
         self.setWindowTitle('Installing mods')
@@ -36,7 +38,7 @@ class newModLocation(Dialog):
         frameLayout = qtw.QVBoxLayout()
         frameLayout.setSpacing(5)
 
-        for mod in (x.fileName() for x in modName):
+        for mod in (os.path.basename(x) for x in modName):
 
             group = qtw.QGroupBox(f'{mod}')
             group.setObjectName(mod)
@@ -108,7 +110,7 @@ class newModLocation(Dialog):
 
             buttons: list[qtw.QRadioButton] = item.findChildren(qtw.QRadioButton)
 
-            modName = self.modName[count].fileName()
+            modName = os.path.basename(self.modName[count])
 
             if buttons[0].isChecked():
 

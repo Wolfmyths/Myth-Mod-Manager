@@ -1,5 +1,10 @@
+import tempfile
+import os
+
 import pytest
 from pytestqt.qtbot import QtBot
+
+from PySide6.QtCore import Qt as qt
 
 from src.widgets.managerQTableWidget import ModListWidget
 from src.constant_vars import ModType
@@ -49,6 +54,25 @@ def test_getSelectedNameItems(create_QTable: ModListWidget) -> None:
 
 def test_getModTypeCount(create_QTable: ModListWidget) -> None:
     assert create_QTable.getModTypeCount(ModType.mods) == 1
+
+#TODO: Test drop events
+@pytest.mark.skip
+def test_dropFile():
+    pass
+
+def test_Icon(create_QTable: ModListWidget, getDir: str) -> None:
+
+    with tempfile.TemporaryDirectory(dir=os.path.join(getDir, 'game_path', 'mods')) as tmp_mod:
+
+        tmp_mod_name = os.path.basename(tmp_mod)
+
+        create_QTable.saveManager.addMods((tmp_mod_name, ModType.mods))
+        create_QTable.saveManager.setModWorkshopAssetID(tmp_mod_name, '1234')
+
+        create_QTable.refreshMods()
+        tmp_mod_item = create_QTable.findItems(tmp_mod_name, qt.MatchFlag.MatchExactly)[0]
+
+        assert tmp_mod_item.icon().isNull() == False
 
 def test_widget(qtbot: QtBot, create_QTable: ModListWidget) -> None:
 

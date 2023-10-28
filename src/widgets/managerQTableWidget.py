@@ -193,6 +193,8 @@ class ModListWidget(qtw.QTableWidget):
 
             else:
                 logging.info('%s is already disabled in the save file', modName)
+        
+        self.saveManager.writeData()
 
     def deleteItem(self) -> None:
         '''
@@ -217,6 +219,8 @@ class ModListWidget(qtw.QTableWidget):
                 self.removeRow(row)
             
             self.itemChanged.emit(*items)
+
+            self.saveManager.writeData()
     
     def setItemEnabled(self) -> None:
         '''Sets one or more mods to be enabled in MOD_CONFIG and in the GUI'''
@@ -235,6 +239,8 @@ class ModListWidget(qtw.QTableWidget):
             self.saveManager.setEnabled(modName, True)
 
             self.getEnabledItem(row).setText('Enabled')
+        
+        self.saveManager.writeData()
 
     # This isn't used anywhere, might be removed later
     def isMultipleSelected(self) -> bool:
@@ -279,6 +285,8 @@ class ModListWidget(qtw.QTableWidget):
             logging.debug('Adding mod to table, %s|%s|%s|%s|%s', mod, type, isEnabled, version, assetID)
 
             self.addMod(name=mod, type=type, enabled=isEnabled, version=version)
+        
+        self.saveManager.writeData()
 
         # Clear selections from the disabled mod check
         self.clearSelection()
@@ -380,16 +388,16 @@ class ModListWidget(qtw.QTableWidget):
             errorChecking.openWebPage(f'https://modworkshop.net/mod/{assetID}')
     
     def openModDir(self) -> None:
-            if not len(self.getSelectedNameItems()) <= 0:
-                selectedItem = self.getSelectedNameItems()[0]
+        if not len(self.getSelectedNameItems()) <= 0:
+            selectedItem = self.getSelectedNameItems()[0]
 
-                modName = self.getNameItem(self.row(selectedItem)).text()
-                modType = self.getTypeItem(self.row(selectedItem)).text()
+            modName = self.getNameItem(self.row(selectedItem)).text()
+            modType = self.getTypeItem(self.row(selectedItem)).text()
 
-                path = self.p.mod(ModType(modType), modName)
+            path = self.p.mod(ModType(modType), modName)
 
-                if os.path.exists(path):
-                    os.startfile(path)
+            if os.path.exists(path):
+                os.startfile(path)
 
     def hideMod(self) -> None:
         items = self.getSelectedNameItems()
@@ -397,6 +405,8 @@ class ModListWidget(qtw.QTableWidget):
             modName = item.text()
             self.saveManager.setIgnored(modName, True)
             self.removeRow(item.row())
+        
+        self.saveManager.writeData()
 
         self.itemChanged.emit(items[0])
     
@@ -485,7 +495,7 @@ class ModListWidget(qtw.QTableWidget):
                         zips.append(mod)
 
                 # Gather where the user wants each mod to go
-                notice = newModLocation(*list(dirs + zips))
+                notice = newModLocation(*[x.toString() for x in list(dirs + zips)])
                 notice.exec()
 
                 dict_ = notice.typeDict
@@ -496,20 +506,20 @@ class ModListWidget(qtw.QTableWidget):
                 # Combine the mod location and URL into a Tuple
                 if dirs:
 
-                    dirTuple: list[tuple[QUrl, ModType]] = []
+                    dirTuple: list[tuple[str, ModType]] = []
 
                     for dir in dirs:
-                        dirTuple.append((dir, dict_[dir.fileName()]))
+                        dirTuple.append((dir.toString(), dict_[dir.fileName()]))
 
                     startFileMover = ProgressWidget(ChangeModType(*dirTuple))
                     startFileMover.exec()
 
                 if zips:
 
-                    zipsTuple: list[tuple[QUrl, ModType]] = []
+                    zipsTuple: list[tuple[str, ModType]] = []
 
                     for zip in zips:
-                        zipsTuple.append((zip, dict_[zip.fileName()]))
+                        zipsTuple.append((zip.toString(), dict_[zip.fileName()]))
 
                     startFileMover = ProgressWidget(UnZipMod(*zipsTuple))
                     startFileMover.exec()

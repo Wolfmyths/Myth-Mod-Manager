@@ -24,7 +24,11 @@ class Config(ConfigParser):
             with open(self.file, 'w+') as f:
                 pass
 
-        self.read(self.file)
+        self.def_read()
+    
+    def def_read(self) -> None:
+        '''Short for default read, reads `self.file`'''
+        return super().read(self.file)
 
     def writeData(self) -> None:
         with open(self.file, 'w') as f:
@@ -38,6 +42,15 @@ class Save(Config):
 
     def __init__(self, file=MOD_CONFIG):
         super().__init__(file=file)
+    
+    def mods(self) -> list[str]:
+        return self.sections()
+    
+    def hasModOption(self, mod: str, option: str) -> bool:
+        return self.has_option(mod, option)
+    
+    def hasMod(self, mod: str) -> bool:
+        return self.has_section(mod)
 
     def addMods(self, *mods: tuple[list[str] | str, ModType]) -> None:
         '''
@@ -71,14 +84,16 @@ class Save(Config):
         self.setEnabled(mod)
 
         self.setType(mod, type)
-    
+
     def getEnabled(self, mod: str) -> bool:
+        self.def_read()
         return self.getboolean(mod, ModKeys.enabled, fallback=False)
-    
+
     def setEnabled(self, mod: str, value: bool = True) -> None:
         self.set(mod, ModKeys.enabled.value, str(value))
 
     def getIgnored(self, mod: str) -> bool:
+        self.def_read()
         return self.getboolean(mod, ModKeys.ignored, fallback = False)
 
     def setIgnored(self, mod: str, value: bool = False) -> None:
@@ -89,6 +104,7 @@ class Save(Config):
         Converts the string into a `ModType` then returns it.
         Returns `None` if the mod doesn't have a type.
         '''
+        self.def_read()
 
         modType = self.get(mod, ModKeys.type, fallback=None)
 
@@ -101,6 +117,7 @@ class Save(Config):
         self.set(mod, ModKeys.type.value, str(type))
     
     def getModworkshopAssetID(self, mod: str) -> str:
+        self.def_read()
         return self.get(mod, ModKeys.modworkshopid, fallback='')
     
     def setModWorkshopAssetID(self, mod: str, id: str = '') -> None:
@@ -123,31 +140,38 @@ class Save(Config):
 class OptionsManager(Config):
     '''Manages Program's Settings'''
 
-    def __init__(self, file: str = OPTIONS_CONFIG):
+    def __init__(self, file=OPTIONS_CONFIG):
         super().__init__(file=file)
 
         if not self.has_section(OptionKeys.section.value):
             self.add_section(OptionKeys.section.value)
+    
+    def hasOption(self, option: str) -> bool:
+        return self.has_option(OptionKeys.section.value, option)
 
     def getTheme(self) -> str:
+        self.def_read()
         return self.get(OptionKeys.section, OptionKeys.color_theme, fallback=LIGHT)
     
     def setTheme(self, theme: str = LIGHT) -> None:
         self.set(OptionKeys.section.value, OptionKeys.color_theme.value, theme)
     
     def getGamepath(self) -> str:
+        self.def_read()
         return self.get(OptionKeys.section.value, OptionKeys.game_path, fallback='')
     
     def setGamepath(self, path: str = '') -> None:
         self.set(OptionKeys.section.value, OptionKeys.game_path.name, path)
     
     def getDispath(self) -> str:
+        self.def_read()
         return self.get(OptionKeys.section, OptionKeys.dispath, fallback=MODS_DISABLED_PATH_DEFAULT)
     
     def setDispath(self, path: str = MODS_DISABLED_PATH_DEFAULT) -> None:
         self.set(OptionKeys.section.value, OptionKeys.dispath.value, path)
     
     def getWindowSize(self) -> QSize:
+        self.def_read()
         width = self.getint(OptionKeys.section, OptionKeys.windowsize_w, fallback=800)
         height = self.getint(OptionKeys.section, OptionKeys.windowsize_h, fallback=800)
         return QSize(width, height)

@@ -58,6 +58,7 @@ class GamePathNotFound(Dialog):
             self.noticeLabelDesc.setText('Game Path is valid')
 
             self.optionsManager.setGamepath(gamePath)
+            self.optionsManager.writeData()
 
         else:
 

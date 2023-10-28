@@ -36,7 +36,7 @@ class DeleteMod(FileMover):
 
                 path = self.p.mod(type, modName) if type != 'disabled' else disPath
 
-                if os.path.exists(path):
+                if os.path.isdir(path):
                     shutil.rmtree(path, onerror=self.onError)
                 else:
                     logging.error('An error was raised in FileMover.deleteMod(), mod path does not exist:\n%s', path)

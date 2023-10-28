@@ -2,14 +2,19 @@ import os
 
 from pytestqt.qtbot import QtBot
 
-from PySide6.QtCore import QUrl
 import PySide6.QtWidgets as qtw
 
 from src.widgets.QDialog.newModQDialog import newModLocation
 from src.constant_vars import ModType
 
 def test_dialog(qtbot: QtBot, create_mod_dirs: str) -> None:
-    widget = newModLocation(*[QUrl(x) for x in os.listdir(os.path.join(create_mod_dirs, 'mods'))])
+    list_of_paths = [
+        os.path.join(create_mod_dirs, 'mods', 'super fun mod'),
+        os.path.join(create_mod_dirs, 'mod_overrides', 'best mod ever'),
+        os.path.join(create_mod_dirs, 'maps', 'make game easy mod')
+        ]
+    
+    widget = newModLocation(*list_of_paths)
     qtbot.addWidget(widget)
 
     assert len(widget.findChildren(qtw.QGroupBox)) == 3

@@ -2,13 +2,13 @@ from typing import TYPE_CHECKING
 
 import PySide6.QtGui as qtg
 
-from widgets.QMenu.QMenu import ModContextMenu
+from src.widgets.QMenu.QMenu import ModContextMenu
 
 if TYPE_CHECKING:
-    from widgets.ignoredModsQListWidget import IgnoredMods
+    from src.widgets.ignoredModsQListWidget import IgnoredMods
 
 class IgnoredModsQMenu(ModContextMenu):
-    def __init__(self, parent) -> None:
+    def __init__(self, parent = None) -> None:
         super().__init__(parent)
         self.qParent: IgnoredMods = parent
 

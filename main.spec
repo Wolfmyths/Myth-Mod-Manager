@@ -3,13 +3,13 @@
 block_cipher = None
 
 DATA = [
-    ('src/icon.ico', '.'), 
-    ('src/graphics', 'graphics')
+    ('src\\icon.ico', '.\\src'), 
+    ('src\\graphics', '.\\src\\graphics')
     ]
 
 
 a = Analysis(
-    ['src\\main.py'],
+    ['src\\__main__.py'],
     pathex=[],
     binaries=[('src\\runGame.bat', '.')],
     datas=DATA,

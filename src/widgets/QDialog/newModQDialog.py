@@ -1,15 +1,17 @@
+import os
+
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QUrl, Qt as qt
+from PySide6.QtCore import Qt as qt
 
-from widgets.QDialog.QDialog import Dialog
+from src.widgets.QDialog.QDialog import Dialog
 
-from constant_vars import ModType
+from src.constant_vars import ModType
 
 class newModLocation(Dialog):
 
     typeDict: dict[str : ModType] = {}
     
-    def __init__(self, *modName: QUrl) -> None:
+    def __init__(self, *modName: str) -> None:
         super().__init__()
 
         self.setWindowTitle('Installing mods')
@@ -36,7 +38,7 @@ class newModLocation(Dialog):
         frameLayout = qtw.QVBoxLayout()
         frameLayout.setSpacing(5)
 
-        for mod in (x.fileName() for x in modName):
+        for mod in (os.path.basename(x) for x in modName):
 
             group = qtw.QGroupBox(f'{mod}')
             group.setObjectName(mod)
@@ -44,16 +46,16 @@ class newModLocation(Dialog):
             radioButtonMod = qtw.QRadioButton(ModType.mods.value, group)
             radioButtonMod.setObjectName(f'{mod} {ModType.mods}')
             radioButtonMod.setChecked(False)
-            radioButtonMod.clicked.connect(lambda: self.isAllChecked())
+            radioButtonMod.clicked.connect(self.isAllChecked)
 
             radioButtonOverride = qtw.QRadioButton(ModType.mods_override.value, group)
             radioButtonOverride.setObjectName(f'{mod} {ModType.mods_override}')
-            radioButtonOverride.clicked.connect(lambda: self.isAllChecked())
+            radioButtonOverride.clicked.connect(self.isAllChecked)
             radioButtonOverride.setChecked(False)
 
             radioButtonMaps = qtw.QRadioButton(ModType.maps.value, group)
             radioButtonMaps.setObjectName(f'{mod} {ModType.maps}')
-            radioButtonMaps.clicked.connect(lambda: self.isAllChecked())
+            radioButtonMaps.clicked.connect(self.isAllChecked)
             radioButtonMaps.setChecked(False)
 
             h1 = qtw.QHBoxLayout()
@@ -80,7 +82,7 @@ class newModLocation(Dialog):
         self.setLayout(layout)
     
     def changeOkButtonState(self, bool: bool) -> None:
-        self.buttonBox.buttons()[0].setEnabled(bool)
+        self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok).setEnabled(bool)
     
     def isAllChecked(self):
 
@@ -108,7 +110,7 @@ class newModLocation(Dialog):
 
             buttons: list[qtw.QRadioButton] = item.findChildren(qtw.QRadioButton)
 
-            modName = self.modName[count].fileName()
+            modName = os.path.basename(self.modName[count])
 
             if buttons[0].isChecked():
 

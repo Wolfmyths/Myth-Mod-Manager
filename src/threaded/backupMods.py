@@ -2,10 +2,13 @@ import os
 import shutil
 import logging
 
-from threaded.file_mover import FileMover
-from constant_vars import ModType, OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT, BACKUP_MODS, MODSIGNORE, MOD_CONFIG
+from src.threaded.file_mover import FileMover
+from src.constant_vars import ModType, BACKUP_MODS, MODSIGNORE, MOD_CONFIG
 
 class BackupMods(FileMover):
+
+    bundledFilePath = os.path.join(os.path.abspath(os.curdir), BACKUP_MODS)
+
     def run(self) -> None:
         self.backupMods()
         return super().run()
@@ -15,7 +18,7 @@ class BackupMods(FileMover):
 
             # Step 1: Gather Options
 
-            disPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+            disPath = self.optionsManager.getDispath()
 
             # Step 2: Set Paths
 
@@ -25,19 +28,15 @@ class BackupMods(FileMover):
 
             maps_path = self.p.maps()
 
-            bundledFilePath = os.path.join(os.path.abspath(os.curdir), BACKUP_MODS)
+            bundledModsPath = os.path.join(self.bundledFilePath, 'mods')
 
-            bundledModsPath = os.path.join(bundledFilePath, 'mods')
+            bundledOverridePath = os.path.join(self.bundledFilePath, 'assets', 'mod_overrides')
 
-            bundledOverridePath = os.path.join(bundledFilePath, 'assets', 'mod_overrides')
-
-            bundledMapsPath = os.path.join(bundledFilePath, 'Maps')
+            bundledMapsPath = os.path.join(self.bundledFilePath, 'Maps')
 
             outputPathDict = {ModType.mods_override : bundledOverridePath, ModType.mods : bundledModsPath, ModType.maps : bundledMapsPath}
 
             srcPathDict = {ModType.mods_override : mod_overridePath, ModType.mods : modPath, ModType.maps : maps_path}
-
-            # Define error msg
 
             try:
 
@@ -51,11 +50,13 @@ class BackupMods(FileMover):
                 self.setCurrentProgress.emit(1, f'Validating backup folder paths')
 
                 # Creating backup environment
-                for path in (bundledFilePath, bundledModsPath, bundledMapsPath):
+                for path in (self.bundledFilePath, bundledModsPath, bundledMapsPath):
 
                     if not os.path.isdir(path):
 
                         os.mkdir(path)
+
+                        print(self.bundledFilePath, os.path.isfile(self.bundledFilePath))
 
                 # Because this dir is a nested one, needs os.makedirs unlike the others
                 if not os.path.isdir(bundledOverridePath):
@@ -77,7 +78,7 @@ class BackupMods(FileMover):
                         continue
 
                     # If the mod is disabled then the src will go to the disabled mods directory
-                    src = os.path.join(srcPathDict[modType], mod) if self.saveManager.isEnabled(mod) else os.path.join(disPath, mod)
+                    src = os.path.join(srcPathDict[modType], mod) if self.saveManager.getEnabled(mod) else os.path.join(disPath, mod)
 
                     output = os.path.join(outputPathDict[modType], mod)
 
@@ -93,25 +94,25 @@ class BackupMods(FileMover):
                 self.cancelCheck()
 
                 # Step 6: Zip Backup folder
-                self.setCurrentProgress.emit(1, f'Zipping to {bundledFilePath}\nThis might take some time...')
+                self.setCurrentProgress.emit(1, f'Zipping to {self.bundledFilePath}\nThis might take some time...')
 
-                # Create Zip, this should overwrite if it already exists
-                shutil.make_archive(BACKUP_MODS, 'zip', bundledFilePath)
+                # This should overwrite if it already exists
+                shutil.make_archive(BACKUP_MODS, 'zip', self.bundledFilePath)
 
                 # Step 7: Cleanup
 
                 self.setCurrentProgress.emit(1, 'Cleanup')
 
                 # Delete Folder
-                shutil.rmtree(bundledFilePath)
+                shutil.rmtree(self.bundledFilePath)
 
                 self.succeeded.emit()
 
             except Exception as e:
 
                 # If something goes wrong, delete the unfinished bundled file
-                if os.path.exists(bundledFilePath):
-                    shutil.rmtree(bundledFilePath)
+                if os.path.exists(self.bundledFilePath):
+                    shutil.rmtree(self.bundledFilePath)
 
                 if not self.cancel:
                     logging.error('Something went wrong in FileSaver.backupMods():\n%s', str(e))

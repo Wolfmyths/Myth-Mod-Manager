@@ -1,27 +1,46 @@
 import os
 import sys
-from enum import Enum
+from enum import StrEnum, auto
 
 import semantic_version
 
-class ModType(Enum):
+class ModType(StrEnum):
     '''
     Types of PAYDAY 2 mods 
     in reference to where they're installed.
     '''
 
-    mods: str = 'mods'
-    mods_override: str = 'mods_override'
-    maps: str = 'maps'
+    mods          = auto()
+    mods_override = auto()
+    maps          = auto()
 
     def all_types() -> list[str]:
         return [enum.value for enum in ModType]
 
+class ModKeys(StrEnum):
+    '''Keys that a mod has in `MOD_CONFIG`'''
+
+    enabled       = auto()
+    type          = auto()
+    modworkshopid = auto()
+    ignored       = auto()
+
+class OptionKeys(StrEnum):
+    '''Option's keys in `OPTIONS_CONFIG`'''
+
+    section      = 'OPTIONS' # Main section
+
+    game_path    = auto()
+    dispath      = 'disabled-mods'
+    color_theme  = auto()
+    windowsize_w = auto()
+    windowsize_h = auto()
+
 class ProfileRole():
 
-    parent: int = 33 # Role ID for an item's parent
-    type: int = 32 # Role ID for an item's type
-    installed: int = 34 # Role ID if a mod is installed or not
+    parent    = 33 # Role ID for an item's parent
+    type      = 32 # Role ID for an item's type
+    installed = 34 # Role ID if a mod is installed or not
 
 # Detection if the program is being run through an exe or the script
 IS_SCRIPT = not getattr(sys, 'frozen', False)
@@ -52,24 +71,8 @@ KOFI_LOGO_B = 'kofi_s_logo_nolabel.webp'
 # Mod Table Object Name
 MOD_TABLE_OBJECT = 'mod_table'
 
-# Keys that a mod has
-MOD_ENABLED = 'enabled'
-MOD_TYPE = 'type'
-MOD_MODWORKSHOP_ASSET_ID = 'modworkshopid'
-MOD_IGNORED = 'ignored'
-
 # Files in PAYDAY2/Mods/ to ignore
 MODSIGNORE = ('base', 'logs', 'saves', 'downloads')
-
-# Option Sections
-OPTIONS_SECTION = 'OPTIONS'
-
-# Keys in OPTIONS_CONFIG
-OPTIONS_GAMEPATH = 'game_path'
-OPTIONS_DISPATH = 'disabled-mods'
-OPTIONS_THEME = 'color_theme'
-OPTIONS_WINDOWSIZE_H = 'window_size_h'
-OPTIONS_WINDOWSIZE_W = 'window_size_w'
 
 # These tuples are usually meant to be unpacked as arguments using the * prefix
 DATA_PROFILE = (0, ProfileRole.type, 'profile') # Used to label an item as a profile
@@ -91,4 +94,4 @@ LIGHT = 'light'
 # Program Info
 PROGRAM_NAME = 'Myth Mod Manager'
 
-VERSION = semantic_version.Version(major=1, minor=2, patch=2)
+VERSION = semantic_version.Version(major=1, minor=2, patch=3)

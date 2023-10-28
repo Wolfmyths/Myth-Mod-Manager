@@ -47,65 +47,74 @@ def __parseVersion(version: str) -> Version | None:
     
     return version
 
-def findModworkshopAssetID(modPath: str) -> str | None:
+def findModworkshopAssetID(modPath: str) -> str:
     '''Finds the AssetID of a modworkshop mod if it can'''
+
+    assetID = ''
 
     xml = __loadXML(modPath)
 
     if xml is None:
-        return
+        return assetID
 
     assetUpdates = xml.find('AssetUpdates')
 
     if assetUpdates is not None:
 
         modworkshop = assetUpdates.attrib.get('provider') == 'modworkshop'
-        assetID = assetUpdates.attrib.get('id')
+        assetID = assetUpdates.attrib.get('id', '')
 
         if modworkshop and assetID:
             return assetID
+    
+    return assetID
 
 def findModVersion(modPath: str) -> Version | None:
     '''Finds the mod version if it can by parsing `main.xml` and `mod.txt`'''
+    try:
 
-    version: str | None = None
+        version: str | None = None
 
-    xml = __loadXML(modPath)
+        xml = __loadXML(modPath)
 
-    txtName = 'mod.txt'
-    txtPath = os.path.join(modPath, txtName)
+        txtName = 'mod.txt'
+        txtPath = os.path.join(modPath, txtName)
 
-    if xml is not None:
+        if xml is not None:
 
-        assetUpdates = xml.find('AssetUpdates')
+            assetUpdates = xml.find('AssetUpdates')
 
-        if assetUpdates is not None and assetUpdates.attrib.get('version'):
+            if assetUpdates is not None and assetUpdates.attrib.get('version'):
 
-            version = assetUpdates.attrib.get('version')
+                version = assetUpdates.attrib.get('version')
 
-        elif xml.getroot().get('version'):
-            version = xml.getroot().get('version')
+            elif xml.getroot().get('version'):
+                version = xml.getroot().get('version')
 
-    else:
-        
-        if os.path.exists(txtPath):
-            logging.debug('Checking txt file of %s', os.path.basename(modPath))
-            with open(txtPath, 'r') as f:
-                for line in f.readlines():
-                    line = line.strip()
+        else:
+            
+            if os.path.exists(txtPath):
+                logging.debug('Checking txt file of %s', os.path.basename(modPath))
+                with open(txtPath, 'r') as f:
+                    for line in f.readlines():
+                        line = line.strip()
 
-                    if line.startswith('"version"'):
+                        if line.startswith('"version"'):
 
-                        if line.endswith(','):
-                            line = line.removesuffix(',')
-                        try:
+                            if line.endswith(','):
+                                line = line.removesuffix(',')
+
                             data: dict = json.loads('{{{line}}}'.format(line=line))
-                        except json.decoder.JSONDecodeError as e:
-                            logging.error('Something went wrong converting a mod version into a dictionary in %s:\n%s', txtPath, str(e))
 
-                        version = data.get('version')
+                            version = data.get('version')
 
-                        break
+                            break
+      
+        return __parseVersion(version)
+    
+    except Exception as e:
 
+        logging.error('Something happened in findModVersion with %s: %s', os.path.basename(modPath), e)
+        return None
 
-    return __parseVersion(version)
+    

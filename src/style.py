@@ -1,6 +1,6 @@
 import logging
 
-from constant_vars import LIGHT, DARK
+from src.constant_vars import LIGHT, DARK
 
 class StyleManager():
 

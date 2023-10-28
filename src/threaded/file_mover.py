@@ -2,10 +2,12 @@ import shutil
 import os
 import logging
 
-from save import Save, OptionsManager
-from getPath import Pathing
-import errorChecking
-from threaded.QThread import Thread
+from src.save import Save, OptionsManager
+from src.getPath import Pathing
+import src.errorChecking as errorChecking
+from src.threaded.QThread import Thread
+
+from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG
 
 
 class FileMover(Thread):
@@ -13,15 +15,15 @@ class FileMover(Thread):
     Base class for threaded functions involving file manipulation
     '''
 
-    def __init__(self):
+    def __init__(self, optionsPath: str = OPTIONS_CONFIG, savePath: str = MOD_CONFIG):
         super().__init__()
 
         logging.getLogger(__name__)
 
-        self.saveManager = Save()
-        self.optionsManager = OptionsManager()
+        self.saveManager = Save(savePath)
+        self.optionsManager = OptionsManager(optionsPath)
 
-        self.p = Pathing()
+        self.p = Pathing(optionsPath)
     
     def cancelCheck(self) -> None:
         logging.info('%s was canceled', self.__class__)

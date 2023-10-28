@@ -7,12 +7,12 @@ from PySide6.QtNetwork import QNetworkReply
 
 from semantic_version import Version
 
-from widgets.QDialog.QDialog import Dialog
-from constant_vars import VERSION
-from widgets.QDialog.announcementQDialog import Notice
-from errorChecking import openWebPage
+from src.widgets.QDialog.QDialog import Dialog
+from src.constant_vars import VERSION
+from src.widgets.QDialog.announcementQDialog import Notice
+from src.errorChecking import openWebPage
 
-from api.update import Update
+from src.api.update import Update
 
 class updateDetected(Dialog):
 
@@ -39,8 +39,8 @@ class updateDetected(Dialog):
         self.autoUpdate.downloading.connect(lambda x, y: self.downloadStarted(x, y))
         self.autoUpdate.addTotalProgress.connect(lambda x: self.progressBar.setMaximum(self.progressBar.maximum() + x))
         self.autoUpdate.error.connect(lambda x: self.errorRaised(x))
-        self.autoUpdate.succeeded.connect(lambda: self.succeeded())
-        self.autoUpdate.doneCanceling.connect(lambda: self.close())
+        self.autoUpdate.succeeded.connect(self.succeeded)
+        self.autoUpdate.doneCanceling.connect(self.close)
 
         self.message = qtw.QLabel(self, text=f'New update found: {newVersion}\nCurrent Version: {VERSION}\nDo you want to Update?')
 
@@ -54,8 +54,8 @@ class updateDetected(Dialog):
         self.buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(self.buttons)
-        self.buttonBox.accepted.connect(lambda: self.okButton())
-        self.buttonBox.rejected.connect(lambda: self.cancel())
+        self.buttonBox.accepted.connect(self.okButton)
+        self.buttonBox.rejected.connect(self.cancel)
 
         for widget in (self.message, self.progressBar, self.changelog, self.viewWeb, self.buttonBox):
             layout.addWidget(widget)
@@ -81,7 +81,7 @@ class updateDetected(Dialog):
         error.exec()
 
         self.cancel()
-        self.close()
+        self.reject()
 
     def succeeded(self):
 

@@ -5,19 +5,19 @@ import PySide6.QtGui as qtg
 from PySide6.QtCore import Qt as qt, QSize
 import PySide6.QtWidgets as qtw
 
-from save import OptionsManager
-from errorChecking import openWebPage
+from src.save import OptionsManager
+from src.errorChecking import openWebPage
 
-from constant_vars import VERSION, PROGRAM_NAME, UI_GRAPHICS_PATH, GITHUB_LOGO_W, GITHUB_LOGO_B, LIGHT, OPTIONS_THEME, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, KOFI_LOGO_B
+from src.constant_vars import VERSION, PROGRAM_NAME, UI_GRAPHICS_PATH, GITHUB_LOGO_W, GITHUB_LOGO_B, LIGHT, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, KOFI_LOGO_B, OPTIONS_CONFIG
 
 
 class About(qtw.QWidget):
-    def __init__(self) -> None:
+    def __init__(self, optionsPath: str = OPTIONS_CONFIG) -> None:
         super().__init__()
 
         logging.getLogger(__file__)
 
-        self.options = OptionsManager()
+        self.options = OptionsManager(optionsPath)
 
         layout = qtw.QVBoxLayout()
         layout.setAlignment(qt.AlignmentFlag.AlignTop)
@@ -71,7 +71,7 @@ Suggestions are greatly appreciated on modworkshop.net
     
     def updateIcons(self) -> None:
 
-        themeIsLight: bool = self.options.getOption(OPTIONS_THEME, LIGHT) == LIGHT
+        themeIsLight: bool = self.options.getTheme() == LIGHT
 
         self.githubIcon = GITHUB_LOGO_B if themeIsLight else GITHUB_LOGO_W
         self.kofiIcon = KOFI_LOGO_B

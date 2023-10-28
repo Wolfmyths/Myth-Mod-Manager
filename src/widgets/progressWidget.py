@@ -3,9 +3,9 @@ import logging
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
 
-from widgets.QDialog.QDialog import Dialog
-from widgets.QDialog.announcementQDialog import Notice
-from threaded.file_mover import FileMover
+from src.widgets.QDialog.QDialog import Dialog
+
+from src.threaded.file_mover import FileMover
 
 class ProgressWidget(Dialog):
     '''
@@ -29,9 +29,9 @@ class ProgressWidget(Dialog):
         self.mode.setTotalProgress.connect(lambda x: self.progressBar.setMaximum(x))
         self.mode.setCurrentProgress.connect(lambda x, y: self.updateProgressBar(x, y))
         self.mode.addTotalProgress.connect(lambda x: self.progressBar.setMaximum(self.progressBar.maximum() + x))
+        self.mode.doneCanceling.connect(self.reject)
         self.mode.error.connect(lambda x: self.errorRaised(x))
-
-        self.mode.succeeded.connect(lambda: self.succeeded())
+        self.mode.succeeded.connect(self.succeeded)
 
         buttons = qtw.QDialogButtonBox.StandardButton.Cancel
 
@@ -81,7 +81,7 @@ class ProgressWidget(Dialog):
         logging.info('Task %s was canceled...', str(self.mode))
         self.warningLabel.setText('Canceling... (Finishing current step)')
 
-        isModeCanceled = True
+        self.mode.cancel = True
     
     def updateProgressBar(self, x, y):
 

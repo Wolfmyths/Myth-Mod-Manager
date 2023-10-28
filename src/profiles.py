@@ -4,29 +4,29 @@ from typing import TYPE_CHECKING
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
 
-import errorChecking
+import src.errorChecking as errorChecking
 
-from widgets.QDialog.announcementQDialog import Notice
-from widgets.progressWidget import ProgressWidget
-from widgets.modProfileQTreeWidget import ProfileList
-from threaded.moveToDisabledDir import MoveToDisabledDir
-from threaded.moveToEnabledDir import MoveToEnabledModDir
-from save import OptionsManager, Save
+from src.widgets.QDialog.announcementQDialog import Notice
+from src.widgets.progressWidget import ProgressWidget
+from src.widgets.modProfileQTreeWidget import ProfileList
+from src.threaded.moveToDisabledDir import MoveToDisabledDir
+from src.threaded.moveToEnabledDir import MoveToEnabledModDir
+from src.save import Save
+
+from src.constant_vars import MOD_CONFIG, PROFILES_JSON
 
 if TYPE_CHECKING:
-    from widgets.managerQTableWidget import ModListWidget
+    from src.widgets.managerQTableWidget import ModListWidget
 
 class modProfile(qtw.QWidget):
-    def __init__(self) -> None:
+    def __init__(self, savePath = MOD_CONFIG, profilePath: str = PROFILES_JSON) -> None:
         super().__init__()
 
-        self.saveManager = Save()
-
-        self.optionsManager = OptionsManager()
+        self.saveManager = Save(savePath)
 
         layout = qtw.QVBoxLayout()
 
-        self.profileDisplay = ProfileList(self)
+        self.profileDisplay = ProfileList(self, profilePath)
 
         self.profileDisplay.applyProfile.connect(lambda x: self.applyMods(x))
 
@@ -47,6 +47,7 @@ class modProfile(qtw.QWidget):
         disableMods.exec()
 
         # Refresh table so it is updated after all of this is done
+        # TODO: Refactor to make this more flexible, we need a way to find an object within an app-wide scope
         widget: ModListWidget
         for widget in qtw.QApplication.allWidgets():
             if str(widget.__class__) == "<class 'widgets.managerQTableWidget.ModListWidget'>":

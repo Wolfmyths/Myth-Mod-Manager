@@ -6,18 +6,18 @@ import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
 from PySide6.QtCore import Qt as qt, Signal
 
-from widgets.QMenu.profileQMenu import ProfileMenu
-from widgets.QDialog.insertStringQDialog import insertString
-from widgets.QDialog.announcementQDialog import Notice
-from widgets.QDialog.modSelectionQDialog import SelectMod
-from widgets.QDialog.profileSelectionQDialog import SelectProfile
+from src.widgets.QMenu.profileQMenu import ProfileMenu
+from src.widgets.QDialog.insertStringQDialog import insertString
+from src.widgets.QDialog.announcementQDialog import Notice
+from src.widgets.QDialog.modSelectionQDialog import SelectMod
+from src.widgets.QDialog.profileSelectionQDialog import SelectProfile
 
-import errorChecking
-from profileManager import ProfileManager
-from constant_vars import DATA_PROFILE, DATA_MOD, ProfileRole
+import src.errorChecking as errorChecking
+from src.profileManager import ProfileManager
+from src.constant_vars import DATA_PROFILE, DATA_MOD, ProfileRole, PROFILES_JSON
 
 if TYPE_CHECKING:
-    from profiles import modProfile
+    from src.profiles import modProfile
 
 class ProfileList(qtw.QTreeWidget):
 
@@ -29,7 +29,7 @@ class ProfileList(qtw.QTreeWidget):
 
     noneRightclicked = Signal()
 
-    def __init__(self, parent: modProfile) -> None:
+    def __init__(self, parent: modProfile = None, profilePath: str = PROFILES_JSON) -> None:
         super().__init__(parent)
 
         logging.getLogger(__name__)
@@ -43,21 +43,21 @@ class ProfileList(qtw.QTreeWidget):
         self.header().setSectionResizeMode(0, qtw.QHeaderView.ResizeMode.Stretch)
         self.header().setSectionResizeMode(1, qtw.QHeaderView.ResizeMode.Interactive)
 
-        self.profileManager = ProfileManager()
+        self.profileManager = ProfileManager(profilePath)
 
         self.menu = ProfileMenu(self)
 
         self.updateView()
-    
+
     def __getProfiles(self) -> list[str]:
-        return [x.text(0) for x in self.findItems('*', qt.MatchFlag.MatchWildcard | qt.MatchFlag.MatchWrap | qt.MatchFlag.MatchRecursive)]
-    
+        return [x.text(0) for x in self.findItems('*', qt.MatchFlag.MatchWildcard | qt.MatchFlag.MatchWrap | qt.MatchFlag.MatchRecursive) if self.isProfile(x)]
+
     def __findProfile(self, profile: str) -> qtw.QTreeWidgetItem:
         return self.findItems(profile, qt.MatchFlag.MatchExactly)[0]
-    
+
     def __getParentOfChild(self, child: qtw.QTreeWidgetItem) -> qtw.QTreeWidgetItem:
         return self.__findProfile(child.data(0, ProfileRole.parent))
-    
+
     def __getMods(self, profile: qtw.QTreeWidgetItem) -> list[qtw.QTreeWidgetItem] | None:
         '''Returns a list of mod names given the profile'''
         mods: list[str] = []
@@ -70,19 +70,19 @@ class ProfileList(qtw.QTreeWidget):
                 continue
 
             mods.append(child)
-        
+
         if not mods:
             return None
-        
+
         return mods
-    
+
     def __selectedItem(self) -> qtw.QTreeWidgetItem | None:
         '''Returns the first object selected in `selectedItems()`'''
 
         try:
 
             return self.selectedItems()[0]
-        
+
         except IndexError:
 
             logging.warning('IndexError in ProfileList.__selectedItem()')
@@ -343,7 +343,7 @@ class ProfileList(qtw.QTreeWidget):
         self.profileManager.changeProfile(profile.text(0), name)
 
         profile.setText(0, name)
-    
+
     def copyProfile(self):
 
         profileToCopy = self.__selectedItem()
@@ -382,7 +382,7 @@ class ProfileList(qtw.QTreeWidget):
 
                     break
                 else:
-                    
+
                     logging.warning('A profile with the name %s already exists', qDialog.userInput)
 
                     msg = Notice(f'A profile named {qDialog.userInput} already exists.', 
@@ -399,7 +399,7 @@ class ProfileList(qtw.QTreeWidget):
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
 
         if event.button() == qt.MouseButton.RightButton:
-            
+
             self.clearSelection()
 
             selectedItem = self.itemAt(event.pos())
@@ -412,10 +412,10 @@ class ProfileList(qtw.QTreeWidget):
                     self.profileRightclicked.emit()
                 else:
                     self.modRightclicked.emit()
-            
+
             else:
                 self.noneRightclicked.emit()
-            
+
             self.menu.exec(qtg.QCursor.pos())
 
         elif event.button() == qt.MouseButton.LeftButton:
@@ -424,7 +424,7 @@ class ProfileList(qtw.QTreeWidget):
                 self.clearSelection()
 
         return super().mousePressEvent(event)
-    
+
     def keyPressEvent(self, event: qtg.QKeyEvent) -> None:
 
         selectedItem = self.__selectedItem()
@@ -437,7 +437,7 @@ class ProfileList(qtw.QTreeWidget):
             if not self.isProfile(selectedItem):
 
                 self.removeMods()
-        
+
         elif event.key() == qt.Key.Key_Return:
 
             if self.isProfile(selectedItem):

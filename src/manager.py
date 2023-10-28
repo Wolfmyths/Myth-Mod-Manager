@@ -6,26 +6,26 @@ import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt
 import PySide6.QtGui as qtg
 
-from widgets.managerQTableWidget import ModListWidget
-from widgets.QDialog.announcementQDialog import Notice
-from save import Save, OptionsManager
-import errorChecking
-from constant_vars import OPTIONS_GAMEPATH, START_PAYDAY_PATH, MOD_TABLE_OBJECT, ModType
+from src.widgets.managerQTableWidget import ModListWidget
+from src.widgets.QDialog.announcementQDialog import Notice
+from src.save import Save, OptionsManager
+import src.errorChecking as errorChecking
+from src.constant_vars import START_PAYDAY_PATH, MOD_TABLE_OBJECT, ModType, MOD_CONFIG, OPTIONS_CONFIG
 
 class ModManager(qtw.QWidget):
 
-    def __init__(self) -> None:
+    def __init__(self, saveManagerPath = MOD_CONFIG, optionsManagerPath = OPTIONS_CONFIG) -> None:
         super().__init__()
 
         self.setObjectName('manager')
-        selectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+A"), self)
-        selectAllShortCut.activated.connect(lambda: self.modsTable.selectAll())
+        self.selectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+A"), self)
+        self.selectAllShortCut.activated.connect(lambda: self.modsTable.selectAll())
 
-        deselectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+D"), self)
-        deselectAllShortCut.activated.connect(self.deselectAllShortcut)
+        self.deselectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+D"), self)
+        self.deselectAllShortCut.activated.connect(self.deselectAllShortcut)
 
-        self.saveManager = Save()
-        self.optionsManager = OptionsManager()
+        self.saveManager = Save(saveManagerPath)
+        self.optionsManager = OptionsManager(optionsManagerPath)
 
         layout = qtw.QVBoxLayout()
 
@@ -35,7 +35,7 @@ class ModManager(qtw.QWidget):
         self.refresh.clicked.connect(lambda: self.modsTable.refreshMods())
 
         self.openGameDir = qtw.QPushButton('Open Game Directory', self)
-        self.openGameDir.clicked.connect(lambda: os.startfile(self.optionsManager.getOption(OPTIONS_GAMEPATH)))
+        self.openGameDir.clicked.connect(lambda: os.startfile(self.optionsManager.getGamepath()))
 
         self.startGame = qtw.QPushButton('Start PAYDAY 2', self)
         self.startGame.clicked.connect(self.startPayday)
@@ -46,13 +46,13 @@ class ModManager(qtw.QWidget):
 
         self.labelFrame = qtw.QFrame()
 
-        self.totalModsLabel = qtw.QLabel(self)
+        self.totalModsLabel = qtw.QLabel('Total Mods: 0', self)
 
-        self.modsLabel = qtw.QLabel(self)
+        self.modsLabel = qtw.QLabel('Mods: 0', self)
 
-        self.overrideLabel = qtw.QLabel(self)
+        self.overrideLabel = qtw.QLabel('Mod_Overrides: 0', self)
 
-        self.mapsLabel = qtw.QLabel(self)
+        self.mapsLabel = qtw.QLabel('Maps: 0', self)
 
         for widget in (self.totalModsLabel, self.modsLabel, self.overrideLabel, self.mapsLabel):
             modLabelLayout.addWidget(widget)
@@ -63,7 +63,7 @@ class ModManager(qtw.QWidget):
         self.search.setPlaceholderText('Search...')
         self.search.textChanged.connect(lambda x: self.modsTable.search(x))
 
-        self.modsTable = ModListWidget()
+        self.modsTable = ModListWidget(saveManagerPath, optionsManagerPath)
         self.modsTable.itemChanged.connect(self.updateModCount)
         
         self.modsTable.setObjectName(MOD_TABLE_OBJECT)
@@ -89,7 +89,7 @@ class ModManager(qtw.QWidget):
 
         if errorChecking.validGamePath():
 
-            gamePath: str = self.optionsManager.getOption(OPTIONS_GAMEPATH)
+            gamePath: str = self.optionsManager.getGamepath()
 
             drive: str = gamePath[0].lower()
 

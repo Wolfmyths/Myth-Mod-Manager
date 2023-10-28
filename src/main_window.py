@@ -1,30 +1,37 @@
+import os
+
+
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
+from PySide6.QtCore import QCoreApplication
 
-from manager import ModManager
-from settings import Options
-from profiles import modProfile
-from widgets.aboutQWidget import About
-from save import OptionsManager
+from src.manager import ModManager
+from src.settings import Options
+from src.profiles import modProfile
+from src.widgets.aboutQWidget import About
+from src.widgets.QDialog.newUpdateQDialog import updateDetected
+from src.save import OptionsManager, Save
+from src.api.checkUpdate import checkUpdate
 
-from constant_vars import OPTIONS_WINDOWSIZE_W, OPTIONS_WINDOWSIZE_H, ICON, PROGRAM_NAME, VERSION
+from src.constant_vars import ICON, PROGRAM_NAME, VERSION, MOD_CONFIG, OPTIONS_CONFIG, ROOT_PATH
 
 class MainWindow(qtw.QMainWindow):
-    def __init__(self, app: qtw.QApplication) -> None:
+    def __init__(self, app: qtw.QApplication | None = None, savePath = MOD_CONFIG, optionsPath = OPTIONS_CONFIG) -> None:
         super().__init__()
 
-        self.optionsManager = OptionsManager()
+        self.optionsManager = OptionsManager(optionsPath)
+        self.save = Save(savePath)
 
         self.setWindowIcon(qtg.QIcon(ICON))
         self.setWindowTitle(f'{PROGRAM_NAME} {VERSION}')
         self.setMinimumSize(800, 800)
-        self.resize(self.optionsManager.getOption(OPTIONS_WINDOWSIZE_W, fallback=800, type=int), self.optionsManager.getOption(OPTIONS_WINDOWSIZE_H, fallback=800, type=int))
+        self.resize(self.optionsManager.getWindowSize())
 
         self.app = app
 
         self.tab = qtw.QTabWidget(self)
 
-        self.manager = ModManager()
+        self.manager = ModManager(savePath, optionsPath)
         self.profile = modProfile()
         self.options = Options()
         self.about = About()
@@ -46,9 +53,19 @@ class MainWindow(qtw.QMainWindow):
             self.tab.addTab(page[0], page[1])
 
         self.setCentralWidget(self.tab)
+
+        run_checkUpdate = checkUpdate()
+        run_checkUpdate.updateDetected.connect(lambda x, y: self.updateDetected(x, y))
+    
+    def updateDetected(latestVersion: str, changelog: str) -> None:
+        notice = updateDetected(latestVersion, changelog)
+        notice.exec()
+        
+        if notice.result():
+            os.startfile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
+            QCoreApplication.quit()
     
     def close(self) -> bool:
-        self.optionsManager.setOption(self.width(), OPTIONS_WINDOWSIZE_W)
-        self.optionsManager.setOption(self.height(), OPTIONS_WINDOWSIZE_H)
-
+        self.optionsManager.setWindowSize(self.size())
+        self.optionsManager.writeData()
         return super().close()

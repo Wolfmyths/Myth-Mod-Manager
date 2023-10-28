@@ -1,13 +1,12 @@
 import logging
+import os
 
-from PySide6.QtCore import QUrl
-
-import errorChecking
-from threaded.file_mover import FileMover
-from constant_vars import ModType
+import src.errorChecking as errorChecking
+from src.threaded.file_mover import FileMover
+from src.constant_vars import ModType
 
 class ChangeModType(FileMover):
-    def __init__(self, *mods: tuple[QUrl, ModType]):
+    def __init__(self, *mods: tuple[str, ModType]):
         super().__init__()
 
         self.mods = mods
@@ -16,7 +15,7 @@ class ChangeModType(FileMover):
         self.changeModType(*self.mods)
         return super().run()
     
-    def changeModType(self, *mods: tuple[QUrl, ModType]) -> None:
+    def changeModType(self, *mods: tuple[str, ModType]) -> None:
         '''
         Moves the mod to a new directory
         '''
@@ -30,12 +29,10 @@ class ChangeModType(FileMover):
 
                 self.cancelCheck()
 
-                modURL = mod[0]
+                modsDirPath = mod[0]
                 ChosenDir = mod[1]
 
-                modsDirPath = modURL.toLocalFile()
-
-                mod = modURL.fileName()
+                mod = os.path.basename(modsDirPath)
 
                 self.setCurrentProgress.emit(1, f'Installing {mod}')
 

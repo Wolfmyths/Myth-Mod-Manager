@@ -1,6 +1,6 @@
 import PySide6.QtWidgets as qtw
 
-from widgets.QDialog.QDialog import Dialog
+from src.widgets.QDialog.QDialog import Dialog
 
 class insertString(Dialog):
     '''QDialog class that requests a string input from the user'''
@@ -21,8 +21,8 @@ class insertString(Dialog):
         buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(buttons)
-        self.buttonBox.accepted.connect(lambda: self.accept())
-        self.buttonBox.rejected.connect(lambda: self.reject())
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
 
         for widget in (self.label, self.inputString, self.buttonBox):
             layout.addWidget(widget)

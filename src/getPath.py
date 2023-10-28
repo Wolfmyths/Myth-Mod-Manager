@@ -1,28 +1,28 @@
 import os
 
-from save import OptionsManager
-from constant_vars import OPTIONS_GAMEPATH, ModType
+from src.save import OptionsManager
+from src.constant_vars import ModType, OPTIONS_CONFIG
 
 class Pathing():
     '''Getter functions that shorten the process of obtaining mod paths'''
 
-    def __init__(self) -> None:
-        self.option = OptionsManager()
+    def __init__(self, optionFile: str = OPTIONS_CONFIG) -> None:
+        self.option = optionFile
+    
+    def __getGamepath(self) -> str:
+        return OptionsManager(self.option).getGamepath()
     
     def mod_overrides(self) -> str:
         '''Returns mod_overrides path'''
-        gamePath = self.option.getOption(OPTIONS_GAMEPATH)
-        return os.path.join(gamePath, 'assets', 'mod_overrides')
+        return os.path.join(self.__getGamepath(), 'assets', 'mod_overrides')
     
     def mods(self) -> str:
         '''Returns mods directory path'''
-        gamePath = self.option.getOption(OPTIONS_GAMEPATH)
-        return os.path.join(gamePath, 'mods')
+        return os.path.join(self.__getGamepath(), 'mods')
     
     def maps(self) -> str:
         '''Returns maps directory path'''
-        gamePath = self.option.getOption(OPTIONS_GAMEPATH)
-        return os.path.join(gamePath, 'Maps')
+        return os.path.join(self.__getGamepath(), 'Maps')
     
     def mod(self, type: ModType, modName: str) -> list[str] | str:
         '''

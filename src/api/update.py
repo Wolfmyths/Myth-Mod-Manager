@@ -6,7 +6,7 @@ import json
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PySide6.QtCore import QObject, QUrl, Signal
 
-from constant_vars import ROOT_PATH
+from src.constant_vars import ROOT_PATH
 
 class Update(QObject):
 

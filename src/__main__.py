@@ -3,13 +3,12 @@ import os
 
 import PySide6.QtWidgets as qtw
 
-from main_window import MainWindow
-from save import Save, OptionsManager
-from widgets.QDialog.gamepathQDialog import GamePathNotFound
-from api.checkUpdate import checkUpdate
-from constant_vars import VERSION, PROGRAM_NAME, LOG, IS_SCRIPT, OPTIONS_THEME, LIGHT, OLD_EXE, ROOT_PATH
-import errorChecking
-from style import StyleManager
+from src.main_window import MainWindow
+from src.save import Save, OptionsManager
+from src.widgets.QDialog.gamepathQDialog import GamePathNotFound
+from src.constant_vars import VERSION, PROGRAM_NAME, LOG, IS_SCRIPT, OLD_EXE, ROOT_PATH, ICON
+import src.errorChecking as errorChecking
+from src.style import StyleManager
 
 
 if __name__ == '__main__':
@@ -33,21 +32,18 @@ if __name__ == '__main__':
 
     app = qtw.QApplication(sys.argv)
 
-    run_checkUpdate = checkUpdate()
-
     save = Save()
     optionsManager = OptionsManager()
 
-    app.setStyleSheet(StyleManager().getStyleSheet(optionsManager.getOption(OPTIONS_THEME, LIGHT)))
+    app.setStyleSheet(StyleManager().getStyleSheet(optionsManager.getTheme()))
 
     # Checking game path
     if not errorChecking.validGamePath():
 
         warning = GamePathNotFound(app)
         warning.exec()
-    
+
     # Checking neccessary directories
-    errorChecking.createDisabledModFolder()
     errorChecking.createModDirs()
 
     window = MainWindow(app)

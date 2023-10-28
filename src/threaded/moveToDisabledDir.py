@@ -1,9 +1,7 @@
 import os
 import logging
 
-import errorChecking
-from threaded.file_mover import FileMover
-from constant_vars import OPTIONS_DISPATH, MODS_DISABLED_PATH_DEFAULT
+from src.threaded.file_mover import FileMover
 
 
 class MoveToDisabledDir(FileMover):
@@ -21,9 +19,7 @@ class MoveToDisabledDir(FileMover):
 
         self.setTotalProgress.emit(len(mods))
 
-        disabledModsPath = self.optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
-
-        errorChecking.createDisabledModFolder()
+        disabledModsPath = self.optionsManager.getDispath()
 
         try:
 

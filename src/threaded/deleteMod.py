@@ -39,7 +39,7 @@ class DeleteMod(FileMover):
                 if os.path.isdir(path):
                     shutil.rmtree(path, onerror=self.onError)
                 else:
-                    logging.error('An error was raised in FileMover.deleteMod(), mod path does not exist:\n%s', path)
+                    logging.error('An error was raised in FileMover.deleteMod(), %s path does not exist:\n%s', os.path.basename(path), path)
 
             self.succeeded.emit()
 

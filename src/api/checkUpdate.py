@@ -21,6 +21,7 @@ class checkUpdate(QObject):
 
     def __init__(self) -> None:
         super().__init__()
+        logging.getLogger(__file__)
 
         link = 'https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases'
 
@@ -29,6 +30,7 @@ class checkUpdate(QObject):
         
         network = QNetworkAccessManager(self)
         request = QNetworkRequest(QUrl(link))
+        logging.debug('Request for %s from checkUpdate() started', link)
         
         self.reply = network.get(request)
         self.reply.finished.connect(self.__reply_handler)
@@ -61,4 +63,3 @@ class checkUpdate(QObject):
             self.updateDetected.emit(latestVersion, data['body'])
 
         self.deleteLater()
-                

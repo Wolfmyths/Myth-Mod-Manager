@@ -10,6 +10,7 @@ from semantic_version import Version
 from src.widgets.QDialog.QDialog import Dialog
 from src.constant_vars import VERSION
 from src.widgets.QDialog.announcementQDialog import Notice
+from src.save import OptionsManager
 from src.errorChecking import openWebPage
 
 from src.api.update import Update
@@ -105,6 +106,11 @@ class updateDetected(Dialog):
         self.message.setText('Canceling... (Finishing current step)')
 
         self.autoUpdate.cancel = True
+    
+    def doNotAskAgain(self) -> None:
+        logging.info('Do not alert me to updates button was pressed')
+        OptionsManager().setMMMUpdateAlert(False)
+        self.cancel()
     
     def downloadStarted(self, current: int, total: int) -> None:
 

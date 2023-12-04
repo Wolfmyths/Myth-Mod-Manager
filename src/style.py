@@ -203,6 +203,18 @@ class StyleManager():
             QGroupBox {{
                 border: 15px solid {0};
             }}
+
+            QFrame#externaltool {{
+                background-color: {2};
+                border: 2px solid {3};
+                border-radius: 4px;
+                padding: 2px;
+            }}
+
+            QFrame#optionsframe {{
+                background-color: {2};
+                border: none;
+            }}
             '''
 
     def __init__(self) -> None:

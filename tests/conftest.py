@@ -84,3 +84,17 @@ def createTemp_Profiles_ini() -> str:
     yield tmp_name
 
     os.remove(tmp_name)
+
+@pytest.fixture(scope='module')
+def createTemp_externalShortcuts_ini() -> str:
+
+    data = {'shortcuts' : ['C:\\path\\program.exe', 'D:\\path\\payday.exe', 'C:\\path\\map_builder.exe']}
+
+    with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as tmp:
+        tmp_name = tmp.name
+
+        tmp.write(json.dumps(data))
+
+    yield tmp_name
+
+    os.remove(tmp_name)

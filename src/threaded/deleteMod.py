@@ -7,6 +7,7 @@ from src.threaded.file_mover import FileMover
 class DeleteMod(FileMover):
     def __init__(self, *mods: str):
         super().__init__()
+        logging.getLogger(__name__)
 
         self.mods = mods
     
@@ -16,6 +17,8 @@ class DeleteMod(FileMover):
     
     def deleteMod(self, *mods: str) -> None:
         '''Removes the mod(s) from the user's computer'''
+
+        logging.info('Deleting mods from computer: %s', ', '.join(mods))
 
         self.setTotalProgress.emit(len(mods))
 

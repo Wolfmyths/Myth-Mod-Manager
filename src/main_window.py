@@ -1,11 +1,11 @@
 import os
 
-
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication
 
 from src.manager import ModManager
+from src.tools import ToolManager
 from src.settings import Options
 from src.profiles import modProfile
 from src.widgets.aboutQWidget import About
@@ -33,6 +33,7 @@ class MainWindow(qtw.QMainWindow):
 
         self.manager = ModManager(savePath, optionsPath)
         self.profile = modProfile()
+        self.tools = ToolManager()
         self.options = Options()
         self.about = About()
 
@@ -46,6 +47,7 @@ class MainWindow(qtw.QMainWindow):
         for page in (
                         (self.manager, 'Manager'),
                         (self.profile, 'Profiles'),
+                        (self.tools, 'Tools'),
                         (self.options, 'Options'),
                         (self.about, 'About')
                     ):

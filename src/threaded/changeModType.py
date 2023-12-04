@@ -8,6 +8,7 @@ from src.constant_vars import ModType
 class ChangeModType(FileMover):
     def __init__(self, *mods: tuple[str, ModType]):
         super().__init__()
+        logging.getLogger(__name__)
 
         self.mods = mods
 

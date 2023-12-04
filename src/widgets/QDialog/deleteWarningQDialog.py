@@ -7,11 +7,11 @@ class DeleteModConfirmation(Dialog):
     def __init__(self) -> None:
         super().__init__()
 
-        self.setWindowTitle('Mods are about to be permanently deleted!')
+        self.setWindowTitle('Deletion Confirmation')
 
         layout = qtw.QVBoxLayout()
 
-        warningLabel = qtw.QLabel(self, text='Are you sure you want to delete these mod(s) from your computer?\n(This action cannot be reversed)')
+        self.warningLabel = qtw.QLabel(self, text='Are you sure you want to delete these mod(s) from your computer?\n(This action cannot be reversed)')
 
         buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
@@ -19,7 +19,7 @@ class DeleteModConfirmation(Dialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        for widget in (warningLabel, self.buttonBox):
+        for widget in (self.warningLabel, self.buttonBox):
             layout.addWidget(widget)
         
         self.setLayout(layout)

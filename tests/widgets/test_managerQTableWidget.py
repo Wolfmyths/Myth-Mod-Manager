@@ -35,11 +35,15 @@ def test_addMods(create_QTable: ModListWidget) -> None:
 
 def test_sort(create_QTable: ModListWidget) -> None:
 
-    create_QTable.changeSortState(1)
+    create_QTable.sort(1)
     assert create_QTable.sortState['col'] == 1
-    assert create_QTable.sortState['ascending'] == True
-    create_QTable.changeSortState(1)
-    assert create_QTable.sortState['ascending'] == False
+    assert create_QTable.sortState['ascending'] == qt.SortOrder.AscendingOrder
+    create_QTable.sort(2)
+    assert create_QTable.sortState['col'] == 2
+    assert create_QTable.sortState['ascending'] == qt.SortOrder.AscendingOrder
+    create_QTable.sort(2)
+    assert create_QTable.sortState['col'] == 2
+    assert create_QTable.sortState['ascending'] == qt.SortOrder.DescendingOrder
 
 def test_getSelectedNameItems(create_QTable: ModListWidget) -> None:
 
@@ -55,11 +59,6 @@ def test_getSelectedNameItems(create_QTable: ModListWidget) -> None:
 def test_getModTypeCount(create_QTable: ModListWidget) -> None:
     assert create_QTable.getModTypeCount(ModType.mods) == 1
 
-#TODO: Test drop events
-@pytest.mark.skip
-def test_dropFile():
-    pass
-
 def test_Icon(create_QTable: ModListWidget, getDir: str) -> None:
 
     with tempfile.TemporaryDirectory(dir=os.path.join(getDir, 'game_path', 'mods')) as tmp_mod:
@@ -73,6 +72,11 @@ def test_Icon(create_QTable: ModListWidget, getDir: str) -> None:
         tmp_mod_item = create_QTable.findItems(tmp_mod_name, qt.MatchFlag.MatchExactly)[0]
 
         assert tmp_mod_item.icon().isNull() == False
+
+#TODO: Test installMods()
+@pytest.mark.skip
+def test_installMods():
+    pass
 
 def test_widget(qtbot: QtBot, create_QTable: ModListWidget) -> None:
 

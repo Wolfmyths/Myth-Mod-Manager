@@ -2,6 +2,7 @@ import os
 import logging
 
 import PySide6.QtWidgets as qtw
+from PySide6.QtCore import QCoreApplication
 
 from src.widgets.progressWidget import ProgressWidget
 from src.threaded.backupMods import BackupMods
@@ -9,7 +10,10 @@ from src.save import OptionsManager
 from src.getPath import Pathing
 from src.style import StyleManager
 from src.widgets.ignoredModsQListWidget import IgnoredMods
-from src.constant_vars import DARK, LIGHT, OPTIONS_CONFIG
+from src.constant_vars import DARK, LIGHT, OPTIONS_CONFIG, ROOT_PATH
+from src.widgets.QDialog.newUpdateQDialog import updateDetected
+
+from src.api.checkUpdate import checkUpdate
 
 class Options(qtw.QWidget):
 
@@ -24,6 +28,13 @@ class Options(qtw.QWidget):
         layout.setRowWrapPolicy(qtw.QFormLayout.RowWrapPolicy.WrapAllRows)
 
         self.optionsManager = OptionsManager(optionsPath)
+
+        self.updateAlertCheckbox = qtw.QCheckBox(self, text='Update alerts on startup')
+        self.updateAlertCheckbox.setChecked(self.optionsManager.getMMMUpdateAlert())
+        self.updateAlertCheckbox.clicked.connect(self.setUpdateAlert)
+
+        self.checkUpdateButton = qtw.QPushButton(self, text='Check for updates')
+        self.checkUpdateButton.clicked.connect(self.checkUpdate)
 
         self.gameDirLabel = qtw.QLabel(self, text='Payday 2 Game Path:')
 
@@ -84,7 +95,8 @@ class Options(qtw.QWidget):
         self.modLog = qtw.QPushButton(parent=self, text='Mod Crash Logs')
         self.modLog.clicked.connect(lambda: self.openCrashLogBLT())
 
-        for row in ( (self.gameDirLabel, self.gameDir),
+        for row in ( (self.updateAlertCheckbox, self.checkUpdateButton),
+                     (self.gameDirLabel, self.gameDir),
                      (self.disabledModLabel, self.disabledModDir),
                      (self.ignoredModsLabel, self.ignoredModsListWidget),
                      (self.backupModsLabel, self.backupMods),
@@ -95,6 +107,28 @@ class Options(qtw.QWidget):
             layout.addRow(row[0], row[1])
 
         self.setLayout(layout)
+    
+    def setUpdateAlert(self) -> None:
+        alert = self.updateAlertCheckbox.isChecked()
+        self.optionsManager.setMMMUpdateAlert(alert)
+        self.optionsManager.writeData()
+    
+    def checkUpdate(self) -> None:
+        def updateFound(latestVersion: str, changelog: str) -> None:
+            notice = updateDetected(latestVersion, changelog)
+            notice.rejected.connect(lambda: self.checkUpdateButton.setText('Check for updates'))
+            notice.exec()
+            
+            if notice.result():
+                os.startfile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
+                QCoreApplication.quit()
+
+        self.checkUpdateButton.setText('Checking...')
+
+        self.run_checkupdate = checkUpdate()
+        self.run_checkupdate.updateDetected.connect(lambda x, y: updateFound(x, y))
+        self.run_checkupdate.error.connect(lambda: self.checkUpdateButton.setText('Error: Check logs for more info'))
+        self.run_checkupdate.upToDate.connect(lambda: self.checkUpdateButton.setText('Up to date! ^_^'))
 
     def openCrashLogBLT(self) -> None:
         modPath = Pathing().mods()

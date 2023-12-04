@@ -63,6 +63,7 @@ def createTemp_Config_ini(getDir: str) -> str:
     config.add_section(OptionKeys.section.value)
     config.set(OptionKeys.section.value, OptionKeys.game_path.value, os.path.join(getDir, 'game_path'))
     config.set(OptionKeys.section.value, OptionKeys.dispath.value, os.path.join(getDir, 'game_path', 'disabledMods'))
+    config.set(OptionKeys.section.value, OptionKeys.mmm_update_alert.value, str(False))
 
     with open(tmp_filename, 'w') as f:
         config.write(f)

@@ -18,6 +18,8 @@ class checkUpdate(QObject):
     '''
 
     updateDetected = Signal(str, str)
+    upToDate = Signal()
+    error = Signal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -42,6 +44,7 @@ class checkUpdate(QObject):
             self.__checkVersion()
         else:
             logging.error('Internet error in checkUpdate():\n%s', reply.error())
+            self.error.emit()
     
     def __checkVersion(self) -> None:
         reply: QNetworkReply = self.sender()
@@ -50,6 +53,7 @@ class checkUpdate(QObject):
             data: dict = json.loads(reply.readAll().data().decode())
         except Exception as e:
             logging.error('An error occured trying to access a Github API reply in checkUpdate().__checkversion():\n%s', str(e))
+            self.error.emit()
             return
 
         if isPrerelease(VERSION):
@@ -61,5 +65,7 @@ class checkUpdate(QObject):
 
         if latestVersion > VERSION:
             self.updateDetected.emit(latestVersion, data['body'])
+        else:
+            self.upToDate.emit()
 
         self.deleteLater()

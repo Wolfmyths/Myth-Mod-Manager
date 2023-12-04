@@ -56,10 +56,11 @@ class MainWindow(qtw.QMainWindow):
 
         self.setCentralWidget(self.tab)
 
-        run_checkUpdate = checkUpdate()
-        run_checkUpdate.updateDetected.connect(lambda x, y: self.updateDetected(x, y))
+        if self.optionsManager.getMMMUpdateAlert():
+            self.run_checkUpdate = checkUpdate()
+            self.run_checkUpdate.updateDetected.connect(lambda x, y: self.updateDetected(x, y))
     
-    def updateDetected(latestVersion: str, changelog: str) -> None:
+    def updateDetected(self, latestVersion: str, changelog: str) -> None:
         notice = updateDetected(latestVersion, changelog)
         notice.exec()
         

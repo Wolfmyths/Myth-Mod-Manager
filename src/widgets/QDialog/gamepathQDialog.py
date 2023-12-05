@@ -52,20 +52,11 @@ class GamePathNotFound(Dialog):
         self.setLayout(layout)
 
     def openFileDialog(self) -> None:
-        nameFilters = ['PAYDAY 2 Directory']
         dialog = qtw.QFileDialog()
-        dialog.setFileMode(dialog.FileMode.Directory)
-        dialog.setNameFilters(nameFilters)
-        dialog.selectNameFilter(nameFilters[0])
-        dialog.setWindowTitle('Select PAYDAY 2 Directory')
-        dialog.setLabelText(dialog.DialogLabel.Accept, 'Select')
+        url = dialog.getExistingDirectory(self, caption='Select PAYDAY 2 Directory')
 
-        dialog.exec()
-
-        urls = dialog.selectedFiles()
-
-        if dialog.result() and urls:
-            self.gameDir.setText(urls[0])
+        if url:
+            self.gameDir.setText(url)
             self.checkGamePath()
 
     def checkGamePath(self) -> None:

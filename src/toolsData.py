@@ -9,6 +9,7 @@ class ToolJSON():
     def __init__(self, path: str = TOOLS_JSON) -> None:
         logging.getLogger(__name__)
         self.path = path
+
         try:
             self.__loadJSON()
         except (json.decoder.JSONDecodeError, FileNotFoundError):
@@ -30,7 +31,7 @@ class ToolJSON():
         with open(self.path, 'r') as f:
             self.file = json.loads(f.read())
 
-    def __saveJSON(self):
+    def saveData(self):
         logging.debug('External tools have been saved')
         with open(TOOLS_JSON, 'w') as f:
             f.seek(0)
@@ -53,8 +54,6 @@ class ToolJSON():
             else:
                 dupes.append(url)
 
-        self.__saveJSON()
-
         if dupes:
             logging.info('Duplicate URL shortcuts tried to be added: %s', ', '.join(dupes))
 
@@ -63,16 +62,11 @@ class ToolJSON():
     def removeTool(self, *urls: str) -> None:
         for url in urls:
             if url in self.file['shortcuts']:
-                urlToBeDeleted = os.path.abspath(url)
-                logging.info('External tool at %s has been deleted', urlToBeDeleted)
-                self.file['shortcuts'].remove(urlToBeDeleted)
-        
-        self.__saveJSON()
+                logging.info('External tool at %s has been deleted', url)
+                self.file['shortcuts'].remove(url)
     
     def changeTool(self, old: str, new: str) -> None:
         if old in self.file['shortcuts']:
             logging.info('External tool url has changed from %s to %s', old, new)
             index = self.file['shortcuts'].index(os.path.abspath(old))
             self.file['shortcuts'][index] = os.path.abspath(new)
-
-            self.__saveJSON()

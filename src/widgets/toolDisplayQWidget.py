@@ -8,17 +8,16 @@ from src.widgets.QDialog.announcementQDialog import Notice
 from src.widgets.QDialog.deleteWarningQDialog import DeleteModConfirmation
 
 class ExternalTool(qtw.QFrame):
-    deleted = Signal()
-    nameChanged = Signal(str)
+    deleted = Signal(str)
+    nameChanged = Signal(str, str)
     def __init__(self, toolURL: str) -> None:
         super().__init__()
         logging.getLogger(__name__)
+        self.toolURL = toolURL
 
         self.setMaximumSize(256, 256)
 
         self.setObjectName('externaltool')
-
-        self.toolURL = toolURL
 
         style = self.style()
 
@@ -63,26 +62,18 @@ class ExternalTool(qtw.QFrame):
         return os.path.basename(path).split('.')[0]
 
     def editToolURL(self) -> None:
-        nameFilters = ['Executables (*.exe, *.bat)', 'Any (*)']
         dialog = qtw.QFileDialog()
-        dialog.setFileMode(dialog.FileMode.ExistingFile)
-        dialog.setNameFilters(nameFilters)
-        dialog.selectNameFilter(nameFilters[0])
-        dialog.setWindowTitle('Select External Tool')
-        dialog.setLabelText(dialog.DialogLabel.Accept, 'Select')
+        new_url = dialog.getOpenFileName(self, 
+                                       caption='Select new external tool',
+                                       filter='Executables (*.exe *.bat)')[0]
 
-        dialog.exec()
-
-        new_url = dialog.selectedUrls()
-
-        if dialog.result() and new_url:
-            new_url = new_url[0].toLocalFile()
-
+        if new_url:
+            old_url = self.toolURL
             self.toolURL = new_url
 
             self.startToolButton.setText(self.__trimBasename(self.toolURL))
 
-            self.nameChanged.emit(self.toolURL)
+            self.nameChanged.emit(new_url, old_url)
 
     def deleteExternalTool(self, ask: bool = True) -> None:
         if ask:
@@ -93,7 +84,7 @@ class ExternalTool(qtw.QFrame):
             if not notice.result():
                 return
 
-        self.deleted.emit()
+        self.deleted.emit(self.toolURL)
 
     def startExternalTool(self) -> None:
         try:

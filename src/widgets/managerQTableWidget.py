@@ -430,23 +430,6 @@ class ModListWidget(qtw.QTableWidget):
 
             if not item.icon().isNull():
                 item.setIcon(qtg.QIcon(os.path.join(UI_GRAPHICS_PATH, reverseDict[newIcon])))
-    
-    def selectModsToAdd(self) -> None:
-        nameFilters = ['Folder or Compressed File (*)']
-        dialog = qtw.QFileDialog()
-        dialog.setFileMode(dialog.FileMode.ExistingFiles)
-        dialog.setNameFilters(nameFilters)
-        dialog.selectNameFilter(nameFilters[0])
-        dialog.setWindowTitle('Select mods to install')
-        dialog.setLabelText(dialog.DialogLabel.Accept, 'Select')
-
-        dialog.exec()
-
-        new_url = dialog.selectedUrls()
-
-        if dialog.result() and new_url:
-            logging.info('Installing mods via QFileDialog')
-            self.installMods(*[x.toLocalFile() for x in new_url])
 
     def installMods(self, *urls: str) -> None:
 

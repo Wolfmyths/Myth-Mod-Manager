@@ -21,17 +21,10 @@ class ToolManager(qtw.QWidget):
         self.setLayout(layout)
     
     def createTools(self) -> None:
-        nameFilters = ['Executables (*.exe, *.bat)', 'Any (*)']
         dialog = qtw.QFileDialog()
-        dialog.setFileMode(dialog.FileMode.ExistingFile)
-        dialog.setNameFilters(nameFilters)
-        dialog.selectNameFilter(nameFilters[0])
-        dialog.setWindowTitle('Select External Tool')
-        dialog.setLabelText(dialog.DialogLabel.Accept, 'Select')
+        urls = dialog.getOpenFileNames(self, 
+                                       caption='Select External Tool(s)', 
+                                       filter='Executables (*.exe *.bat)')[0]
 
-        dialog.exec()
-
-        new_url = dialog.selectedUrls()
-
-        if dialog.result() and new_url:
-            self.toolsWidget.addTool(*[x.toLocalFile() for x in new_url])
+        if urls:
+            self.toolsWidget.addTool(*urls)

@@ -34,11 +34,8 @@ class ManagerMenu(ModContextMenu):
         self.hideMod = qtg.QAction('Hide', self)
         self.hideMod.triggered.connect(self.hideModClicked)
 
-        self.installMods = qtg.QAction('Install mod(s)...', self)
-        self.installMods.triggered.connect(self.installModsClicked)
-
         self.addActions((self.enable, self.disable, self.hideMod, self.delete, self.addSeparator(),
-                         self.visitModPage, self.openModDir, self.addSeparator(), self.installMods))
+                         self.visitModPage, self.openModDir))
     
     def enabledClicked(self):
         if self.wasLastClickLMB():
@@ -63,10 +60,6 @@ class ManagerMenu(ModContextMenu):
     def hideModClicked(self):
         if self.wasLastClickLMB():
             self.qParent.hideMod()
-    
-    def installModsClicked(self):
-        if self.wasLastClickLMB():
-            self.qParent.selectModsToAdd()
 
 # EVENT OVERRIDES
 

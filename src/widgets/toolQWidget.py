@@ -13,7 +13,6 @@ class ExternalToolDisplay(qtw.QListWidget):
     def __init__(self, json = TOOLS_JSON) -> None:
         super().__init__()
         logging.getLogger(__name__)
-
         self.json = ToolJSON(json)
 
         self.setWrapping(True)
@@ -30,6 +29,7 @@ class ExternalToolDisplay(qtw.QListWidget):
 
         if save:
             dupes = self.json.newTool(*url)
+            self.json.saveData()
 
         for s in url:
 
@@ -40,8 +40,8 @@ class ExternalToolDisplay(qtw.QListWidget):
             self.addItem(item)
 
             frame = ExternalTool(s)
-            frame.deleted.connect(lambda: self.deleteItem(item, s))
-            frame.nameChanged.connect(lambda x: self.changeName(item, x))
+            frame.deleted.connect(lambda x: self.deleteItem(x))
+            frame.nameChanged.connect(lambda x, y: self.changeName(x, y))
             item.setSizeHint(QSize(245, 245))
 
             self.setItemWidget(item, frame)
@@ -51,11 +51,16 @@ class ExternalToolDisplay(qtw.QListWidget):
                             'Duplicate shortcuts found')
             notice.exec()
     
-    def deleteItem(self, item: qtw.QListWidgetItem, url: str) -> None:
+    def deleteItem(self, url: str) -> None:
+        
+        item = self.findItems(url, qt.MatchFlag.MatchContains)[0]
         self.takeItem(self.row(item))
+
         self.json.removeTool(url)
 
-    def changeName(self, item: qtw.QListWidgetItem, newUrl: str) -> None:
-        oldURL = item.text()
+    def changeName(self, newUrl: str, oldUrl: str) -> None:
+        item = self.findItems(oldUrl, qt.MatchFlag.MatchExactly)[0]
         item.setText(newUrl)
-        self.json.changeTool(oldURL, newUrl)
+
+        self.json.changeTool(oldUrl, newUrl)
+        self.json.saveData()

@@ -1,10 +1,14 @@
 import pytest
 from pytestqt.qtbot import QtBot
 
+from PySide6.QtCore import Qt as qt
+
 from src.widgets.toolQWidget import ExternalToolDisplay
 
 MOCK_NAME = 'new name'
-MOCK_URLS = ('url', 'url2')
+MOCK_URLS = ('C:\\this\\is\\a\\mock\\url.exe', 'D:\\this\\is\\a\\mock\\url2.bat')
+
+EXPECTED_URL = 'C:\\path\\program.exe'
 
 # ExternalToolDisplay starts with 3 items
 @pytest.fixture(scope='function')
@@ -13,22 +17,17 @@ def create_ExternalToolDisplay(createTemp_externalShortcuts_ini: str) -> Externa
 
 def test_deleteItem(create_ExternalToolDisplay: ExternalToolDisplay) -> None:
 
-    item = create_ExternalToolDisplay.item(0)
-
-    create_ExternalToolDisplay.deleteItem(item, item.text())
+    create_ExternalToolDisplay.deleteItem(EXPECTED_URL)
 
     assert create_ExternalToolDisplay.count() == 2
 
 def test_changeName(create_ExternalToolDisplay: ExternalToolDisplay) -> None:
 
-    item = create_ExternalToolDisplay.item(0)
+    create_ExternalToolDisplay.changeName(MOCK_NAME, EXPECTED_URL)
 
-    create_ExternalToolDisplay.changeName(item, MOCK_NAME)
-
-    assert item.text() == MOCK_NAME
+    assert create_ExternalToolDisplay.item(0).text() == MOCK_NAME
 
 def test_addTool(create_ExternalToolDisplay: ExternalToolDisplay) -> None:
-
     create_ExternalToolDisplay.addTool(*MOCK_URLS, save=False)
 
     assert create_ExternalToolDisplay.count() == 5

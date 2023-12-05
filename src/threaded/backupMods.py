@@ -56,8 +56,6 @@ class BackupMods(FileMover):
 
                         os.mkdir(path)
 
-                        print(self.bundledFilePath, os.path.isfile(self.bundledFilePath))
-
                 # Because this dir is a nested one, needs os.makedirs unlike the others
                 if not os.path.isdir(bundledOverridePath):
 

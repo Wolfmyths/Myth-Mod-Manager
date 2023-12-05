@@ -126,7 +126,9 @@ class newModLocation(Dialog):
             count += 1
 
     def accept(self) -> None:
-
         self.getData()
-
         return super().accept()
+    
+    def reject(self) -> None:
+        self.setResult(0)
+        return super().reject()

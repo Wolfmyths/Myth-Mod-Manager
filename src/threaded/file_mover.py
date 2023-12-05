@@ -51,6 +51,7 @@ class FileMover(Thread):
 
             try:
                 shutil.move(src, dest)
+                logging.info('Moved file %s to destination %s', src, dest)
                 break
 
             except PermissionError:

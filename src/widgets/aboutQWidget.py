@@ -61,7 +61,8 @@ Suggestions are greatly appreciated on modworkshop.net
         self.aboutLabel.setAlignment(qt.AlignmentFlag.AlignTop)
 
         self.shortcutsLabel = qtw.QLabel(self)
-        self.shortcutsLabel.setText('Shortcuts:\n\n+ Select All: Ctrl + A\n\n+ Deselect All: Ctrl + D\n\n+ Delete Mod or Profile: Del\n\n+ Change Profile Name: Enter')
+        self.shortcutsLabel.setText(
+            'Shortcuts:\n\n+ Select All: Ctrl + A\n\n+ Deselect All: Ctrl + D\n\n+ Delete Mod or Profile: Del\n\n+ Change Profile Name: Enter\n\n+ Switch tabs: Arrow left, Arrow right')
         self.shortcutsLabel.setTextFormat(qt.TextFormat.MarkdownText)
 
         for widget in (self.buttonFrame, self.aboutLabel, self.shortcutsLabel):

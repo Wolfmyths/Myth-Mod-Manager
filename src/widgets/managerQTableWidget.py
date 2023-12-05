@@ -3,7 +3,7 @@ import logging
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QUrl
+from PySide6.QtCore import Qt as qt
 
 from src.widgets.QMenu.managerQMenu import ManagerMenu
 from src.widgets.progressWidget import ProgressWidget
@@ -26,7 +26,6 @@ class ModListWidget(qtw.QTableWidget):
 
     def __init__(self, savePath: str = MOD_CONFIG, optionsPath: str = OPTIONS_CONFIG) -> None:
         super().__init__()
-
         logging.getLogger(__name__)
 
         self.setObjectName('modlistwidget')
@@ -49,14 +48,17 @@ class ModListWidget(qtw.QTableWidget):
 
         self.setHorizontalHeaderLabels(('Name', 'Type', 'Enabled', 'Version'))
 
-        self.sortState = {'col' : 0, 'ascending': True}
+        horizontalHeader = self.horizontalHeader()
 
-        self.horizontalHeader().sectionClicked.connect(lambda x: self.changeSortState(x))
+        horizontalHeader.sectionClicked.connect(lambda x: self.sort(x))
+        horizontalHeader.setHighlightSections(False)
 
-        self.horizontalHeader().setSectionResizeMode(0, qtw.QHeaderView.ResizeMode.Stretch)
-        self.horizontalHeader().setSectionResizeMode(1, qtw.QHeaderView.ResizeMode.Interactive)
-        self.horizontalHeader().setSectionResizeMode(2, qtw.QHeaderView.ResizeMode.Interactive)
-        self.horizontalHeader().setSectionResizeMode(3, qtw.QHeaderView.ResizeMode.Interactive)
+        horizontalHeader.setSectionResizeMode(0, qtw.QHeaderView.ResizeMode.Stretch)
+        horizontalHeader.setSectionResizeMode(1, qtw.QHeaderView.ResizeMode.Interactive)
+        horizontalHeader.setSectionResizeMode(2, qtw.QHeaderView.ResizeMode.Interactive)
+        horizontalHeader.setSectionResizeMode(3, qtw.QHeaderView.ResizeMode.Interactive)
+
+        self.sortState = {'col' : 0, 'ascending': qt.SortOrder.AscendingOrder}
 
         self.setHorizontalScrollBarPolicy(qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
@@ -88,34 +90,28 @@ class ModListWidget(qtw.QTableWidget):
         if errorChecking.isTypeMod(modType):
             return len(self.findItems(modType.value, qt.MatchFlag.MatchExactly))
     
-    def changeSortState(self, header: int) -> None:
+    def sort(self, header: int, changeAscending = True) -> None:
         '''
-        Changes the sort state based off the header's index that wants to be sorted
-        
-        If the header is already the one being sorted, then reverse the order from
-        ascending to descending
+        Sorts the table widget based on the header selected.
+
+        If `header` is equal to `self.sortState['col']`
+        reverse the order unless specified with `changeAscending`.
         '''
 
-        if self.sortState['col'] == header:
+        if header == self.sortState['col'] and changeAscending:
 
-            self.sortState['ascending'] = not self.sortState['ascending']
+            inverseDict = {qt.SortOrder.AscendingOrder : qt.SortOrder.DescendingOrder, 
+                           qt.SortOrder.DescendingOrder : qt.SortOrder.AscendingOrder}
+
+            currentSort = self.sortState['ascending']
+
+            self.sortState['ascending'] = inverseDict[currentSort]
 
         self.sortState['col'] = header
-
-        self.sort()
-    
-    def sort(self) -> None:
-        '''Sorts the table widget based on the sort state, see changeSortState()'''
-
-        if self.sortState['ascending']:
-
-            sortType = qt.SortOrder.AscendingOrder
-        else:
-            sortType = qt.SortOrder.DescendingOrder
         
         logging.debug('Sorting items by col: %s, ascending: %s', self.sortState.get('col'), self.sortState.get('ascending'))
 
-        self.sortItems(self.sortState['col'], sortType)
+        self.sortItems(self.sortState['col'], self.sortState['ascending'])
     
     def addMod(self, **kwargs: str | ModType | bool) -> None:
         '''
@@ -292,7 +288,7 @@ class ModListWidget(qtw.QTableWidget):
         self.clearSelection()
 
         if sorting:
-            self.sort()
+            self.sort(self.sortState['col'], False)
 
     def getMods(self) -> list[list[str]]:
         '''
@@ -435,6 +431,43 @@ class ModListWidget(qtw.QTableWidget):
             if not item.icon().isNull():
                 item.setIcon(qtg.QIcon(os.path.join(UI_GRAPHICS_PATH, reverseDict[newIcon])))
 
+    def installMods(self, *urls: str) -> None:
+
+        dirs: list[str] = [x for x in urls if errorChecking.getFileType(x) == 'dir']
+        zips: list[str] = [x for x in urls if errorChecking.getFileType(x) == 'zip']
+
+        # Gather where the user wants each mod to go
+        notice = newModLocation(*[x for x in list(dirs + zips)])
+        notice.exec()
+
+        if not notice.result():
+            return
+
+        # Dictionary holding the destination for each mod
+        dict_ = notice.typeDict
+
+        # Combine the mod location and URL into a Tuple
+        if dirs:
+
+            dirTuple: list[tuple[str, ModType]] = []
+
+            for dir in dirs:
+                dirTuple.append((dir, dict_[os.path.basename(dir)]))
+
+            startFileMover = ProgressWidget(ChangeModType(*dirTuple))
+            startFileMover.exec()
+
+        if zips:
+
+            zipsTuple: list[tuple[str, ModType]] = []
+
+            for zip in zips:
+                zipsTuple.append((zip, dict_[os.path.basename(zip)]))
+
+            startFileMover = ProgressWidget(UnZipMod(*zipsTuple))
+            startFileMover.exec()
+    
+        self.itemChanged.emit(qtw.QTableWidgetItem())
 
 # EVENT OVERRIDES
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
@@ -448,7 +481,7 @@ class ModListWidget(qtw.QTableWidget):
         return super().mousePressEvent(event)
     
     def dragEnterEvent(self, event: qtg.QDragEnterEvent) -> None:
-        
+
         if event.mimeData().hasUrls():
 
             event.accept()
@@ -466,72 +499,10 @@ class ModListWidget(qtw.QTableWidget):
             event.ignore()
     
     def dropEvent(self, event: qtg.QDropEvent) -> None:
+        if event.mimeData().hasUrls():
 
-        '''
-        All cases except where files can be moved should end in `event.ignore()` then `return`
-        to prevent the file from automatically being put into the recycling bin
+            logging.info('Drop event with URLs detected')
 
-        The only exception to this is when the file being dropped is a regular folder
-        '''
-        try:
-            if event.mimeData().hasUrls():
-                
-                # Get QUrls
-                urls = event.mimeData().urls()
+            self.installMods(*[x.toLocalFile() for x in event.mimeData().urls()])
 
-                dirs: list[QUrl] = []
-                zips: list[QUrl] = []
-
-                for mod in urls:
-                    logging.info('Beginning to install %s via drop event', mod.fileName())
-
-                    fileType = errorChecking.getFileType(mod.toLocalFile())
-                    logging.debug('File Type: %s', fileType)
-
-                    if fileType == 'dir':
-                        dirs.append(mod)
-
-                    elif fileType == 'zip':
-                        zips.append(mod)
-
-                # Gather where the user wants each mod to go
-                notice = newModLocation(*[x.toString() for x in list(dirs + zips)])
-                notice.exec()
-
-                dict_ = notice.typeDict
-
-                if len(dict_.keys()) != len(dirs + zips):
-                    raise Exception('canceled')
-
-                # Combine the mod location and URL into a Tuple
-                if dirs:
-
-                    dirTuple: list[tuple[str, ModType]] = []
-
-                    for dir in dirs:
-                        dirTuple.append((dir.toString(), dict_[dir.fileName()]))
-
-                    startFileMover = ProgressWidget(ChangeModType(*dirTuple))
-                    startFileMover.exec()
-
-                if zips:
-
-                    zipsTuple: list[tuple[str, ModType]] = []
-
-                    for zip in zips:
-                        zipsTuple.append((zip.toString(), dict_[zip.fileName()]))
-
-                    startFileMover = ProgressWidget(UnZipMod(*zipsTuple))
-                    startFileMover.exec()
-            
-            self.itemChanged.emit(qtw.QTableWidgetItem())
-
-        except Exception as e:
-
-            if str(e) == 'canceled':
-                logging.info('Table widget drop event has been canceled:\nNot all mods were given a destination')
-
-            else:
-                logging.error('An error occured in the table widget drop event:\n%s', str(e))
-        finally:
-            event.ignore()
+        event.ignore()

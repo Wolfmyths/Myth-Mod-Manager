@@ -36,6 +36,7 @@ MANIFEST
 config.ini
 mods.ini
 profiles.json
+externalshortcuts.json
 
 # Disabled Mods Directory
 disabled-mods/

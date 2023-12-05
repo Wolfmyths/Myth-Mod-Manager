@@ -19,6 +19,8 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 * Disable mods you don't want to use at the moment.
     + *This feature is good for testing out which mod is crashing the game!*
 
+* External tools tab to have shortcuts to modding tools in one place
+
 * Search bar to find the installed mod you're looking for in seconds.
 
 * Create profiles to organize your mods.
@@ -74,8 +76,7 @@ Windows:
 
 Linux/MacOS:
 
-+ There are plans to add support for Linux/MacOS
-    - If you are experienced with either OS, help is wanted at this github issue: https://github.com/Wolfmyths/Myth-Mod-Manager/issues/18
+If you are an avid Linux user you may be able to help create compadability for MacOS/Linux on [this issue here](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/18)
 
 ### Reguarding Storefront
 
@@ -86,8 +87,8 @@ You may download any version of Myth Mod Manager and view changelogs at the [rel
 
 # Future Plans
 
++ Rewrite Settings UI
 + New Icon/Logo
-+ Duplicate mod detection
 + Auto mod type detection
 + Linux support
 + Some kind of [modworkshop.net](https://modworkshop.net/g/payday-2) integration, see [issue #14](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/14)

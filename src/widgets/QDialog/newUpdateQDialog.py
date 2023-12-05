@@ -10,6 +10,7 @@ from semantic_version import Version
 from src.widgets.QDialog.QDialog import Dialog
 from src.constant_vars import VERSION
 from src.widgets.QDialog.announcementQDialog import Notice
+from src.save import OptionsManager
 from src.errorChecking import openWebPage
 
 from src.api.update import Update
@@ -54,6 +55,8 @@ class updateDetected(Dialog):
         self.buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(self.buttons)
+        self.buttonBox.addButton('Do not ask again', qtw.QDialogButtonBox.ButtonRole.ActionRole)
+        self.buttonBox.buttons()[2].clicked.connect(self.doNotAskAgain)
         self.buttonBox.accepted.connect(self.okButton)
         self.buttonBox.rejected.connect(self.cancel)
 
@@ -106,11 +109,19 @@ class updateDetected(Dialog):
 
         self.autoUpdate.cancel = True
     
+    def doNotAskAgain(self) -> None:
+        logging.info('Do not alert me to updates button was pressed')
+        options = OptionsManager()
+        options.setMMMUpdateAlert(False)
+        options.writeData()
+        self.cancel()
+    
     def downloadStarted(self, current: int, total: int) -> None:
 
         if self.autoUpdate.cancel:
             reply: QNetworkReply = self.autoUpdate.network.sender()
             reply.abort()
+            self.reject()
 
         if not self.downloadState:
             self.progressBar.setMaximum(self.progressBar.maximum() + total)

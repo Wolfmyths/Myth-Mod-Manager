@@ -90,3 +90,7 @@ def test_OptionsMethods(createTemp_Config_ini: str) -> None:
     options.setWindowSize(QSize(0, 0))
     options.writeData()
     assert options.getWindowSize() == QSize(0, 0)
+
+    options.setMMMUpdateAlert(False)
+    options.writeData()
+    assert options.getMMMUpdateAlert() == False

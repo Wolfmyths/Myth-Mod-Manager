@@ -63,6 +63,7 @@ def createTemp_Config_ini(getDir: str) -> str:
     config.add_section(OptionKeys.section.value)
     config.set(OptionKeys.section.value, OptionKeys.game_path.value, os.path.join(getDir, 'game_path'))
     config.set(OptionKeys.section.value, OptionKeys.dispath.value, os.path.join(getDir, 'game_path', 'disabledMods'))
+    config.set(OptionKeys.section.value, OptionKeys.mmm_update_alert.value, str(False))
 
     with open(tmp_filename, 'w') as f:
         config.write(f)
@@ -75,6 +76,20 @@ def createTemp_Config_ini(getDir: str) -> str:
 def createTemp_Profiles_ini() -> str:
 
     data = {'Awesome mods' : ['cool_beans', 'among us guards', 'make game easy']}
+
+    with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as tmp:
+        tmp_name = tmp.name
+
+        tmp.write(json.dumps(data))
+
+    yield tmp_name
+
+    os.remove(tmp_name)
+
+@pytest.fixture(scope='module')
+def createTemp_externalShortcuts_ini() -> str:
+
+    data = {'shortcuts' : ['C:\\path\\program.exe', 'D:\\path\\payday.exe', 'C:\\path\\map_builder.exe']}
 
     with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as tmp:
         tmp_name = tmp.name

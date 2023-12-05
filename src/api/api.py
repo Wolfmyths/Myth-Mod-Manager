@@ -2,6 +2,7 @@ import os
 import json
 import xml.etree.ElementTree as et
 import logging
+from typing import Any
 
 from semantic_version import Version
 
@@ -25,12 +26,14 @@ def __loadXML(modPath: str) -> et.ElementTree | None:
     
     return xml
 
-def __parseVersion(version: str) -> Version | None:
+def __parseVersion(version: Any) -> Version | None:
 
     logging.debug('Parsing %s', version)
 
     if version is None:
         return
+    
+    version: str = str(version)
     
     removeChars = ('v', 'V')
     try:

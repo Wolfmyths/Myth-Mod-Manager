@@ -30,11 +30,12 @@ class OptionKeys(StrEnum):
 
     section      = 'OPTIONS' # Main section
 
-    game_path    = auto()
-    dispath      = 'disabled-mods'
-    color_theme  = auto()
-    windowsize_w = auto()
-    windowsize_h = auto()
+    game_path    =     auto()
+    dispath      =     'disabled-mods'
+    color_theme  =     auto()
+    windowsize_w =     auto()
+    windowsize_h =     auto()
+    mmm_update_alert = auto()
 
 class ProfileRole():
 
@@ -55,6 +56,7 @@ ICON = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'icon.ico')
 MOD_CONFIG = 'mods.ini'
 OPTIONS_CONFIG = 'config.ini'
 PROFILES_JSON = 'profiles.json'
+TOOLS_JSON = 'externalshortcuts.json'
 START_PAYDAY = 'runGame.bat'
 OLD_EXE = 'Myth Mod Manager.exe (Old)'
 DISABLED_MODS = 'disabled-mods'
@@ -94,4 +96,4 @@ LIGHT = 'light'
 # Program Info
 PROGRAM_NAME = 'Myth Mod Manager'
 
-VERSION = semantic_version.Version(major=1, minor=2, patch=3)
+VERSION = semantic_version.Version(major=1, minor=3, patch=0)

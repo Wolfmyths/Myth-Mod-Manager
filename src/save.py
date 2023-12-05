@@ -79,6 +79,7 @@ class Save(Config):
         '''
 
         if not self.has_section(mod):
+            logging.info('Adding mod: %s', mod)
             self.add_section(mod)
 
         self.setEnabled(mod)
@@ -126,14 +127,15 @@ class Save(Config):
     def removeMods(self, *mods: str) -> None:
         '''Removes mods from MOD_CONFIG'''
 
-        for mod in mods:
+        logging.info('Removing mod(s): %s', ', '.join(mods))
 
+        for mod in mods:
             self.remove_section(mod)
 
     def clearModData(self) -> None:
         '''Wipes the MOD_CONFIG's data'''
 
-        logging.info('DELETING MODS FROM %s', MOD_CONFIG)
+        logging.info('DELETING ALL MODS FROM %s', MOD_CONFIG)
 
         self.clear()
 
@@ -145,37 +147,44 @@ class OptionsManager(Config):
 
         if not self.has_section(OptionKeys.section.value):
             self.add_section(OptionKeys.section.value)
-    
+
     def hasOption(self, option: str) -> bool:
         return self.has_option(OptionKeys.section.value, option)
+
+    def getMMMUpdateAlert(self) -> bool:
+        self.def_read()
+        return self.getboolean(OptionKeys.section.value, OptionKeys.mmm_update_alert, fallback=True)
+
+    def setMMMUpdateAlert(self, alert: bool = True) -> None:
+        self.set(OptionKeys.section.value, OptionKeys.mmm_update_alert.name, str(alert))
 
     def getTheme(self) -> str:
         self.def_read()
         return self.get(OptionKeys.section, OptionKeys.color_theme, fallback=LIGHT)
-    
+
     def setTheme(self, theme: str = LIGHT) -> None:
         self.set(OptionKeys.section.value, OptionKeys.color_theme.value, theme)
-    
+
     def getGamepath(self) -> str:
         self.def_read()
         return self.get(OptionKeys.section.value, OptionKeys.game_path, fallback='')
-    
+
     def setGamepath(self, path: str = '') -> None:
         self.set(OptionKeys.section.value, OptionKeys.game_path.name, path)
-    
+
     def getDispath(self) -> str:
         self.def_read()
         return self.get(OptionKeys.section, OptionKeys.dispath, fallback=MODS_DISABLED_PATH_DEFAULT)
-    
+
     def setDispath(self, path: str = MODS_DISABLED_PATH_DEFAULT) -> None:
         self.set(OptionKeys.section.value, OptionKeys.dispath.value, path)
-    
+
     def getWindowSize(self) -> QSize:
         self.def_read()
         width = self.getint(OptionKeys.section, OptionKeys.windowsize_w, fallback=800)
         height = self.getint(OptionKeys.section, OptionKeys.windowsize_h, fallback=800)
         return QSize(width, height)
-    
+
     def setWindowSize(self, size: QSize = QSize(800, 800)) -> None:
         self.set(OptionKeys.section.value, OptionKeys.windowsize_w.value, str(size.width()))
         self.set(OptionKeys.section.value, OptionKeys.windowsize_h.value, str(size.height()))

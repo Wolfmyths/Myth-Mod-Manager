@@ -34,7 +34,8 @@ class ManagerMenu(ModContextMenu):
         self.hideMod = qtg.QAction('Hide', self)
         self.hideMod.triggered.connect(self.hideModClicked)
 
-        self.addActions((self.enable, self.disable, self.hideMod, self.delete, self.addSeparator(), self.visitModPage, self.openModDir))
+        self.addActions((self.enable, self.disable, self.hideMod, self.delete, self.addSeparator(),
+                         self.visitModPage, self.openModDir))
     
     def enabledClicked(self):
         if self.wasLastClickLMB():

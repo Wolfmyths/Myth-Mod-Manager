@@ -69,11 +69,12 @@ If you still are suspicious, you can build the executable yourself with these st
 
 ### Reguarding OS
 
-It is highly recommended to use Windows 10 or higher
+Windows:
 
-Windows 7 is unsupported
++ It is recommended to use windows 10 or higher
++ Windows 7 is not supported
 
-There are plans to release on Linux
+Linux/MacOS:
 
 If you are an avid Linux user you may be able to help create compadability for MacOS/Linux on [this issue here](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/18)
 
@@ -86,6 +87,7 @@ You may download any version of Myth Mod Manager and view changelogs at the [rel
 
 # Future Plans
 
++ Rewrite Settings UI
 + New Icon/Logo
 + Auto mod type detection
 + Linux support

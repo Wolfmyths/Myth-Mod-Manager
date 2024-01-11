@@ -9,6 +9,7 @@ from src.widgets.QMenu.managerQMenu import ManagerMenu
 from src.widgets.progressWidget import ProgressWidget
 from src.widgets.QDialog.deleteWarningQDialog import DeleteModConfirmation
 from src.widgets.QDialog.newModQDialog import newModLocation
+from src.widgets.QDialog.announcementQDialog import Notice
 
 from src.threaded.moveToDisabledDir import MoveToDisabledDir
 from src.threaded.moveToEnabledDir import MoveToEnabledModDir
@@ -21,6 +22,7 @@ import src.errorChecking as errorChecking
 from src.save import Save, OptionsManager
 from src.constant_vars import MODSIGNORE, ModType, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, LIGHT, MOD_CONFIG, OPTIONS_CONFIG
 from src.api.api import findModworkshopAssetID, findModVersion
+from src.api.checkModUpdate import checkModUpdate
 
 class ModListWidget(qtw.QTableWidget):
 
@@ -383,6 +385,25 @@ class ModListWidget(qtw.QTableWidget):
 
             errorChecking.openWebPage(f'https://modworkshop.net/mod/{assetID}')
     
+    def checkModUpdate(self) -> None:
+        def updateDetected(newVersion: str) -> None:
+            Notice(f'New version for {modName} is found!\nLocal: {modVersion}\nModworkshop: {newVersion}', 'Mod Update Check Results').exec()
+        def uptoDate() -> None:
+            Notice(f'{modName} is up to date', 'Mod Update Check Results').exec()
+
+        item = self.getSelectedNameItems()[0]
+        modName = self.getNameItem(self.row(item)).text()
+        modVersion = self.getVersionItem(self.row(item)).text()
+        assetID = self.saveManager.getModworkshopAssetID(modName)
+
+        if not assetID:
+            logging.warning('ModListWidget.checkModUpdate(), %s is missing an assetID', modName)
+            return
+
+        self.api = checkModUpdate(assetID, modVersion)
+        self.api.upToDate.connect(uptoDate)
+        self.api.updateDetected.connect(lambda x: updateDetected(x))
+
     def openModDir(self) -> None:
         if not len(self.getSelectedNameItems()) <= 0:
             selectedItem = self.getSelectedNameItems()[0]

@@ -200,7 +200,7 @@ class ModListWidget(qtw.QTableWidget):
         and the mod assosiated with that row from the user's PC
         '''
 
-        warning = DeleteModConfirmation(self)
+        warning = DeleteModConfirmation()
         warning.exec()
 
         if warning.result():

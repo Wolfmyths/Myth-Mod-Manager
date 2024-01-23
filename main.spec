@@ -1,17 +1,28 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
+import sys
 
 block_cipher = None
 
 DATA = [
-    ('src\\icon.ico', '.\\src'), 
-    ('src\\graphics', '.\\src\\graphics')
+    (os.path.join('src', 'icon.ico'), os.path.join('.', 'src')), 
+    (os.path.join('src', 'graphics'), os.path.join('.', 'src', 'graphics'))
     ]
 
+BINARIES = []
+
+if sys.platform.startswith('win'):
+    BINARIES.append(('src\\runGame.bat', '.'))
+
+    ICON = os.path.join('src', 'icon.ico')
+
+else:
+    ICON = os.path.join('assets', 'icon.png')
 
 a = Analysis(
-    ['src\\__main__.py'],
+    [os.path.join('src', '__main__.py')],
     pathex=[],
-    binaries=[('src\\runGame.bat', '.')],
+    binaries=BINARIES,
     datas=DATA,
     hiddenimports=[],
     hookspath=[],
@@ -36,7 +47,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    icon='src\\icon.ico',
+    icon=ICON,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,

@@ -2,6 +2,7 @@ import os
 import shutil
 import logging
 import json
+import sys
 
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PySide6.QtCore import QObject, QUrl, Signal
@@ -10,8 +11,12 @@ from src.constant_vars import ROOT_PATH
 
 class Update(QObject):
 
-    fileName = 'Myth-Mod-Manager.zip'
-    exe = 'Myth Mod Manager.exe' 
+    if sys.platform.startswith('win'):
+        fileName = 'Myth-Mod-Manager.zip'
+        exe = 'Myth Mod Manager.exe'
+    else:
+        fileName = 'Myth-Mod-Manager.tar.gz'
+        exe = 'Myth Mod Manager'
     folder = 'Myth Mod Manager'
 
     doneCanceling = Signal()

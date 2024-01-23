@@ -136,9 +136,6 @@ def startFile(path: str) -> None:
 
     try:
 
-        if not os.path.isfile(path):
-            raise Exception('Path is not a file or path does not exist')
-
         if sys.platform.startswith('win'):
             os.startfile(path)
         else:

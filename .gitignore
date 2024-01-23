@@ -38,6 +38,9 @@ mods.ini
 profiles.json
 externalshortcuts.json
 
+# Pyinstaller Output Directory
+Myth Mod Manager/
+
 # Disabled Mods Directory
 disabled-mods/
 

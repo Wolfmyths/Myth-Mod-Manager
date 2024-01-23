@@ -10,7 +10,7 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Framework](https://img.shields.io/badge/Framework-PySide6-green)
-![Platform](https://img.shields.io/badge/OS-Windows-blue)
+![Platform](https://img.shields.io/badge/OS-Windows_|_Linux-blue)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C4MJZS9)
 
@@ -55,14 +55,14 @@ a trojan.
 
 Rest assured, this program does not contain malicious code.
 
-**When a release is published, github builds the executable as seen [here](https://github.com/Wolfmyths/Myth-Mod-Manager/blob/main/.github/workflows/release.yml), not me.**
+**When a release is published, github builds the executable as seen [here](https://github.com/Wolfmyths/Myth-Mod-Manager/blob/main/.github/workflows), not me.**
 
 If you still are suspicious, you can build the executable yourself with these steps:
 
 1. [Install Python 3.11](https://www.python.org/downloads/)
 2. Clone this repository
-3. Run `createEXE.bat`
-4. After the `createEXE.bat` automatically closes, there will be a folder created called `Myth Mod Manager` which contains the newly compiled executable. This is created within the repository.
+3. Run `createEXE.bat` or `createEXE.sh` depending on your OS
+4. There will be a folder created called `Myth Mod Manager` which contains the newly compiled executable. This is created within the repository.
 5. Move `Myth Mod Manager` to your preferred directory and start it.
 
 # Supported Platforms
@@ -76,7 +76,9 @@ Windows:
 
 Linux/MacOS:
 
-If you are an avid Linux user you may be able to help create compadability for MacOS/Linux on [this issue here](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/18)
+Linux is supported, but I've only tested on Mint Linux.
+
+Please report any issues found.
 
 ### Reguarding Storefront
 
@@ -90,7 +92,6 @@ You may download any version of Myth Mod Manager and view changelogs at the [rel
 + Rewrite Settings UI
 + New Icon/Logo
 + Auto mod type detection
-+ Linux support
 + Some kind of [modworkshop.net](https://modworkshop.net/g/payday-2) integration, see [issue #14](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/14)
 
 *Suggestions are appreciated!*
@@ -103,9 +104,9 @@ There are plans to add a CONTRIBUTING.md and maybe even a wiki.
 
 ### Things to know when contributing
 
-+ `start_MMM.bat` is the script that starts the program
++ `start_MMM.bat` and `start_MMM.sh` are the scripts that starts the program
 + The program auto-adjusts paths if running via script or EXE
-+ If you want to compile an exe on your system, run `createEXE.bat`
++ If you want to compile an exe on your system, run `createEXE.bat` or `createEXE.sh`
 + Variables that are used throughout the project are stored in `constant_vars.py`
 + Please keep your code formatting consistent with the rest of the project
 + **Use the other branch which includes the next update when submitting commits and PRs**

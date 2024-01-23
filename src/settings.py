@@ -1,5 +1,6 @@
 import os
 import logging
+import sys
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication
@@ -12,8 +13,11 @@ from src.style import StyleManager
 from src.widgets.ignoredModsQListWidget import IgnoredMods
 from src.constant_vars import DARK, LIGHT, OPTIONS_CONFIG, ROOT_PATH
 from src.widgets.QDialog.newUpdateQDialog import updateDetected
+from src.widgets.QDialog.announcementQDialog import Notice
 
 from src.api.checkUpdate import checkUpdate
+
+from src import errorChecking
 
 class Options(qtw.QWidget):
 
@@ -133,10 +137,19 @@ class Options(qtw.QWidget):
     def openCrashLogBLT(self) -> None:
         modPath = Pathing().mods()
 
-        os.startfile(os.path.join(modPath, 'logs'))
+        errorChecking.startFile(os.path.join(modPath, 'logs'))
     
     def openCrashLogs(self) -> None:
-        os.startfile(os.path.join('C:', 'Users', os.environ['USERNAME'], 'AppData', 'Local', 'PAYDAY 2'))            
+
+        if sys.platform.startswith('win'):
+            os.startfile(os.path.join('C:', 'Users', os.environ['USERNAME'], 'AppData', 'Local', 'PAYDAY 2'))
+        else:
+            notice = Notice(
+                'Overkill did not implement a vanilla crash log for linux :(',
+                'Myth Mod Manager: Vanilla crashlogs unsupported'
+                )
+            notice.exec()
+            
     
     def setGamePath(self, path: str) -> None:
 

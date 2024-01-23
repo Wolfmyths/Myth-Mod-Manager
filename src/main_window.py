@@ -14,6 +14,7 @@ from src.save import OptionsManager, Save
 from src.api.checkUpdate import checkUpdate
 
 from src.constant_vars import ICON, PROGRAM_NAME, VERSION, MOD_CONFIG, OPTIONS_CONFIG, ROOT_PATH
+from src import errorChecking
 
 class MainWindow(qtw.QMainWindow):
     def __init__(self, app: qtw.QApplication | None = None, savePath = MOD_CONFIG, optionsPath = OPTIONS_CONFIG) -> None:
@@ -65,7 +66,7 @@ class MainWindow(qtw.QMainWindow):
         notice.exec()
         
         if notice.result():
-            os.startfile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
+            errorChecking.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
             QCoreApplication.quit()
     
     def close(self) -> bool:

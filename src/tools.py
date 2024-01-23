@@ -24,7 +24,7 @@ class ToolManager(qtw.QWidget):
         dialog = qtw.QFileDialog()
         urls = dialog.getOpenFileNames(self, 
                                        caption='Select External Tool(s)', 
-                                       filter='Executables (*.exe *.bat)')[0]
+                                       filter='Executables (*.exe *.bat *.sh);;Any (*)')[0]
 
         if urls:
             self.toolsWidget.addTool(*urls)

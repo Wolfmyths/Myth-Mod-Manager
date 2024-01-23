@@ -414,7 +414,7 @@ class ModListWidget(qtw.QTableWidget):
             path = self.p.mod(ModType(modType), modName)
 
             if os.path.exists(path):
-                os.startfile(path)
+                errorChecking.startFile(path)
 
     def hideMod(self) -> None:
         items = self.getSelectedNameItems()
@@ -495,9 +495,14 @@ class ModListWidget(qtw.QTableWidget):
 
         if event.button() == qt.MouseButton.RightButton:
             
-            if len(self.getSelectedNameItems()) <= 1:
-                self.selectRow(self.itemAt(event.pos()).row())
-            self.contextMenu.exec(qtg.QCursor.pos())
+            # Will return None if there are no mods causing a traceback
+            tableWidgetItem = self.itemAt(event.pos())
+
+            if tableWidgetItem is not None:
+
+                if len(self.getSelectedNameItems()) <= 1:
+                    self.selectRow(tableWidgetItem.row())
+                self.contextMenu.exec(qtg.QCursor.pos())
 
         return super().mousePressEvent(event)
     

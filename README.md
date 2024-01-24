@@ -92,23 +92,7 @@ You may download any version of Myth Mod Manager and view changelogs at the [rel
 + Rewrite Settings UI
 + New Icon/Logo
 + Auto mod type detection
++ Muli-Language Support [See issue #44](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/44)
 + Some kind of [modworkshop.net](https://modworkshop.net/g/payday-2) integration, see [issue #14](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/14)
 
 *Suggestions are appreciated!*
-
-# Contributing
-
-As long as there's an opened issue, please take a look and send a pull request of your contribution!
-
-There are plans to add a CONTRIBUTING.md and maybe even a wiki.
-
-### Things to know when contributing
-
-+ `start_MMM.bat` and `start_MMM.sh` are the scripts that starts the program
-+ The program auto-adjusts paths if running via script or EXE
-+ If you want to compile an exe on your system, run `createEXE.bat` or `createEXE.sh`
-+ Variables that are used throughout the project are stored in `constant_vars.py`
-+ Please keep your code formatting consistent with the rest of the project
-+ **Use the other branch which includes the next update when submitting commits and PRs**
-
-If you have any questions, [contact me](https://github.com/Wolfmyths) on one of my socials.

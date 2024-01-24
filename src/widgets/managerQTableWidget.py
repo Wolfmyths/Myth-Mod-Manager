@@ -44,7 +44,7 @@ class ModListWidget(qtw.QTableWidget):
         self.setColumnCount(4)
 
         self.setColumnWidth(0, 400)
-        self.setColumnWidth(1, 125)
+        self.setColumnWidth(1, 130)
         self.setColumnWidth(2, 100)
         self.setColumnWidth(3, 100)
 
@@ -295,9 +295,12 @@ class ModListWidget(qtw.QTableWidget):
     def getMods(self) -> list[list[str]]:
         '''
         Returns a list of two lists that have all of the mods from 
-        "\\mods" and "\\assets\\mod_overrides"
+        "\\mods", "\\Maps" and "\\assets\\mod_overrides"
 
-        Index 0 is "\\assets\\mod_overrides", index 1 is "\\mods"
+        Returning Indexes:
+        + 0: mod_overrides
+        + 1: mods
+        + 2: Maps
         '''
 
         mod_override: list[str] = []
@@ -489,6 +492,7 @@ class ModListWidget(qtw.QTableWidget):
             startFileMover.exec()
     
         self.itemChanged.emit(qtw.QTableWidgetItem())
+        self.refreshMods()
 
 # EVENT OVERRIDES
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:

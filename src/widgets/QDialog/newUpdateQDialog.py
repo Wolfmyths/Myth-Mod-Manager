@@ -74,6 +74,7 @@ class updateDetected(Dialog):
         else:
 
             self.changelog.hide()
+            self.buttonBox.buttons()[0].setEnabled(False)
 
             self.progressBar.show()
 
@@ -94,6 +95,7 @@ class updateDetected(Dialog):
         self.message.setText('Installed!\nClick ok to exit and update Myth Mod Manager')
 
         self.succeededState = True
+        self.buttonBox.buttons()[0].setEnabled(True)
     
     def cancel(self):
         '''

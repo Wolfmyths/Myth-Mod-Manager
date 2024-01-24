@@ -7,16 +7,18 @@ import sys
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PySide6.QtCore import QObject, QUrl, Signal
 
-from src.constant_vars import ROOT_PATH
+from src.constant_vars import ROOT_PATH, OLD_EXE
 
 class Update(QObject):
 
     if sys.platform.startswith('win'):
         fileName = 'Myth-Mod-Manager.zip'
         exe = 'Myth Mod Manager.exe'
+        tmp = os.environ['TEMP']
     else:
         fileName = 'Myth-Mod-Manager.tar.gz'
         exe = 'Myth Mod Manager'
+        tmp = '/tmp'
     folder = 'Myth Mod Manager'
 
     doneCanceling = Signal()
@@ -37,12 +39,14 @@ class Update(QObject):
     def start(self) -> None:
         logging.info('Updating program...')
 
-        logging.info('Fetching assets_url')
+        link = 'https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest'
+
+        logging.info('Fetching assets_url at %s', link)
 
         self.setTotalProgress.emit(6)
 
         self.network = QNetworkAccessManager()
-        request = QNetworkRequest(QUrl('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest'))
+        request = QNetworkRequest(QUrl(link))
         
         self.setCurrentProgress.emit(1, 'Getting asset_URL')
 
@@ -65,7 +69,7 @@ class Update(QObject):
 
         assetUrl: str = data['assets_url']
 
-        logging.info('Fetching asset data')
+        logging.info('Fetching asset data at %s', assetUrl)
 
         self.setCurrentProgress.emit(1, 'Getting asset data')
 
@@ -78,9 +82,9 @@ class Update(QObject):
 
         self.__replyErrorCheck()
 
-        logging.info('Fetching asset data complete')
-
         self.__cancelCheck()
+
+        logging.info('Fetching asset data complete')
 
         reply: QNetworkReply = self.sender()
 
@@ -100,7 +104,7 @@ class Update(QObject):
         
         if downloadLink is not None:
 
-            logging.info('Downloading update')
+            logging.info('Downloading update at %s', downloadLink)
 
             self.setCurrentProgress.emit(0, 'Downloading update')
 
@@ -116,9 +120,9 @@ class Update(QObject):
 
         reply: QNetworkReply = self.sender()
 
-        downloadDir = os.path.join(os.environ['TEMP'], self.fileName)
+        downloadDir = os.path.join(self.tmp, self.fileName)
 
-        logging.info('Download complete!\nWriting update to computer in %s', downloadDir)
+        logging.info('Download complete!\nWriting update to computer to %s', downloadDir)
 
         self.setCurrentProgress.emit(1, 'Writing...')
 
@@ -131,7 +135,7 @@ class Update(QObject):
 
         self.__cancelCheck()
         
-        shutil.unpack_archive(downloadDir, os.environ['TEMP'])
+        shutil.unpack_archive(downloadDir, self.tmp)
 
         if os.path.exists(os.path.join(ROOT_PATH, self.exe)):
 
@@ -143,7 +147,7 @@ class Update(QObject):
 
             self.setCurrentProgress.emit(1, 'Renaming old version...')
 
-            os.rename(self.exe, f'{self.exe} (Old)')
+            os.replace(self.exe, OLD_EXE)
 
         self.setCurrentProgress.emit(1, 'Moving new version...')
 
@@ -151,7 +155,7 @@ class Update(QObject):
 
         logging.info('Moving new update to %s', ROOT_PATH)
 
-        shutil.move(os.path.join(os.environ['TEMP'], self.folder, self.exe), ROOT_PATH)
+        shutil.move(os.path.join(self.tmp, self.folder, self.exe), ROOT_PATH)
 
         logging.info('Update complete!')
 

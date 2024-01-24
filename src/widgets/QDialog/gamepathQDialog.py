@@ -1,4 +1,5 @@
 import os
+import sys
 
 import PySide6.QtWidgets as qtw
 
@@ -64,7 +65,9 @@ class GamePathNotFound(Dialog):
         gamePath = self.gameDir.text()
         okButton = self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok)
 
-        if os.path.isfile(os.path.join(gamePath, 'payday2_win32_release.exe')):
+        exe = 'payday2_win32_release.exe' if sys.platform.startswith('win') else 'payday2_release'
+
+        if os.path.isfile(os.path.join(gamePath, exe)):
 
             okButton.setEnabled(True)
 
@@ -81,6 +84,7 @@ class GamePathNotFound(Dialog):
 
     def reject(self) -> None:
 
-        if type(self.QParent) is qtw.QApplication:
+        if isinstance(self.QParent, qtw.QApplication):
             self.QParent.shutdown()
-        return super().reject()
+        else:
+            return super().reject()

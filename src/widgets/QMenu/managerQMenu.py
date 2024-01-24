@@ -25,6 +25,9 @@ class ManagerMenu(ModContextMenu):
         self.delete = qtg.QAction('Delete', self)
         self.delete.triggered.connect(self.deleteClicked)
 
+        self.checkUpdate = qtg.QAction('Check Update', self)
+        self.checkUpdate.triggered.connect(self.checkUpdateClicked)
+
         self.visitModPage = qtg.QAction('Visit Page', self)
         self.visitModPage.triggered.connect(self.visitPageClicked)
 
@@ -35,7 +38,7 @@ class ManagerMenu(ModContextMenu):
         self.hideMod.triggered.connect(self.hideModClicked)
 
         self.addActions((self.enable, self.disable, self.hideMod, self.delete, self.addSeparator(),
-                         self.visitModPage, self.openModDir))
+                         self.visitModPage, self.checkUpdate, self.openModDir))
     
     def enabledClicked(self):
         if self.wasLastClickLMB():
@@ -52,6 +55,10 @@ class ManagerMenu(ModContextMenu):
     def visitPageClicked(self):
         if self.wasLastClickLMB():
             self.qParent.visitModPage()
+    
+    def checkUpdateClicked(self):
+        if self.wasLastClickLMB():
+            self.qParent.checkModUpdate()
     
     def openModDirClicked(self):
         if self.wasLastClickLMB():
@@ -71,7 +78,9 @@ class ManagerMenu(ModContextMenu):
 
         if Save().getModworkshopAssetID(selectedItems[0].text()):
             self.visitModPage.setEnabled(True)
+            self.checkUpdate.setEnabled(True)
         else:
             self.visitModPage.setEnabled(False)
+            self.checkUpdate.setEnabled(False)
 
         return super().showEvent(event)

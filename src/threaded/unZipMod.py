@@ -17,7 +17,7 @@ class UnZipMod(FileMover):
         return super().run()
 
     def unZipMod(self, *mods: tuple[str, ModType]) -> None:
-        '''Extracts a mod and puts it into a destination based off the type given'''
+        '''Extracts a mod and puts it into a destination based off the ModType Enum given'''
 
         self.setTotalProgress.emit(len(mods))
 

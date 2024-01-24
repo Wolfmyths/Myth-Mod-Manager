@@ -7,6 +7,8 @@ from PySide6.QtCore import Qt as qt, Signal
 from src.widgets.QDialog.announcementQDialog import Notice
 from src.widgets.QDialog.deleteWarningQDialog import DeleteModConfirmation
 
+from src import errorChecking
+
 class ExternalTool(qtw.QFrame):
     deleted = Signal(str)
     nameChanged = Signal(str, str)
@@ -63,9 +65,10 @@ class ExternalTool(qtw.QFrame):
 
     def editToolURL(self) -> None:
         dialog = qtw.QFileDialog()
-        new_url = dialog.getOpenFileName(self, 
+        new_url = dialog.getOpenFileName(None, 
                                        caption='Select new external tool',
-                                       filter='Executables (*.exe *.bat)')[0]
+                                       filter='',
+                                       selectedFilter='Executables (*.exe *.bat *.sh);;Any (*)')[0]
 
         if new_url:
             old_url = self.toolURL
@@ -88,7 +91,7 @@ class ExternalTool(qtw.QFrame):
 
     def startExternalTool(self) -> None:
         try:
-            os.startfile(self.toolURL)
+            errorChecking.startFile(self.toolURL)
         except Exception as e:
             errorMessage = 'An error has occured starting an external tool'
             logging.error('%s: %s\n%s', errorMessage, self.toolURL, str(e))

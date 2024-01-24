@@ -1,6 +1,7 @@
 import os
 import subprocess
 import logging
+import sys
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt
@@ -35,7 +36,7 @@ class ModManager(qtw.QWidget):
         self.refresh.clicked.connect(lambda: self.modsTable.refreshMods())
 
         self.openGameDir = qtw.QPushButton('Open Game Directory', self)
-        self.openGameDir.clicked.connect(lambda: os.startfile(self.optionsManager.getGamepath()))
+        self.openGameDir.clicked.connect(lambda: errorChecking.startFile(self.optionsManager.getGamepath()))
 
         self.startGame = qtw.QPushButton('Start PAYDAY 2', self)
         self.startGame.clicked.connect(self.startPayday)
@@ -93,17 +94,22 @@ class ModManager(qtw.QWidget):
 
             drive: str = gamePath[0].lower()
 
-            # Starts START_PAYDAY.bat
-            # First argument is to change the directory to the game's directory
-            # Second argument the drive for the cd command
-            # Third argument is the exe name
-            # Fourth argument is extra arguments for payday 2
-            subprocess.call([START_PAYDAY_PATH, gamePath, drive, 'payday2_win32_release.exe'])
+            if sys.platform.startswith('win'):
+
+                # Starts START_PAYDAY.bat
+                # First argument is to change the directory to the game's directory
+                # Second argument the drive for the cd command
+                # Third argument is the exe name
+                # Fourth argument is extra arguments for payday 2
+                subprocess.call([START_PAYDAY_PATH, gamePath, drive, 'payday2_win32_release.exe'])
+            
+            else:
+                errorChecking.startFile(os.path.join(gamePath, 'payday2_release'))
         else:
             
-            logging.error('Could not start PAYDAY 2, could not find payday2_win32_release.exe in:\n%s', gamePath)
+            logging.error('Could not start PAYDAY 2, could not find payday 2 executable in:\n%s', gamePath)
 
-            notice = Notice(f'Could not find payday2_win32_release.exe in:\n{gamePath}', 'Error: Invalid Gamepath')
+            notice = Notice(f'Could not find payday 2 executable in:\n{gamePath}', 'Error: Invalid Gamepath')
             notice.exec()
 
     def deselectAllShortcut(self):

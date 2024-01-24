@@ -9,6 +9,7 @@ from src.widgets.QMenu.managerQMenu import ManagerMenu
 from src.widgets.progressWidget import ProgressWidget
 from src.widgets.QDialog.deleteWarningQDialog import DeleteModConfirmation
 from src.widgets.QDialog.newModQDialog import newModLocation
+from src.widgets.QDialog.announcementQDialog import Notice
 
 from src.threaded.moveToDisabledDir import MoveToDisabledDir
 from src.threaded.moveToEnabledDir import MoveToEnabledModDir
@@ -21,6 +22,7 @@ import src.errorChecking as errorChecking
 from src.save import Save, OptionsManager
 from src.constant_vars import MODSIGNORE, ModType, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, LIGHT, MOD_CONFIG, OPTIONS_CONFIG
 from src.api.api import findModworkshopAssetID, findModVersion
+from src.api.checkModUpdate import checkModUpdate
 
 class ModListWidget(qtw.QTableWidget):
 
@@ -42,7 +44,7 @@ class ModListWidget(qtw.QTableWidget):
         self.setColumnCount(4)
 
         self.setColumnWidth(0, 400)
-        self.setColumnWidth(1, 125)
+        self.setColumnWidth(1, 130)
         self.setColumnWidth(2, 100)
         self.setColumnWidth(3, 100)
 
@@ -198,7 +200,7 @@ class ModListWidget(qtw.QTableWidget):
         and the mod assosiated with that row from the user's PC
         '''
 
-        warning = DeleteModConfirmation(self)
+        warning = DeleteModConfirmation()
         warning.exec()
 
         if warning.result():
@@ -293,9 +295,12 @@ class ModListWidget(qtw.QTableWidget):
     def getMods(self) -> list[list[str]]:
         '''
         Returns a list of two lists that have all of the mods from 
-        "\\mods" and "\\assets\\mod_overrides"
+        "\\mods", "\\Maps" and "\\assets\\mod_overrides"
 
-        Index 0 is "\\assets\\mod_overrides", index 1 is "\\mods"
+        Returning Indexes:
+        + 0: mod_overrides
+        + 1: mods
+        + 2: Maps
         '''
 
         mod_override: list[str] = []
@@ -383,6 +388,25 @@ class ModListWidget(qtw.QTableWidget):
 
             errorChecking.openWebPage(f'https://modworkshop.net/mod/{assetID}')
     
+    def checkModUpdate(self) -> None:
+        def updateDetected(newVersion: str) -> None:
+            Notice(f'New version for {modName} is found!\nLocal: {modVersion}\nModworkshop: {newVersion}', 'Mod Update Check Results').exec()
+        def uptoDate() -> None:
+            Notice(f'{modName} is up to date', 'Mod Update Check Results').exec()
+
+        item = self.getSelectedNameItems()[0]
+        modName = self.getNameItem(self.row(item)).text()
+        modVersion = self.getVersionItem(self.row(item)).text()
+        assetID = self.saveManager.getModworkshopAssetID(modName)
+
+        if not assetID:
+            logging.warning('ModListWidget.checkModUpdate(), %s is missing an assetID', modName)
+            return
+
+        self.api = checkModUpdate(assetID, modVersion)
+        self.api.upToDate.connect(uptoDate)
+        self.api.updateDetected.connect(lambda x: updateDetected(x))
+
     def openModDir(self) -> None:
         if not len(self.getSelectedNameItems()) <= 0:
             selectedItem = self.getSelectedNameItems()[0]
@@ -393,7 +417,7 @@ class ModListWidget(qtw.QTableWidget):
             path = self.p.mod(ModType(modType), modName)
 
             if os.path.exists(path):
-                os.startfile(path)
+                errorChecking.startFile(path)
 
     def hideMod(self) -> None:
         items = self.getSelectedNameItems()
@@ -468,15 +492,21 @@ class ModListWidget(qtw.QTableWidget):
             startFileMover.exec()
     
         self.itemChanged.emit(qtw.QTableWidgetItem())
+        self.refreshMods()
 
 # EVENT OVERRIDES
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
 
         if event.button() == qt.MouseButton.RightButton:
             
-            if len(self.getSelectedNameItems()) <= 1:
-                self.selectRow(self.itemAt(event.pos()).row())
-            self.contextMenu.exec(qtg.QCursor.pos())
+            # Will return None if there are no mods causing a traceback
+            tableWidgetItem = self.itemAt(event.pos())
+
+            if tableWidgetItem is not None:
+
+                if len(self.getSelectedNameItems()) <= 1:
+                    self.selectRow(tableWidgetItem.row())
+                self.contextMenu.exec(qtg.QCursor.pos())
 
         return super().mousePressEvent(event)
     

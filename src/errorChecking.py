@@ -2,6 +2,8 @@ import os
 import stat
 import logging
 import webbrowser
+import sys
+import subprocess
 
 from semantic_version import Version
 
@@ -14,25 +16,27 @@ from src.constant_vars import ModType, OPTIONS_CONFIG
 logging.getLogger(__name__)
 
 def openWebPage(link: str) -> bool:
-        '''`webbrowser.open_new_tab()` but with some exception handling, returns a bool depending if it failed or not'''
+    '''`webbrowser.open_new_tab()` but with some exception handling, returns a bool depending if it failed or not'''
 
-        outcome = webbrowser.open_new_tab(link)
+    outcome = webbrowser.open_new_tab(link)
 
-        if not outcome:
+    if not outcome:
 
-            logging.error('Could not open web browser:\n%s', link)
+        logging.error('Could not open web browser:\n%s', link)
 
-            notice = Notice(f'Could not open to {link}')
-            notice.exec()
-        
-        return outcome
+        notice = Notice(f'Could not open to {link}')
+        notice.exec()
+    
+    return outcome
 
 def validGamePath(optionsPath: str = OPTIONS_CONFIG) -> bool:
     '''Gets the gamepath from OPTIONS_CONFIG and checks if the paths contains the PAYDAY 2 exe'''
 
     gamePath = OptionsManager(optionsPath).getGamepath()
 
-    if os.path.isdir(gamePath) and 'payday2_win32_release.exe' in os.listdir(gamePath):
+    gameEx = 'payday2_win32_release.exe' if sys.platform.startswith('win') else 'payday2_release'
+
+    if os.path.isdir(gamePath) and gameEx in os.listdir(gamePath):
 
         logging.info('Gamepath: %s', gamePath)
         return True
@@ -103,7 +107,7 @@ def isPrerelease(version: Version) -> bool:
     return version.prerelease != ()
 
 def isTypeMod(modType: ModType) -> bool:
-    return type(modType) is ModType
+    return isinstance(modType, ModType)
 
 def permissionCheck(src: str) -> int:
     '''
@@ -126,3 +130,17 @@ def permissionCheck(src: str) -> int:
         result = 1
     
     return result
+
+def startFile(path: str) -> None:
+    '''A cross-platform version of `os.startfile()`'''
+
+    try:
+
+        if sys.platform.startswith('win'):
+            os.startfile(path)
+        else:
+            cmd = 'open' if sys.platform == 'darwin' else 'xdg-open'
+            subprocess.call([cmd, path])
+
+    except Exception as e:
+        logging.error('Error in errorChecking.startFile(%s): %s', path, str(e))

@@ -25,6 +25,7 @@ PyTest doesn't cover every function yet but it covers most of it.
 3. Start the venv via:
    + Windows: `venv/scripts/activate.bat`
    + Linux (bash/zsh): `venv/bin/activate`
-4. Execute command `pytest tests` and it should work
+4. Install/Update dependencies in the venv `pip install -r requirements.txt`
+5. Execute command `pytest tests` and it should work
 
 If you have any questions, [contact me](https://github.com/Wolfmyths) on one of my socials.

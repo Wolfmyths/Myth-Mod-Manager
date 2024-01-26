@@ -11,19 +11,19 @@ class Pathing():
     
     def __getGamepath(self) -> str:
         return OptionsManager(self.option).getGamepath()
-    
+
     def mod_overrides(self) -> str:
         '''Returns mod_overrides path'''
         return os.path.join(self.__getGamepath(), 'assets', 'mod_overrides')
-    
+
     def mods(self) -> str:
         '''Returns mods directory path'''
         return os.path.join(self.__getGamepath(), 'mods')
-    
+
     def maps(self) -> str:
         '''Returns maps directory path'''
         return os.path.join(self.__getGamepath(), 'Maps')
-    
+
     def mod(self, type: ModType, modName: str) -> list[str] | str:
         '''
         Returns mod path given the type and name,

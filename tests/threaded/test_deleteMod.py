@@ -11,12 +11,12 @@ def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod
     parser.setGamepath(create_mod_dirs)
     parser.writeData()
 
-    thread = DeleteMod()
-    thread.optionsManager = parser
-    thread.saveManager = Save(createTemp_Mod_ini)
+    worker = DeleteMod('make game easy mod')
+    worker.optionsManager = parser
+    worker.saveManager = Save(createTemp_Mod_ini)
 
-    thread.p = Pathing(createTemp_Config_ini)
+    worker.p = Pathing(createTemp_Config_ini)
 
-    thread.deleteMod('make game easy mod')
+    worker.start()
 
     assert os.path.isdir(os.path.join(create_mod_dirs, 'mods', 'make game easy mod')) == False

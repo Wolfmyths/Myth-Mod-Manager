@@ -3,29 +3,25 @@ import logging
 
 import patoolib
 
-from src.threaded.file_mover import FileMover
+from src.threaded.workerQObject import Worker
 from src.constant_vars import ModType
 
-class UnZipMod(FileMover):
+class UnZipMod(Worker):
     def __init__(self, *mods: tuple[str, ModType]):
         super().__init__()
 
         self.mods = mods
-    
-    def run(self) -> None:
-        self.unZipMod(*self.mods)
-        return super().run()
 
-    def unZipMod(self, *mods: tuple[str, ModType]) -> None:
+    def start(self) -> None:
         '''Extracts a mod and puts it into a destination based off the ModType Enum given'''
 
-        self.setTotalProgress.emit(len(mods))
+        self.setTotalProgress.emit(len(self.mods))
 
         modDestDict = {ModType.mods : self.p.mods(), ModType.mods_override : self.p.mod_overrides(), ModType.maps : self.p.maps()}
 
         try:
 
-            for modURL in mods:
+            for modURL in self.mods:
 
                 src = modURL[0]
 
@@ -48,15 +44,7 @@ class UnZipMod(FileMover):
             self.succeeded.emit()
         
         except patoolib.util.PatoolError as e:
-
-            logging.error('An error was raised in FileMover.unZipMod():\n%s\nTry extracting the mod manually first', str(e))
             self.error.emit(f'An error was raised in FileMover.unZipMod():\n{e}\nTry extracting the mod manually first')
 
-            self.cancel = True
-
         except Exception as e:
-
-            logging.error('An error was raised in FileMover.unZipMod():\n%s', str(e))
             self.error.emit(f'An error was raised in FileMover.unZipMod():\n{e}')
-
-            self.cancel = True

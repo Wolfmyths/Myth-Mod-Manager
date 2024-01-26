@@ -17,15 +17,15 @@ def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod
     parser.setDispath(dispath)
     parser.writeData()
 
-    thread = BackupMods()
-    thread.saveManager = Save(createTemp_Mod_ini)
-    thread.optionsManager = parser
+    worker = BackupMods()
+    worker.saveManager = Save(createTemp_Mod_ini)
+    worker.optionsManager = parser
     bundledFilePath = os.path.join(create_mod_dirs, BACKUP_MODS)
-    thread.bundledFilePath = bundledFilePath
+    worker.bundledFilePath = bundledFilePath
 
-    thread.p = Pathing(createTemp_Config_ini)
+    worker.p = Pathing(createTemp_Config_ini)
 
-    thread.backupMods()
+    worker.start()
 
     assert os.path.isfile(f'{bundledFilePath}.zip')
 

@@ -1,28 +1,27 @@
 import logging
 import os
 
-from src.threaded.file_mover import FileMover
+from src.threaded.workerQObject import Worker
 
-class MoveToEnabledModDir(FileMover):
-    def __init__(self, *mods: str):
-        super().__init__()
+from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG
+
+class MoveToEnabledModDir(Worker):
+
+    def __init__(self, *mods: str, optionsPath: str = OPTIONS_CONFIG, savePath: str = MOD_CONFIG):
+        super().__init__(optionsPath=optionsPath, savePath=savePath)
 
         self.mods = mods
-    
-    def run(self) -> None:
-        self.moveToEnableModDir(*self.mods)
-        return super().run()
-    
-    def moveToEnableModDir(self, *mods: str) -> None:
+
+    def start(self) -> None:
         '''Returns a mod to their respective directory'''
 
         try:
 
-            self.setTotalProgress.emit(len(mods))
+            self.setTotalProgress.emit(len(self.mods))
 
             disabledModsPath = self.optionsManager.getDispath()
 
-            for mod in mods:
+            for mod in self.mods:
 
                 self.cancelCheck()
 
@@ -39,7 +38,4 @@ class MoveToEnabledModDir(FileMover):
             self.succeeded.emit()
 
         except Exception as e:
-            logging.error('An error occured while enabling a mod:\n%s', str(e))
             self.error.emit(f'An error occured while enabling a mod:\n{e}')
-
-            self.cancel = True            

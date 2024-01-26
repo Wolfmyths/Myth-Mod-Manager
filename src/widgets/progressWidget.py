@@ -2,6 +2,7 @@ import logging
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
+from PySide6.QtCore import QThread
 
 from src.widgets.QDialog.QDialog import Dialog
 
@@ -23,6 +24,12 @@ class ProgressWidget(Dialog):
 
         layout = qtw.QVBoxLayout()
 
+        # Create QThread
+        self.qthread = QThread()
+        self.qthread.started.connect(self.mode.start)
+
+        self.mode.moveToThread(self.qthread)
+
         self.warningLabel = qtw.QLabel(self)
 
         self.progressBar = qtw.QProgressBar()
@@ -36,7 +43,7 @@ class ProgressWidget(Dialog):
         buttons = qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(buttons)
-        self.buttonBox.rejected.connect(lambda: self.cancel())
+        self.buttonBox.rejected.connect(self.cancel)
 
         for widget in (self.warningLabel, self.progressBar, self.buttonBox):
             layout.addWidget(widget)
@@ -50,13 +57,13 @@ class ProgressWidget(Dialog):
     
     def errorRaised(self, message: str):
         self.warningLabel.setText(message)
+        self.qthread.exit(1)
 
     def succeeded(self):
         self.progressBar.setValue(self.progressBar.maximum())
         self.warningLabel.setText('Done!')
 
-        self.mode.terminate()
-        self.mode.deleteLater()
+        self.qthread.exit(0)
 
         self.accept()
     
@@ -76,6 +83,7 @@ class ProgressWidget(Dialog):
         isModeCanceled = self.mode.cancel
 
         if isModeCanceled:
+            self.qthread.exit(2)
             self.reject()
 
         logging.info('Task %s was canceled...', str(self.mode))

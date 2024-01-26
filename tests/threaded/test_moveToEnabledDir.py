@@ -18,13 +18,13 @@ def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod
 
     shutil.move(enabledDir, disabledDir)
 
-    thread = MoveToEnabledModDir()
-    thread.saveManager = Save(createTemp_Mod_ini)
-    thread.optionsManager = parser
+    worker = MoveToEnabledModDir('make game easy mod')
+    worker.saveManager = Save(createTemp_Mod_ini)
+    worker.optionsManager = parser
 
-    thread.p = Pathing(createTemp_Config_ini)
+    worker.p = Pathing(createTemp_Config_ini)
 
-    thread.moveToEnableModDir('make game easy mod')
+    worker.start()
 
     assert os.path.isdir(enabledDir)
     assert not os.path.isdir(disabledDir)

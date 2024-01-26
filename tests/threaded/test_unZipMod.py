@@ -19,14 +19,14 @@ def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod
     os.mkdir(zip_path)
     shutil.make_archive(zip_path, 'zip')
 
-    thread = UnZipMod()
-    thread.optionsManager = parser
-    thread.saveManager = Save(createTemp_Mod_ini)
-
-    thread.p = Pathing(createTemp_Config_ini)
-
     url = os.path.join(create_mod_dirs, 'zip.zip')
 
-    thread.unZipMod((url, ModType.mods))
+    worker = UnZipMod((url, ModType.mods))
+    worker.optionsManager = parser
+    worker.saveManager = Save(createTemp_Mod_ini)
 
-    assert os.path.exists(os.path.join(create_mod_dirs, 'mods', 'zip'))
+    worker.p = Pathing(createTemp_Config_ini)
+
+    worker.start()
+
+    assert os.path.isdir(os.path.join(create_mod_dirs, 'mods', 'zip'))

@@ -12,13 +12,13 @@ def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod
     parser.setDispath(dispath)
     parser.writeData()
 
-    thread = MoveToDisabledDir()
-    thread.saveManager = Save(createTemp_Mod_ini)
-    thread.optionsManager = parser
+    worker = MoveToDisabledDir('make game easy mod')
+    worker.saveManager = Save(createTemp_Mod_ini)
+    worker.optionsManager = parser
 
-    thread.p = Pathing(createTemp_Config_ini)
+    worker.p = Pathing(createTemp_Config_ini)
 
-    thread.moveToDisabledDir('make game easy mod')
+    worker.start()
 
     assert os.path.isdir(os.path.join(create_mod_dirs, 'disabledMods', 'make game easy mod'))
     assert not os.path.isdir(os.path.join(create_mod_dirs, 'mods', 'make game easy mod'))

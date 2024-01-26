@@ -414,9 +414,12 @@ class ModListWidget(qtw.QTableWidget):
             modName = self.getNameItem(self.row(selectedItem)).text()
             modType = self.getTypeItem(self.row(selectedItem)).text()
 
-            path = self.p.mod(ModType(modType), modName)
+            if not self.saveManager.getEnabled(modName):
+                path = os.path.join(self.optionsManager.getDispath(), modName)
+            else:
+                path = self.p.mod(ModType(modType), modName)
 
-            if os.path.exists(path):
+            if os.path.isdir(path):
                 errorChecking.startFile(path)
 
     def hideMod(self) -> None:

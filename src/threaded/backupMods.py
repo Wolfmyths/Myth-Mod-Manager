@@ -2,18 +2,14 @@ import os
 import shutil
 import logging
 
-from src.threaded.file_mover import FileMover
+from src.threaded.workerQObject import Worker
 from src.constant_vars import ModType, BACKUP_MODS, MODSIGNORE, MOD_CONFIG
 
-class BackupMods(FileMover):
+class BackupMods(Worker):
 
     bundledFilePath = os.path.join(os.path.abspath(os.curdir), BACKUP_MODS)
 
-    def run(self) -> None:
-        self.backupMods()
-        return super().run()
-
-    def backupMods(self) -> None:
+    def start(self) -> None:
             '''Takes all of the mods and compresses them into a zip file, the output is in the exe directory'''
 
             # Step 1: Gather Options
@@ -113,7 +109,4 @@ class BackupMods(FileMover):
                     shutil.rmtree(self.bundledFilePath)
 
                 if not self.cancel:
-                    logging.error('Something went wrong in FileSaver.backupMods():\n%s', str(e))
                     self.error.emit(f'Something went wrong in FileSaver.backupMods():\n{e}')
-                
-                    self.cancel = True

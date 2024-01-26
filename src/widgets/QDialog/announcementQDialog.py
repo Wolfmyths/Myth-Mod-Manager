@@ -1,4 +1,3 @@
-
 import PySide6.QtWidgets as qtw
 
 from src.widgets.QDialog.QDialog import Dialog
@@ -14,7 +13,7 @@ class Notice(Dialog):
         self.warningLabel = qtw.QLabel(self, text=message)
         self.warningLabel.setWordWrap(True)
 
-        buttons = qtw.QDialogButtonBox.Ok
+        buttons = qtw.QDialogButtonBox.StandardButton.Ok
 
         self.buttonBox = qtw.QDialogButtonBox(buttons)
         self.buttonBox.accepted.connect(self.accept)

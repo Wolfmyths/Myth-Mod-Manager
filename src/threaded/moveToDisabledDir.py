@@ -1,29 +1,26 @@
 import os
 import logging
 
-from src.threaded.file_mover import FileMover
+from src.threaded.workerQObject import Worker
 
+from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG
 
-class MoveToDisabledDir(FileMover):
-    def __init__(self, *mods: str) -> None:
-        super().__init__()
+class MoveToDisabledDir(Worker):
+    def __init__(self, *mods: str, optionsPath: str = OPTIONS_CONFIG, savePath: str = MOD_CONFIG) -> None:
+        super().__init__(optionsPath=optionsPath, savePath=savePath)
 
         self.mods = mods
-    
-    def run(self) -> None:
-        self.moveToDisabledDir(*self.mods)
-        return super().run()
-    
-    def moveToDisabledDir(self, *mods: str) -> None:
+
+    def start(self) -> None:
         '''Moves a mod to the disabled folder'''
 
-        self.setTotalProgress.emit(len(mods))
+        self.setTotalProgress.emit(len(self.mods))
 
         disabledModsPath = self.optionsManager.getDispath()
 
         try:
 
-            for mod in mods:
+            for mod in self.mods:
 
                 self.cancelCheck()
 
@@ -37,11 +34,8 @@ class MoveToDisabledDir(FileMover):
                     self.move(modPath, os.path.join(disabledModsPath, mod))
                 else:
                     logging.info('%s is already in the disabled directory', mod)
-            
-            self.succeeded.emit()
-        
-        except Exception as e:
-            logging.error('An error occured while disabling a mod:\n%s', str(e))
-            self.error.emit(f'An error occured while disabling a mod:\n{e}')
 
-            self.cancel = True
+            self.succeeded.emit()
+
+        except Exception as e:
+            self.error.emit(f'An error occured while disabling a mod:\n{e}')

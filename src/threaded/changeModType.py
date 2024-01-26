@@ -2,31 +2,27 @@ import logging
 import os
 
 import src.errorChecking as errorChecking
-from src.threaded.file_mover import FileMover
+from src.threaded.workerQObject import Worker
 from src.constant_vars import ModType
 
-class ChangeModType(FileMover):
+class ChangeModType(Worker):
     def __init__(self, *mods: tuple[str, ModType]):
         super().__init__()
         logging.getLogger(__name__)
 
         self.mods = mods
-
-    def run(self) -> None:
-        self.changeModType(*self.mods)
-        return super().run()
     
-    def changeModType(self, *mods: tuple[str, ModType]) -> None:
+    def start(self) -> None:
         '''
         Moves the mod to a new directory
         '''
 
         try:
-            self.setTotalProgress.emit(len(mods))
+            self.setTotalProgress.emit(len(self.mods))
 
             ChosenDir = None
             
-            for mod in mods:
+            for mod in self.mods:
 
                 self.cancelCheck()
 
@@ -47,6 +43,4 @@ class ChangeModType(FileMover):
             self.succeeded.emit()
 
         except Exception as e:
-            logging.error('An error occured in changeModType:\n%s', str(e))
-            self.error.emit(str(e))
-            self.cancel = True
+            self.error.emit(f'An error occured in changeModType:\n{e}')

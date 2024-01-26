@@ -2,30 +2,27 @@ import logging
 import os
 import shutil
 
-from src.threaded.file_mover import FileMover
+from src.threaded.workerQObject import Worker
 
-class DeleteMod(FileMover):
-    def __init__(self, *mods: str):
-        super().__init__()
-        logging.getLogger(__name__)
+from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG
+
+class DeleteMod(Worker):
+    def __init__(self, *mods: str, optionsPath: str = OPTIONS_CONFIG, savePath: str = MOD_CONFIG):
+        super().__init__(optionsPath=optionsPath, savePath=savePath)
 
         self.mods = mods
-    
-    def run(self) -> None:
-        self.deleteMod(*self.mods)
-        return super().run()
-    
-    def deleteMod(self, *mods: str) -> None:
+
+    def start(self) -> None:
         '''Removes the mod(s) from the user's computer'''
 
-        logging.info('Deleting mods from computer: %s', ', '.join(mods))
+        logging.info('Deleting mods from computer: %s', ', '.join(self.mods))
 
-        self.setTotalProgress.emit(len(mods))
+        self.setTotalProgress.emit(len(self.mods))
 
         disPath = self.optionsManager.getDispath()
 
         try: 
-            for modName in mods:
+            for modName in self.mods:
 
                 self.cancelCheck()
 
@@ -47,6 +44,4 @@ class DeleteMod(FileMover):
             self.succeeded.emit()
 
         except Exception as e:
-            logging.error('An error has occured in deleteMod():\n%s', str(e))
-            self.error.emit(str(e))
-            self.cancel = True
+            self.error.emit(f'An error has occured in deleteMod():\n{e}')

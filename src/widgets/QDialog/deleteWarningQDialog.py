@@ -1,4 +1,3 @@
-
 import PySide6.QtWidgets as qtw
 
 from src.widgets.QDialog.QDialog import Dialog

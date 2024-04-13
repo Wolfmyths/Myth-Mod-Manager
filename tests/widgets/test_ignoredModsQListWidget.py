@@ -13,7 +13,7 @@ def test_ignoredModList(qtbot: QtBot, create_ignoredModList: IgnoredMods) -> Non
 def test_refreshList(create_ignoredModList: IgnoredMods) -> None:
     
     create_ignoredModList.saveManager.setIgnored('super fun mod', True)
-    create_ignoredModList.saveManager.writeData()
+    create_ignoredModList.saveManager.saveJSON()
 
     create_ignoredModList.refreshList()
 

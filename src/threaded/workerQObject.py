@@ -38,8 +38,8 @@ class Worker(QObject):
         ...
 
     def cancelCheck(self) -> None:
-        logging.info('%s was canceled', self.__class__)
         if self.cancel:
+            logging.info('%s was canceled', self.__class__)
             self.doneCanceling.emit()
 
     def move(self, src: str, dest: str):
@@ -50,7 +50,7 @@ class Worker(QObject):
             shutil.rmtree(dest, onerror=self.onError)
 
         # Will try to move the file, if there is an exception, fix the issue and try again
-        while True and not self.cancel:
+        while not self.cancel:
 
             try:
                 shutil.move(src, dest)

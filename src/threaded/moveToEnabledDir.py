@@ -27,11 +27,13 @@ class MoveToEnabledModDir(Worker):
 
                 self.setCurrentProgress.emit(1, f'Enabling {mod}')
 
-                if mod in os.listdir(disabledModsPath):
+                modPath = os.path.join(disabledModsPath, mod)
+
+                if os.path.isdir(modPath):
 
                     modDestPath = self.p.mod(self.saveManager.getType(mod), mod)
 
-                    self.move(os.path.join(disabledModsPath, mod), modDestPath)
+                    self.move(modPath, modDestPath)
                 else:
                     logging.warning('%s was not found in:\n%s\nIgnoring...', mod, disabledModsPath)
             

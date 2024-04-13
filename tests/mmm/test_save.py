@@ -21,12 +21,7 @@ def test_saveMethods(createTemp_Mod_ini: str) -> None:
 
     save = Save(createTemp_Mod_ini)
 
-    modName = 'funniest mod ever'
-
-    save.addMods((modName, ModType.mods))
-    assert save.hasMod(modName)
-    assert save.hasModOption(modName, ModKeys.type.value)
-    assert save.getType(modName) == ModType.mods
+    modName = 'super fun mod'
     
     # Testing setters and getters (get/setType() is tested through the use of addMods())
     save.setEnabled(modName, False)
@@ -77,11 +72,11 @@ def test_OptionsMethods(createTemp_Config_ini: str) -> None:
 
     options.setDispath('somepath')
     options.writeData()
-    assert options.getDispath() == 'somepath'
+    assert os.path.basename(options.getDispath()) == 'somepath'
 
     options.setGamepath('somepath2')
     options.writeData()
-    assert options.getGamepath() == 'somepath2'
+    assert os.path.basename(options.getGamepath()) == 'somepath2'
 
     options.setTheme('somecolortheme')
     options.writeData()

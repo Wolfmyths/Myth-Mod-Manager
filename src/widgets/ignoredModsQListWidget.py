@@ -55,7 +55,7 @@ class IgnoredMods(qtw.QListWidget):
             self.takeItem(index)
             itemsInList.pop(index)
         
-        self.saveManager.writeData()
+        self.saveManager.saveJSON()
 
         self.itemsRemoved.emit()
         self.itemsChanged.emit()

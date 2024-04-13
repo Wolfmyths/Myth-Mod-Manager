@@ -7,9 +7,10 @@ from PySide6.QtCore import Qt as qt
 
 from src.widgets.QMenu.managerQMenu import ManagerMenu
 from src.widgets.progressWidget import ProgressWidget
-from src.widgets.QDialog.deleteWarningQDialog import DeleteModConfirmation
+from src.widgets.QDialog.deleteWarningQDialog import Confirmation
 from src.widgets.QDialog.newModQDialog import newModLocation
 from src.widgets.QDialog.announcementQDialog import Notice
+from src.widgets.tagViewerQWidget import TagViewer
 
 from src.threaded.moveToDisabledDir import MoveToDisabledDir
 from src.threaded.moveToEnabledDir import MoveToEnabledModDir
@@ -20,7 +21,7 @@ from src.threaded.unZipMod import UnZipMod
 from src.getPath import Pathing
 import src.errorChecking as errorChecking
 from src.save import Save, OptionsManager
-from src.constant_vars import MODSIGNORE, ModType, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, LIGHT, MOD_CONFIG, OPTIONS_CONFIG
+from src.constant_vars import MODSIGNORE, ModType, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, LIGHT, MOD_CONFIG, OPTIONS_CONFIG, ModRole, ModKeys
 from src.api.api import findModworkshopAssetID, findModVersion
 from src.api.checkModUpdate import checkModUpdate
 
@@ -30,8 +31,6 @@ class ModListWidget(qtw.QTableWidget):
         super().__init__()
         logging.getLogger(__name__)
 
-        self.setObjectName('modlistwidget')
-
         self.saveManager = Save(savePath)
         self.optionsManager = OptionsManager(optionsPath)
 
@@ -39,6 +38,7 @@ class ModListWidget(qtw.QTableWidget):
 
         self.setSelectionMode(qtw.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.setSelectionBehavior(qtw.QAbstractItemView.SelectionBehavior.SelectRows)
+        self.setEditTriggers(qtw.QAbstractItemView.EditTrigger.NoEditTriggers)
         self.setAcceptDrops(True)
 
         self.setColumnCount(4)
@@ -56,8 +56,8 @@ class ModListWidget(qtw.QTableWidget):
         horizontalHeader.setHighlightSections(False)
 
         horizontalHeader.setSectionResizeMode(0, qtw.QHeaderView.ResizeMode.Stretch)
-        horizontalHeader.setSectionResizeMode(1, qtw.QHeaderView.ResizeMode.Interactive)
-        horizontalHeader.setSectionResizeMode(2, qtw.QHeaderView.ResizeMode.Interactive)
+        horizontalHeader.setSectionResizeMode(1, qtw.QHeaderView.ResizeMode.ResizeToContents)
+        horizontalHeader.setSectionResizeMode(2, qtw.QHeaderView.ResizeMode.ResizeToContents)
         horizontalHeader.setSectionResizeMode(3, qtw.QHeaderView.ResizeMode.Interactive)
 
         self.sortState = {'col' : 0, 'ascending': qt.SortOrder.AscendingOrder}
@@ -115,7 +115,7 @@ class ModListWidget(qtw.QTableWidget):
 
         self.sortItems(self.sortState['col'], self.sortState['ascending'])
     
-    def addMod(self, **kwargs: str | ModType | bool) -> None:
+    def addMod(self, **kwargs: str | ModType | bool | list[str]) -> None:
         '''
         Adds a new mod to the table (Not in the save manager)
 
@@ -125,6 +125,7 @@ class ModListWidget(qtw.QTableWidget):
         + type : ModType
         + enabled : bool
         + version: str
+        + tags: list[str]
 
         If there is any other kwarg, then it will return
         '''
@@ -137,6 +138,10 @@ class ModListWidget(qtw.QTableWidget):
 
                 case 'name':
                     item = qtw.QTableWidgetItem(value)
+                    tags = kwargs.get('tags')
+                    if tags is None:
+                        tags = []
+                    item.setData(ModRole.tags, tuple(tags))
 
                     if self.saveManager.getModworkshopAssetID(value):
 
@@ -175,6 +180,8 @@ class ModListWidget(qtw.QTableWidget):
 
         items = self.getSelectedNameItems()
 
+        disabledModDir = self.optionsManager.getDispath()
+
         startFileMover = ProgressWidget(MoveToDisabledDir(*[x.text() for x in items]))
         startFileMover.exec()
 
@@ -184,15 +191,16 @@ class ModListWidget(qtw.QTableWidget):
 
             modName = item.text()
 
-            if self.saveManager.getEnabled(modName):
+            if os.path.isdir(os.path.join(disabledModDir, modName)):
 
                 self.saveManager.setEnabled(modName, False)
+
                 self.getEnabledItem(row).setText('Disabled')
 
             else:
                 logging.info('%s is already disabled in the save file', modName)
         
-        self.saveManager.writeData()
+        self.saveManager.saveJSON()
 
     def deleteItem(self) -> None:
         '''
@@ -200,7 +208,7 @@ class ModListWidget(qtw.QTableWidget):
         and the mod assosiated with that row from the user's PC
         '''
 
-        warning = DeleteModConfirmation()
+        warning = Confirmation(title='Deletion Confirmation', body='Are you sure you want to delete these mod(s) from your computer?\n(This action cannot be reversed)')
         warning.exec()
 
         if warning.result():
@@ -218,7 +226,7 @@ class ModListWidget(qtw.QTableWidget):
             
             self.itemChanged.emit(*items)
 
-            self.saveManager.writeData()
+            self.saveManager.saveJSON()
     
     def setItemEnabled(self) -> None:
         '''Sets one or more mods to be enabled in MOD_CONFIG and in the GUI'''
@@ -233,12 +241,16 @@ class ModListWidget(qtw.QTableWidget):
             row = item.row()
 
             modName = item.text()
+            modType = ModType(self.getTypeItem(row).text())
 
-            self.saveManager.setEnabled(modName, True)
+            self.p.mod(modType, modName)
 
-            self.getEnabledItem(row).setText('Enabled')
+            if os.path.isdir(self.p.mod(modType, modName)):
+                self.saveManager.setEnabled(modName, True)
+
+                self.getEnabledItem(row).setText('Enabled')
         
-        self.saveManager.writeData()
+        self.saveManager.saveJSON()
 
     # This isn't used anywhere, might be removed later
     def isMultipleSelected(self) -> bool:
@@ -251,25 +263,25 @@ class ModListWidget(qtw.QTableWidget):
             self.setRowCount(0)
 
         # Gather mods from directories
-        mods = self.getMods()
+        mods_override, mods, maps = self.getMods()
 
         # Save mods into .ini
-        self.saveManager.addMods((mods[0], ModType.mods_override), (mods[1], ModType.mods), (mods[2], ModType.maps))
+        self.saveManager.addMods((mods_override, ModType.mods_override), (mods, ModType.mods), (maps, ModType.maps))
 
         disModFolder = self.optionsManager.getDispath()
-        disModFolderContents = os.listdir(disModFolder)
 
         # Add mods to the table widget
-        for mod in (x for x in mods[0] + mods[1] + mods[2]):
+        for mod in (x for x in mods_override + mods + maps):
             
             # Checking if the mod is ignored
             if self.saveManager.getIgnored(mod):
                 continue
 
             type = self.saveManager.getType(mod)
-            modPath = self.p.mod(type, mod)
+            isEnabled = not os.path.isdir(os.path.join(disModFolder, mod))
+            modPath = self.p.mod(type, mod) if isEnabled else os.path.join(disModFolder, mod)
             version = str(findModVersion(modPath))
-            isEnabled = mod not in disModFolderContents
+            tags = self.saveManager.getTags(mod)
 
             assetID = self.saveManager.getModworkshopAssetID(mod)
 
@@ -280,11 +292,11 @@ class ModListWidget(qtw.QTableWidget):
             
             self.saveManager.setModWorkshopAssetID(mod, assetID)
             
-            logging.debug('Adding mod to table, %s|%s|%s|%s|%s', mod, type, isEnabled, version, assetID)
+            logging.debug('Adding mod to table, %s|%s|%s|%s|%s|%s', mod, type, isEnabled, version, assetID, tags)
 
-            self.addMod(name=mod, type=type, enabled=isEnabled, version=version)
+            self.addMod(name=mod, type=type, enabled=isEnabled, version=version, tags=tags)
         
-        self.saveManager.writeData()
+        self.saveManager.saveJSON()
 
         # Clear selections from the disabled mod check
         self.clearSelection()
@@ -303,22 +315,27 @@ class ModListWidget(qtw.QTableWidget):
         + 2: Maps
         '''
 
+        # Valid mods
         mod_override: list[str] = []
         mods: list[str] = []
         maps: list[str] = []
 
+        # Mod Folder Paths
         modsPath = self.p.mods()
-
         mod_overridePath = self.p.mod_overrides()
-
         maps_path = self.p.maps()
-
         disabledModsPath = self.optionsManager.getDispath()
+
+        # Mod Folder Contents
+        modsFolder = os.listdir(modsPath)
+        mod_overrideFolder = os.listdir(mod_overridePath)
+        mapsFolder = os.listdir(maps_path)
+        disabledModsFolder = os.listdir(disabledModsPath)
 
         # Mods Folder
         if os.path.exists(modsPath):
 
-            for mod in os.listdir(modsPath):
+            for mod in modsFolder:
 
                 modPath = os.path.join(modsPath, mod)
 
@@ -331,7 +348,7 @@ class ModListWidget(qtw.QTableWidget):
         # mod_override Folder
         if os.path.exists(mod_overridePath):
 
-            for mod in os.listdir(mod_overridePath):
+            for mod in mod_overrideFolder:
 
                 modPath = os.path.join(mod_overridePath, mod)
 
@@ -344,7 +361,7 @@ class ModListWidget(qtw.QTableWidget):
         # maps Folder
         if os.path.exists(maps_path):
 
-            for mod in os.listdir(maps_path):
+            for mod in mapsFolder:
 
                 modPath = os.path.join(maps_path, mod)
 
@@ -357,7 +374,7 @@ class ModListWidget(qtw.QTableWidget):
         # Disabled Mods Folder
         if os.path.exists(disabledModsPath):
             
-            for mod in os.listdir(disabledModsPath):
+            for mod in disabledModsFolder:
 
                 if self.saveManager.has_section(mod):
 
@@ -377,7 +394,7 @@ class ModListWidget(qtw.QTableWidget):
                 else:
                     logging.error('%s needs to be installed first before becoming disabled', mod)
 
-        return [mod_override, mods, maps]
+        return mod_override, mods, maps
     
     def visitModPage(self) -> None:
 
@@ -429,26 +446,52 @@ class ModListWidget(qtw.QTableWidget):
             self.saveManager.setIgnored(modName, True)
             self.removeRow(item.row())
         
-        self.saveManager.writeData()
+        self.saveManager.saveJSON()
 
         self.itemChanged.emit(items[0])
+
+    def viewTags(self) -> None:
+        self.tagViewer = TagViewer(self)
+        self.tagViewer.tagChanged.connect(lambda x, y: self.updateTags(x, y))
+        self.tagViewer.show()
     
+    def updateTags(self, mod: str, tags: tuple[str]) -> None:
+        items = self.findItems(mod, qt.MatchFlag.MatchFixedString)
+        if items:
+            item = items[0]
+            item.setData(ModRole.tags, sorted(tags))
+
     def search(self, input: str) -> None:
+        searchedTags = None
+
+        if input.startswith('tag:') and len(input) > 4:
+            splitStr = input.split(' ')
+            input = ' '.join(splitStr[1:])
+            searchedTags = splitStr[0][4:].split(',')
 
         results = self.findItems(f'{input}*', qt.MatchFlag.MatchWildcard | qt.MatchFlag.MatchExactly)
 
         for i in range(0, self.rowCount() + 1):
 
             item = self.item(i, 0)
+            if item is not None:
+                modTags: tuple[str] | None = item.data(ModRole.tags)
 
-            if item not in results:
-                self.setRowHidden(i, True)
+            if searchedTags is not None and modTags is not None:
+                for tag in searchedTags:
+                    if tag in modTags and item in results:
+                        self.setRowHidden(i, False)
+                    else:
+                        self.setRowHidden(i, True)
             else:
-                self.setRowHidden(i, False)
+                if item in results and searchedTags is None:
+                    self.setRowHidden(i, False)
+                else:
+                    self.setRowHidden(i, True)
     
-    def swapIcons(self) -> None:
+    def swapIcons(self, mode: str) -> None:
 
-        newIcon = MODWORKSHOP_LOGO_W if self.optionsManager.getTheme() == LIGHT else MODWORKSHOP_LOGO_B
+        newIcon = MODWORKSHOP_LOGO_W if mode == LIGHT else MODWORKSHOP_LOGO_B
 
         reverseDict = {MODWORKSHOP_LOGO_B : MODWORKSHOP_LOGO_W, MODWORKSHOP_LOGO_W : MODWORKSHOP_LOGO_B}
 

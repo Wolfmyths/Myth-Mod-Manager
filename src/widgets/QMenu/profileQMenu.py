@@ -29,14 +29,14 @@ class ProfileMenu(ModContextMenu):
         self.modRemove = qtg.QAction('Remove Mod', self)
         self.copyModsTo = qtg.QAction('Copy mod(s) to...', self)
 
-        self.profileApply.triggered.connect(self.profileApplyPressed)
-        self.profileAdd.triggered.connect(self.profileAddPressed)
-        self.profileRemove.triggered.connect(self.profileRemovePressed)
-        self.profileEdit.triggered.connect(self.profileEditPressed)
-        self.profileCopy.triggered.connect(self.profileCopyPressed)
-        self.modAdd.triggered.connect(self.modAddPressed)
-        self.modRemove.triggered.connect(self.modRemovePressed)
-        self.copyModsTo.triggered.connect(self.copyModsToPressed)
+        self.profileApply.triggered.connect(lambda: self.callFunc(self.qParent.applyProfileEvent))
+        self.profileAdd.triggered.connect(lambda: self.callFunc(self.qParent.menuAddProfile))
+        self.profileRemove.triggered.connect(lambda: self.callFunc(self.qParent.deleteProfile))
+        self.profileEdit.triggered.connect(lambda: self.callFunc(self.qParent.editProfileMenu))
+        self.profileCopy.triggered.connect(lambda: self.callFunc(self.qParent.copyProfile))
+        self.modAdd.triggered.connect(lambda: self.callFunc(self.qParent.modAddMenu))
+        self.modRemove.triggered.connect(lambda: self.callFunc(self.qParent.removeMods))
+        self.copyModsTo.triggered.connect(lambda: self.callFunc(self.qParent.copyModsToProfileMenu))
 
         self.profileButtons = (self.profileApply, self.modAdd, self.profileAdd, self.profileRemove, self.profileEdit, self.profileCopy, self.copyModsTo)
         self.modButtons = (self.profileApply, self.modAdd, self.modRemove, self.copyModsTo)
@@ -48,38 +48,6 @@ class ProfileMenu(ModContextMenu):
             self.addAction(action)
         
         self.actionsTuple = tuple(self.actions())
-    
-    def profileApplyPressed(self):
-        if self.wasLastClickLMB():
-            self.qParent.applyProfileEvent()
-
-    def profileAddPressed(self):
-        if self.wasLastClickLMB():
-            self.qParent.menuAddProfile()
-    
-    def profileRemovePressed(self):
-        if self.wasLastClickLMB():
-            self.qParent.deleteProfile()
-    
-    def profileEditPressed(self):
-        if self.wasLastClickLMB():
-            self.qParent.editProfileMenu()
-    
-    def profileCopyPressed(self):
-        if self.wasLastClickLMB():
-            self.qParent.copyProfile()
-    
-    def modAddPressed(self):
-        if self.wasLastClickLMB():
-            self.qParent.modAddMenu()
-    
-    def modRemovePressed(self):
-        if self.wasLastClickLMB():
-            self.qParent.removeMods()
-    
-    def copyModsToPressed(self):
-        if self.wasLastClickLMB():
-            self.qParent.copyModsToProfileMenu()
 
     def profileRightClicked(self):
         for action in self.actionsTuple:

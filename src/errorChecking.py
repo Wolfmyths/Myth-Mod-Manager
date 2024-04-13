@@ -36,12 +36,12 @@ def validGamePath(optionsPath: str = OPTIONS_CONFIG) -> bool:
 
     gameEx = 'payday2_win32_release.exe' if sys.platform.startswith('win') else 'payday2_release'
 
-    if os.path.isdir(gamePath) and gameEx in os.listdir(gamePath):
+    if os.path.isfile(os.path.join(gamePath, gameEx)):
 
         logging.info('Gamepath: %s', gamePath)
         return True
 
-    logging.warning('There is no gamepath')
+    logging.warning('Could not find %s in "%s"', gameEx, gamePath)
     return False
 
 def createModDirs(optionsPath: str = OPTIONS_CONFIG) -> None:
@@ -120,7 +120,7 @@ def permissionCheck(src: str) -> int:
     permission = str(oct(os.stat(src).st_mode))[-3:]
 
     if int(permission) != 777:
-        logging.info('Permission error found, fixing...')
+        logging.warning('Permission error found, fixing...')
         os.chmod(src, stat.S_IRWXU)
 
         result = 0
@@ -134,13 +134,20 @@ def permissionCheck(src: str) -> int:
 def startFile(path: str) -> None:
     '''A cross-platform version of `os.startfile()`'''
 
+    logging.info('Starting program "%s"', path)
+
     try:
+        if not os.path.isabs(path):
+            raise Exception('Please use a full path to the program you are starting.')
 
         if sys.platform.startswith('win'):
             os.startfile(path)
         else:
             cmd = 'open' if sys.platform == 'darwin' else 'xdg-open'
-            subprocess.call([cmd, path])
+            returnCode = subprocess.run([cmd, path], shell=True)
+            returnCode.check_returncode()
 
     except Exception as e:
         logging.error('Error in errorChecking.startFile(%s): %s', path, str(e))
+        notice = Notice(f'Error in errorChecking.startFile({path}): {e}', 'Could not start program')
+        notice.exec()

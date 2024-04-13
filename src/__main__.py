@@ -6,7 +6,7 @@ import PySide6.QtWidgets as qtw
 from src.main_window import MainWindow
 from src.save import Save, OptionsManager
 from src.widgets.QDialog.gamepathQDialog import GamePathNotFound
-from src.constant_vars import VERSION, PROGRAM_NAME, LOG, IS_SCRIPT, OLD_EXE, ROOT_PATH, ICON
+from src.constant_vars import VERSION, PROGRAM_NAME, LOG, IS_SCRIPT, OLD_EXE, ROOT_PATH
 import src.errorChecking as errorChecking
 from src.style import StyleManager
 

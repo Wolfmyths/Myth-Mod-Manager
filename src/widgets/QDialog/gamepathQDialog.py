@@ -56,9 +56,8 @@ class GamePathNotFound(Dialog):
         dialog = qtw.QFileDialog()
         url = dialog.getExistingDirectory(self, caption='Select PAYDAY 2 Directory')
 
-        if url:
+        if os.path.isdir(url):
             self.gameDir.setText(url)
-            self.checkGamePath()
 
     def checkGamePath(self) -> None:
 
@@ -73,7 +72,7 @@ class GamePathNotFound(Dialog):
 
             self.noticeLabel.setText('Success: Game Path is valid')
 
-            self.optionsManager.setGamepath(gamePath)
+            self.optionsManager.setGamepath(os.path.abspath(gamePath))
             self.optionsManager.writeData()
 
         else:

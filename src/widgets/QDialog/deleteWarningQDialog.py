@@ -2,15 +2,15 @@ import PySide6.QtWidgets as qtw
 
 from src.widgets.QDialog.QDialog import Dialog
 
-class DeleteModConfirmation(Dialog):
-    def __init__(self) -> None:
+class Confirmation(Dialog):
+    def __init__(self, title: str, body: str) -> None:
         super().__init__()
 
-        self.setWindowTitle('Deletion Confirmation')
+        self.setWindowTitle(title)
 
         layout = qtw.QVBoxLayout()
 
-        self.warningLabel = qtw.QLabel(self, text='Are you sure you want to delete these mod(s) from your computer?\n(This action cannot be reversed)')
+        self.warningLabel = qtw.QLabel(self, text=body)
 
         buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 

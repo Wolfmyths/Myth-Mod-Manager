@@ -11,7 +11,7 @@ from src.widgets.managerQTableWidget import ModListWidget
 from src.widgets.QDialog.announcementQDialog import Notice
 from src.save import Save, OptionsManager
 import src.errorChecking as errorChecking
-from src.constant_vars import START_PAYDAY_PATH, MOD_TABLE_OBJECT, ModType, MOD_CONFIG, OPTIONS_CONFIG
+from src.constant_vars import ModType, MOD_CONFIG, OPTIONS_CONFIG
 
 class ModManager(qtw.QWidget):
 
@@ -61,13 +61,11 @@ class ModManager(qtw.QWidget):
         self.labelFrame.setLayout(modLabelLayout)
 
         self.search = qtw.QLineEdit()
-        self.search.setPlaceholderText('Search...')
+        self.search.setPlaceholderText('Search... use "tag:" with no spaces to search for tags, use a comma "," to seperate tags')
         self.search.textChanged.connect(lambda x: self.modsTable.search(x))
 
         self.modsTable = ModListWidget(saveManagerPath, optionsManagerPath)
         self.modsTable.itemChanged.connect(self.updateModCount)
-        
-        self.modsTable.setObjectName(MOD_TABLE_OBJECT)
 
         self.modsTable.refreshMods()
 
@@ -92,19 +90,25 @@ class ModManager(qtw.QWidget):
 
             gamePath: str = self.optionsManager.getGamepath()
 
-            drive: str = gamePath[0].lower()
-
             if sys.platform.startswith('win'):
 
-                # Starts START_PAYDAY.bat
-                # First argument is to change the directory to the game's directory
-                # Second argument the drive for the cd command
-                # Third argument is the exe name
-                # Fourth argument is extra arguments for payday 2
-                subprocess.call([START_PAYDAY_PATH, gamePath, drive, 'payday2_win32_release.exe'])
+                gameExe = 'payday2_win32_release.exe'
+
+                try:
+                    if not os.path.isabs(os.path.join(gamePath, gameExe)):
+                        raise Exception('Path is not absolute')
+
+                    # TODO: Permission error is raised without shell=True, can this be avoided?
+                    cmd = subprocess.run([gamePath[0:2].upper(), '&&', 'cd', os.path.abspath(gamePath), '&&', 'payday2_win32_release.exe'], shell=True)
+                    cmd.check_returncode()
+                except Exception as e:
+                    logging.error('An error occured trying to start PAYDAY 2:\n%s', str(e))
+                    notice = Notice(f'An error occured trying to start PAYDAY 2:\n{e}', 'Could not start PAYDAY 2 from MMM')
+                    notice.exec()
             
             else:
-                errorChecking.startFile(os.path.join(gamePath, 'payday2_release'))
+                gameExe = 'payday2_release'
+                errorChecking.startFile(os.path.join(gamePath, gameExe))
         else:
             
             logging.error('Could not start PAYDAY 2, could not find payday 2 executable in:\n%s', gamePath)

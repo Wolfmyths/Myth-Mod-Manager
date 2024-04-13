@@ -1,8 +1,15 @@
+import os
+
 import pytest
 from pytestqt.qtbot import QtBot
 
+import PySide6.QtWidgets as qtw
+
 from src.settings import Options
-from src.constant_vars import DARK
+from src.constant_vars import DARK, LIGHT, OptionKeys
+
+MOCK_DISMODS = os.path.abspath('path\\to\\disabled\\mods')
+MOCK_GAMEPATH = os.path.abspath('path\\to\\gamepath')
 
 @pytest.fixture(scope='module')
 def create_Settings(createTemp_Config_ini: str) -> Options:
@@ -11,19 +18,47 @@ def create_Settings(createTemp_Config_ini: str) -> Options:
 def test_Settings(qtbot: QtBot, create_Settings: Options) -> None:
     qtbot.addWidget(create_Settings)
 
-@pytest.mark.skip
-def test_setGamePath(create_Settings: Options) -> None:
-    pass
+    assert create_Settings.sectionsList.count() == 4
 
-def test_setDisPath(create_Settings: Options) -> None:
-    create_Settings.setDisPath('test')
+    assert len(create_Settings.sections) == 4
 
-    assert create_Settings.optionsManager.getDispath() == 'test'
+    for k in create_Settings.sections.keys():
+        assert isinstance(create_Settings.sections[k], qtw.QWidget)
 
-def test_changeColorTheme(create_Settings: Options) -> None:
-    create_Settings.changeColorTheme(DARK)
+def test_gamePathChanged(create_Settings: Options) -> None:
+    create_Settings.optionsGeneral.gamePathChanged(MOCK_GAMEPATH)
 
-    assert create_Settings.optionsManager.getTheme() == DARK
+    assert create_Settings.optionChanged[OptionKeys.game_path] == True
 
-def test_updateModIgnoreLabel(create_Settings: Options) -> None:
-    assert create_Settings.ignoredModsLabel.text() == ''
+def test_disPathChanged(create_Settings: Options) -> None:
+    create_Settings.optionsGeneral.disPathChanged(MOCK_DISMODS)
+
+    assert create_Settings.optionChanged[OptionKeys.dispath] == True
+
+def test_themeChanged(create_Settings: Options) -> None:
+    create_Settings.optionsGeneral.themeChanged(DARK)
+
+    assert create_Settings.optionChanged[OptionKeys.color_theme] == True
+
+def test_cancelChanges(create_Settings: Options) -> None:
+    assert create_Settings.applyButton.isEnabled()
+
+    create_Settings.cancelChanges()
+
+    assert create_Settings.applyButton.isEnabled() == False
+
+    assert sum(list(create_Settings.optionChanged.values())) == 0
+
+def test_applySettings(create_Settings: Options) -> None:
+    create_Settings.optionsGeneral.colorThemeLight.setChecked(True)
+    create_Settings.optionsGeneral.gameDir.setText(MOCK_GAMEPATH)
+    create_Settings.optionsGeneral.disabledModDir.setText(MOCK_DISMODS)
+    
+    create_Settings.applySettings()
+
+    assert create_Settings.optionsManager.getTheme() == LIGHT
+    assert create_Settings.optionsManager.getGamepath() == MOCK_GAMEPATH
+    assert create_Settings.optionsManager.getDispath() == MOCK_DISMODS
+
+    assert sum(list(create_Settings.optionChanged.values())) == 0
+    assert create_Settings.applyButton.isEnabled() == False

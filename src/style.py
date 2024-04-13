@@ -201,7 +201,16 @@ class StyleManager():
             }}
 
             QGroupBox {{
-                border: 15px solid {0};
+                background-color: none;
+
+                border: 2px solid {1};
+                border-radius: 0px;
+                margin-top: 1ex;
+            }}
+
+            QGroupBox::title {{
+                subcontrol-origin: margin;
+                padding: 0 3px;
             }}
 
             QFrame#externaltool {{

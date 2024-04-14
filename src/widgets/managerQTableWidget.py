@@ -208,7 +208,8 @@ class ModListWidget(qtw.QTableWidget):
         and the mod assosiated with that row from the user's PC
         '''
 
-        warning = Confirmation(title='Deletion Confirmation', body='Are you sure you want to delete these mod(s) from your computer?\n(This action cannot be reversed)')
+        warning = Confirmation(title='Deletion Confirmation', 
+                               body='Are you sure you want to delete these mod(s) from your computer?\n(This action cannot be reversed)')
         warning.exec()
 
         if warning.result():

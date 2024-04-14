@@ -73,7 +73,7 @@ class GamePathNotFound(Dialog):
             okButton.setEnabled(False)
     
     def accept(self) -> None:
-        self.optionsManager.setGamepath(os.path.abspath(self.gameDir.text()))
+        self.optionsManager.setGamepath(self.gameDir.text())
         self.optionsManager.writeData()
         return super().accept()
 

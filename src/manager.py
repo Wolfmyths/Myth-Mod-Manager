@@ -89,7 +89,7 @@ class ModManager(qtw.QWidget):
         gamePath: str = self.optionsManager.getGamepath()
 
         try:
-            if not os.path.isabs(os.path.join(gamePath, gameExe)):
+            if not os.path.isabs(gamePath):
                 raise Exception('Path is not absolute')
 
             if sys.platform.startswith('win'):

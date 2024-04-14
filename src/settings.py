@@ -128,10 +128,10 @@ class Options(qtw.QWidget):
     
     def applySettings(self) -> None:
         if self.optionChanged.get(OptionKeys.game_path):
-            self.optionsManager.setGamepath(self.optionsGeneral.gameDir.text())
+            self.optionsManager.setGamepath(os.path.abspath(self.optionsGeneral.gameDir.text()))
         
         if self.optionChanged.get(OptionKeys.dispath):
-            self.optionsManager.setDispath(self.optionsGeneral.disabledModDir.text())
+            self.optionsManager.setDispath(os.path.abspath(self.optionsGeneral.disabledModDir.text()))
 
         if self.optionChanged.get(OptionKeys.color_theme):
             theme = LIGHT if self.optionsGeneral.colorThemeLight.isChecked() else DARK
@@ -261,7 +261,6 @@ class OptionsGeneral(OptionsSectionBase):
         self.setLayout(layout)
 
     def gamePathChanged(self, path: str) -> None:
-        print(path)
         changed = True if path != self.optionsManager.getGamepath() else False
         self.pendingChanges.emit(OptionKeys.game_path, changed)
     

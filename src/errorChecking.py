@@ -29,21 +29,6 @@ def openWebPage(link: str) -> bool:
     
     return outcome
 
-def validGamePath(optionsPath: str = OPTIONS_CONFIG) -> bool:
-    '''Gets the gamepath from OPTIONS_CONFIG and checks if the paths contains the PAYDAY 2 exe'''
-
-    gamePath = OptionsManager(optionsPath).getGamepath()
-
-    gameEx = 'payday2_win32_release.exe' if sys.platform.startswith('win') else 'payday2_release'
-
-    if os.path.isfile(os.path.join(gamePath, gameEx)):
-
-        logging.info('Gamepath: %s', gamePath)
-        return True
-
-    logging.warning('Could not find %s in "%s"', gameEx, gamePath)
-    return False
-
 def createModDirs(optionsPath: str = OPTIONS_CONFIG) -> None:
     path = Pathing(optionsPath)
     disPath = OptionsManager(optionsPath).getDispath()
@@ -51,7 +36,6 @@ def createModDirs(optionsPath: str = OPTIONS_CONFIG) -> None:
     for modDir in (path.maps(), path.mod_overrides(), path.mods(), disPath):
         if not os.path.isdir(modDir):
             os.mkdir(modDir)
-
 
 def isInstalled(mod: str, optionsPath: str = OPTIONS_CONFIG) -> bool:
     '''Checks if the mod is installed on the system'''

@@ -86,34 +86,26 @@ class ModManager(qtw.QWidget):
 
     def startPayday(self):
 
-        if errorChecking.validGamePath():
+        gamePath: str = self.optionsManager.getGamepath()
 
-            gamePath: str = self.optionsManager.getGamepath()
+        try:
+            if not os.path.isabs(os.path.join(gamePath, gameExe)):
+                raise Exception('Path is not absolute')
 
             if sys.platform.startswith('win'):
 
                 gameExe = 'payday2_win32_release.exe'
 
-                try:
-                    if not os.path.isabs(os.path.join(gamePath, gameExe)):
-                        raise Exception('Path is not absolute')
-
-                    # TODO: Permission error is raised without shell=True, can this be avoided?
-                    cmd = subprocess.run([gamePath[0:2].upper(), '&&', 'cd', os.path.abspath(gamePath), '&&', 'payday2_win32_release.exe'], shell=True)
-                    cmd.check_returncode()
-                except Exception as e:
-                    logging.error('An error occured trying to start PAYDAY 2:\n%s', str(e))
-                    notice = Notice(f'An error occured trying to start PAYDAY 2:\n{e}', 'Could not start PAYDAY 2 from MMM')
-                    notice.exec()
-            
+                # TODO: Permission error is raised without shell=True, can this be avoided?
+                cmd = subprocess.run([gamePath[0:2].upper(), '&&', 'cd', gamePath, '&&', gameExe], shell=True)
+                cmd.check_returncode()
             else:
                 gameExe = 'payday2_release'
                 errorChecking.startFile(os.path.join(gamePath, gameExe))
-        else:
-            
-            logging.error('Could not start PAYDAY 2, could not find payday 2 executable in:\n%s', gamePath)
 
-            notice = Notice(f'Could not find payday 2 executable in:\n{gamePath}', 'Error: Invalid Gamepath')
+        except Exception as e:
+            logging.error('An error occured trying to start PAYDAY 2:\n%s', str(e))
+            notice = Notice(f'An error occured trying to start PAYDAY 2:\n{e}', 'Could not start PAYDAY 2 from MMM')
             notice.exec()
 
     def deselectAllShortcut(self):
@@ -121,7 +113,7 @@ class ModManager(qtw.QWidget):
         if selectedItems:
             for item in selectedItems:
                 item.setSelected(False)
-    
+
     def keyPressEvent(self, event: qtg.QKeyEvent) -> None:
         if event.key() == qt.Key.Key_Delete and self.modsTable.selectedItems():
             self.modsTable.deleteItem()

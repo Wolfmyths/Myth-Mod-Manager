@@ -64,22 +64,18 @@ class GamePathNotFound(Dialog):
         gamePath = self.gameDir.text()
         okButton = self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok)
 
-        exe = 'payday2_win32_release.exe' if sys.platform.startswith('win') else 'payday2_release'
-
-        if os.path.isfile(os.path.join(gamePath, exe)):
+        if len(gamePath) > 0:
 
             okButton.setEnabled(True)
-
-            self.noticeLabel.setText('Success: Game Path is valid')
-
-            self.optionsManager.setGamepath(os.path.abspath(gamePath))
-            self.optionsManager.writeData()
 
         else:
 
             okButton.setEnabled(False)
-
-            self.noticeLabel.setText('Error: Game Path is not valid')
+    
+    def accept(self) -> None:
+        self.optionsManager.setGamepath(os.path.abspath(self.gameDir.text()))
+        self.optionsManager.writeData()
+        return super().accept()
 
     def reject(self) -> None:
 

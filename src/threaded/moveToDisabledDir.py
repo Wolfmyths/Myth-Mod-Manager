@@ -26,12 +26,14 @@ class MoveToDisabledDir(Worker):
 
                 self.setCurrentProgress.emit(1, f'Disabling {mod}')
 
+                modDest = os.path.join(disabledModsPath, mod)
+
                 # Checking if the mod is already in the disabled mods folder
-                if not mod in os.listdir(disabledModsPath):
+                if not os.path.isdir(modDest):
 
                     modPath = self.p.mod(self.saveManager.getType(mod), mod)
 
-                    self.move(modPath, os.path.join(disabledModsPath, mod))
+                    self.move(modPath, modDest)
                 else:
                     logging.info('%s is already in the disabled directory', mod)
 

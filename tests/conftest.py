@@ -1,3 +1,4 @@
+from typing import Generator
 import tempfile
 import os
 import json
@@ -12,10 +13,7 @@ def getDir() -> str:
     return os.path.dirname(__file__)
 
 @pytest.fixture
-def create_mod_dirs(createTemp_Mod_ini: str) -> str:
-    parser = ConfigParser()
-    parser.read(createTemp_Mod_ini)
-
+def create_mod_dirs() -> Generator:
     with tempfile.TemporaryDirectory() as tmp_dir:
         os.makedirs(os.path.join(tmp_dir, 'mods', 'make game easy mod'))
         os.makedirs(os.path.join(tmp_dir, 'assets', 'mod_overrides', 'best mod ever'))
@@ -25,34 +23,34 @@ def create_mod_dirs(createTemp_Mod_ini: str) -> str:
         yield tmp_dir
 
 @pytest.fixture(scope='module')
-def createTemp_Mod_ini() -> str:
-    with tempfile.NamedTemporaryFile('w', suffix='.ini', delete=False) as tmp:
-        tmp_filename = tmp.name
-    
-    config = ConfigParser()
+def createTemp_Mod_ini() -> Generator:
+    data = {'super fun mod' : {ModKeys.type.value : ModType.maps.value,
+                               ModKeys.modworkshopid.value : '3453',
+                               ModKeys.enabled.value : True,
+                               ModKeys.ignored.value : False},
 
-    config.read(tmp_filename)
+            'best mod ever' : {ModKeys.type.value : ModType.mods_override.value,
+                               ModKeys.modworkshopid.value : '',
+                               ModKeys.enabled.value : True,
+                               ModKeys.ignored.value : False},
+            
+            'make game easy mod' : {ModKeys.type.value : ModType.mods.value,
+                               ModKeys.modworkshopid.value : '2523',
+                               ModKeys.enabled.value : True,
+                               ModKeys.ignored.value : False}
+            }
 
-    for mod in (('super fun mod', ModType.maps.value, '3453'),
-                ('best mod ever', ModType.mods_override.value, ''),
-                ('make game easy mod', ModType.mods.value, '2523')):
+    with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as tmp:
+        tmp_name = tmp.name
 
-        config.add_section(mod[0])
+        tmp.write(json.dumps(data))
 
-        config.set(mod[0], ModKeys.type.value, mod[1])
-        config.set(mod[0], ModKeys.modworkshopid.value, mod[2])
-        config.set(mod[0], ModKeys.enabled.value, 'true')
-        config.set(mod[0], ModKeys.ignored.value, 'false')
+    yield tmp_name
 
-    with open(tmp_filename, 'w') as f:
-        config.write(f)
-
-    yield tmp_filename
-
-    os.remove(tmp_filename)
+    os.remove(tmp_name)
 
 @pytest.fixture(scope='module')
-def createTemp_Config_ini(getDir: str) -> str:
+def createTemp_Config_ini(getDir: str) -> Generator:
     with tempfile.NamedTemporaryFile('w', suffix='.ini', delete=False) as tmp:
         tmp_filename = tmp.name
 
@@ -73,7 +71,7 @@ def createTemp_Config_ini(getDir: str) -> str:
     os.remove(tmp_filename)
 
 @pytest.fixture(scope='module')
-def createTemp_Profiles_ini() -> str:
+def createTemp_Profiles_ini() -> Generator:
 
     data = {'Awesome mods' : ['cool_beans', 'among us guards', 'make game easy']}
 
@@ -87,7 +85,7 @@ def createTemp_Profiles_ini() -> str:
     os.remove(tmp_name)
 
 @pytest.fixture(scope='module')
-def createTemp_externalShortcuts_ini() -> str:
+def createTemp_externalShortcuts_ini() -> Generator:
 
     data = {'shortcuts' : ['C:\\path\\program.exe', 'D:\\path\\payday.exe', 'C:\\path\\map_builder.exe']}
 

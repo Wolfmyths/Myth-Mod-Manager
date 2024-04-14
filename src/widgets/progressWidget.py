@@ -8,7 +8,7 @@ import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QThread
 
 from src.widgets.QDialog.QDialog import Dialog
-
+from src.threaded.workerQObject import Worker
 if TYPE_CHECKING:
     from src.threaded.workerQObject import Worker
 
@@ -27,24 +27,11 @@ class ProgressWidget(Dialog):
 
         layout = qtw.QVBoxLayout()
 
-        # Create QThread
-        self.qthread = QThread()
-        self.qthread.started.connect(self.mode.start)
-
-        # Move task to QThread
-        self.mode.moveToThread(self.qthread)
-
         # Label
         self.infoLabel = qtw.QLabel(self)
 
-        # Progress bar and connecting signals
+        # Progress bar
         self.progressBar = qtw.QProgressBar()
-        self.mode.setTotalProgress.connect(lambda x: self.progressBar.setMaximum(x))
-        self.mode.setCurrentProgress.connect(lambda x, y: self.updateProgressBar(x, y))
-        self.mode.addTotalProgress.connect(lambda x: self.progressBar.setMaximum(self.progressBar.maximum() + x))
-        self.mode.doneCanceling.connect(self.reject)
-        self.mode.error.connect(lambda x: self.errorRaised(x))
-        self.mode.succeeded.connect(self.succeeded)
 
         # Button
         buttons = qtw.QDialogButtonBox.StandardButton.Cancel
@@ -56,12 +43,30 @@ class ProgressWidget(Dialog):
             layout.addWidget(widget)
         
         self.setLayout(layout)
+
+        self.__initMode()
+    
+    def __initMode(self) -> None:
+        # Create QThread
+        self.qthread = QThread()
+        self.qthread.started.connect(self.mode.start)
+
+        # Move task to QThread
+        self.mode.moveToThread(self.qthread)
+
+        # Connect signals
+        self.mode.setTotalProgress.connect(lambda x: self.progressBar.setMaximum(x))
+        self.mode.setCurrentProgress.connect(lambda x, y: self.updateProgressBar(x, y))
+        self.mode.addTotalProgress.connect(lambda x: self.progressBar.setMaximum(self.progressBar.maximum() + x))
+        self.mode.doneCanceling.connect(self.reject)
+        self.mode.error.connect(lambda x: self.errorRaised(x))
+        self.mode.succeeded.connect(self.succeeded)
     
     def exec(self) -> int:
 
         self.qthread.start()
         return super().exec()
-    
+
     def errorRaised(self, message: str):
         logging.error(message)
 
@@ -102,7 +107,11 @@ class ProgressWidget(Dialog):
 
         self.mode.cancel = True
     
-    def updateProgressBar(self, x, y):
+    def updateProgressBar(self, x: int, y: str) -> None:
+        '''
+        Adds progress to the current progress
+        bar value and changes the text of the label
+        '''
 
         newValue = x + self.progressBar.value()
 

@@ -13,10 +13,6 @@ class IgnoredModsQMenu(ModContextMenu):
         self.qParent: IgnoredMods = parent
 
         self.removeItem = qtg.QAction('Remove')
-        self.removeItem.triggered.connect(self.removeItemClicked)
+        self.removeItem.triggered.connect(lambda: self.callFunc(self.qParent.removeItemWidgets))
 
         self.addAction(self.removeItem)
-    
-    def removeItemClicked(self) -> None:
-        if self.wasLastClickLMB():
-            self.qParent.removeItemWidgets()

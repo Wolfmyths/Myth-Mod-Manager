@@ -38,12 +38,9 @@ class MainWindow(qtw.QMainWindow):
         self.options = Options()
         self.about = About()
 
-        self.options.ignoredModsListWidget.itemsRemoved.connect(self.manager.modsTable.refreshMods)
-        self.options.colorThemeDark.clicked.connect(self.manager.modsTable.swapIcons)
-        self.options.colorThemeLight.clicked.connect(self.manager.modsTable.swapIcons)
-
-        self.options.colorThemeDark.clicked.connect(self.about.updateIcons)
-        self.options.colorThemeLight.clicked.connect(self.about.updateIcons)
+        self.options.ignoredMods.ignoredModsListWidget.itemsRemoved.connect(self.manager.modsTable.refreshMods)
+        self.options.themeSwitched.connect(lambda x: self.manager.modsTable.swapIcons(x))
+        self.options.themeSwitched.connect(lambda x: self.about.updateIcons(x))
 
         for page in (
                         (self.manager, 'Manager'),
@@ -69,7 +66,10 @@ class MainWindow(qtw.QMainWindow):
             errorChecking.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
             QCoreApplication.quit()
     
-    def close(self) -> bool:
+    def closeEvent(self, event: qtg.QCloseEvent) -> None:
         self.optionsManager.setWindowSize(self.size())
         self.optionsManager.writeData()
-        return super().close()
+
+        if isinstance(self.app, qtw.QApplication):
+            self.app.closeAllWindows()
+        return super().closeEvent(event)

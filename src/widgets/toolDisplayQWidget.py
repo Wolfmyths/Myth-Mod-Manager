@@ -5,7 +5,7 @@ import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, Signal
 
 from src.widgets.QDialog.announcementQDialog import Notice
-from src.widgets.QDialog.deleteWarningQDialog import DeleteModConfirmation
+from src.widgets.QDialog.deleteWarningQDialog import Confirmation
 
 from src import errorChecking
 
@@ -65,29 +65,28 @@ class ExternalTool(qtw.QFrame):
 
     def editToolURL(self) -> None:
         dialog = qtw.QFileDialog()
-        new_url = dialog.getOpenFileName(None, 
+        new_url = dialog.getOpenFileUrl(None, 
                                        caption='Select new external tool',
-                                       filter='',
-                                       selectedFilter='Executables (*.exe *.bat *.sh);;Any (*)')[0]
+                                       filter='Executables (*.exe *.bat *.sh);;Any (*)')
+        
+        new_urlLocalFile = new_url[0].toLocalFile()
 
-        if new_url:
+        if os.path.isfile(new_urlLocalFile):
             old_url = self.toolURL
-            self.toolURL = new_url
+            self.toolURL = new_urlLocalFile
 
             self.startToolButton.setText(self.__trimBasename(self.toolURL))
 
-            self.nameChanged.emit(new_url, old_url)
+            self.nameChanged.emit(new_urlLocalFile, old_url)
 
     def deleteExternalTool(self, ask: bool = True) -> None:
         if ask:
-            notice = DeleteModConfirmation()
-            notice.warningLabel.setText('Are you sure you want to delete this shortcut?')
+            notice = Confirmation('Delete tool shortcut',
+                                  'Are you sure you want to delete this shortcut?')
             notice.exec()
 
-            if not notice.result():
-                return
-
-        self.deleted.emit(self.toolURL)
+            if notice.result():
+                self.deleted.emit(self.toolURL)
 
     def startExternalTool(self) -> None:
         try:

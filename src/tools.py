@@ -1,3 +1,5 @@
+import os
+
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt
 
@@ -22,9 +24,11 @@ class ToolManager(qtw.QWidget):
     
     def createTools(self) -> None:
         dialog = qtw.QFileDialog()
-        urls = dialog.getOpenFileNames(self, 
+        urls = dialog.getOpenFileUrl(self, 
                                        caption='Select External Tool(s)', 
-                                       filter='Executables (*.exe *.bat *.sh);;Any (*)')[0]
+                                       filter='Executables (*.exe *.bat *.sh);;Any (*)')
+        
+        new_url = urls[0].toLocalFile()
 
-        if urls:
-            self.toolsWidget.addTool(*urls)
+        if os.path.isfile(new_url):
+            self.toolsWidget.addTool(new_url)

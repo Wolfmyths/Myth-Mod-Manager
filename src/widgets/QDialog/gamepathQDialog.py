@@ -56,31 +56,26 @@ class GamePathNotFound(Dialog):
         dialog = qtw.QFileDialog()
         url = dialog.getExistingDirectory(self, caption='Select PAYDAY 2 Directory')
 
-        if url:
+        if os.path.isdir(url):
             self.gameDir.setText(url)
-            self.checkGamePath()
 
     def checkGamePath(self) -> None:
 
         gamePath = self.gameDir.text()
         okButton = self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok)
 
-        exe = 'payday2_win32_release.exe' if sys.platform.startswith('win') else 'payday2_release'
-
-        if os.path.isfile(os.path.join(gamePath, exe)):
+        if len(gamePath) > 0:
 
             okButton.setEnabled(True)
-
-            self.noticeLabel.setText('Success: Game Path is valid')
-
-            self.optionsManager.setGamepath(gamePath)
-            self.optionsManager.writeData()
 
         else:
 
             okButton.setEnabled(False)
-
-            self.noticeLabel.setText('Error: Game Path is not valid')
+    
+    def accept(self) -> None:
+        self.optionsManager.setGamepath(self.gameDir.text())
+        self.optionsManager.writeData()
+        return super().accept()
 
     def reject(self) -> None:
 

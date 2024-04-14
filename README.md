@@ -25,6 +25,8 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 
 * Create profiles to organize your mods.
 
+* Assign tags to mods
+
 * Delete mods from your computer.
 
 * Automatic installation by dragging and dropping files into the program.
@@ -92,7 +94,7 @@ You may download any version of Myth Mod Manager and view changelogs at the [rel
 + Rewrite Settings UI
 + New Icon/Logo
 + Auto mod type detection
-+ Muli-Language Support [See issue #44](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/44)
++ Multi-Language Support [See issue #44](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/44)
 + Some kind of [modworkshop.net](https://modworkshop.net/g/payday-2) integration, see [issue #14](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/14)
 
 *Suggestions are appreciated!*

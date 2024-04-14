@@ -45,7 +45,7 @@ class About(qtw.QWidget):
         
         self.buttonFrame.setLayout(buttonFrameLayout)
 
-        self.updateIcons()
+        self.updateIcons(self.options.getTheme())
 
         self.aboutLabel = qtw.QLabel(self, text=
 f'''
@@ -54,25 +54,20 @@ f'''
 The goal of this program is to streamline the proccess of PAYDAY 2 mod managment
 without hassle of juggling multiple file explorers.
 
-Suggestions are greatly appreciated on modworkshop.net
+Suggestions are greatly appreciated on modworkshop.net and github
 
 ''')
         self.aboutLabel.setWordWrap(True)
         self.aboutLabel.setAlignment(qt.AlignmentFlag.AlignTop)
 
-        self.shortcutsLabel = qtw.QLabel(self)
-        self.shortcutsLabel.setText(
-            'Shortcuts:\n\n+ Select All: Ctrl + A\n\n+ Deselect All: Ctrl + D\n\n+ Delete Mod or Profile: Del\n\n+ Change Profile Name: Enter\n\n+ Switch tabs: Arrow left, Arrow right')
-        self.shortcutsLabel.setTextFormat(qt.TextFormat.MarkdownText)
-
-        for widget in (self.buttonFrame, self.aboutLabel, self.shortcutsLabel):
+        for widget in (self.buttonFrame, self.aboutLabel):
             layout.addWidget(widget)
 
         self.setLayout(layout)
     
-    def updateIcons(self) -> None:
+    def updateIcons(self, mode: str) -> None:
 
-        themeIsLight: bool = self.options.getTheme() == LIGHT
+        themeIsLight: bool = mode == LIGHT
 
         self.githubIcon = GITHUB_LOGO_B if themeIsLight else GITHUB_LOGO_W
         self.kofiIcon = KOFI_LOGO_B

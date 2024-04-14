@@ -19,11 +19,11 @@ class ModType(StrEnum):
 
 class ModKeys(StrEnum):
     '''Keys that a mod has in `MOD_CONFIG`'''
-
     enabled       = auto()
     type          = auto()
     modworkshopid = auto()
     ignored       = auto()
+    tags          = auto()
 
 class OptionKeys(StrEnum):
     '''Option's keys in `OPTIONS_CONFIG`'''
@@ -37,11 +37,18 @@ class OptionKeys(StrEnum):
     windowsize_h     = auto()
     mmm_update_alert = auto()
 
+    def all_keys() -> list[str]:
+        # Splice removes section key
+        return [enum.value for enum in OptionKeys][1:]
+
 class ProfileRole():
 
     parent    = 33 # Role ID for an item's parent
     type      = 32 # Role ID for an item's type
     installed = 34 # Role ID if a mod is installed or not
+
+class ModRole():
+    tags = 33 # Role ID for a mod's tags
 
 # Detection if the program is being run through an exe or the script
 IS_SCRIPT = not getattr(sys, 'frozen', False)
@@ -53,7 +60,7 @@ ROOT_PATH = os.path.abspath(os.getcwd())
 ICON = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'icon.ico')
 
 # File names
-MOD_CONFIG = 'mods.ini'
+MOD_CONFIG = 'mods.json'
 OPTIONS_CONFIG = 'config.ini'
 PROFILES_JSON = 'profiles.json'
 TOOLS_JSON = 'externalshortcuts.json'
@@ -70,9 +77,6 @@ GITHUB_LOGO_W = 'github-mark-white.svg'
 GITHUB_LOGO_B = 'github-mark.svg'
 KOFI_LOGO_B = 'kofi_s_logo_nolabel.webp'
 
-# Mod Table Object Name
-MOD_TABLE_OBJECT = 'mod_table'
-
 # Files in PAYDAY2/Mods/ to ignore
 MODSIGNORE = ('base', 'logs', 'saves', 'downloads')
 
@@ -82,9 +86,6 @@ DATA_MOD = (0, ProfileRole.type, 'mod') # Used to label an item as a mod
 
 # Default Disabled Folder
 MODS_DISABLED_PATH_DEFAULT = os.path.join(os.path.abspath(ROOT_PATH), DISABLED_MODS)
-
-# START_PAYDAY Path
-START_PAYDAY_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), START_PAYDAY)
 
 # Graphics folder path
 UI_GRAPHICS_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'graphics')
@@ -96,4 +97,4 @@ LIGHT = 'light'
 # Program Info
 PROGRAM_NAME = 'Myth Mod Manager'
 
-VERSION = semantic_version.Version(major=1, minor=4, patch=1)
+VERSION = semantic_version.Version(major=1, minor=5, patch=0)

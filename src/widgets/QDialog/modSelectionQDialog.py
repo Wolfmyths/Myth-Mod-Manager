@@ -5,7 +5,7 @@ from src.widgets.QDialog.QDialog import Dialog
 
 import src.errorChecking as errorChecking
 from src.save import Save
-from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG
+from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG, ModRole
 
 class SelectMod(Dialog):
 
@@ -24,7 +24,7 @@ class SelectMod(Dialog):
         self.modList.setSelectionMode(qtw.QListWidget.SelectionMode.MultiSelection)
 
         self.searchBar = qtw.QLineEdit()
-        self.searchBar.setPlaceholderText('Search...')
+        self.searchBar.setPlaceholderText('Search... use "tag:" with no spaces to search for tags, use a comma "," to seperate tags')
         self.searchBar.textChanged.connect(lambda x: self.search(x))
 
         self.saveManager = Save(savePath)
@@ -35,7 +35,15 @@ class SelectMod(Dialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
+        # Add mods
         self.modList.addItems(sorted([x for x in self.saveManager.mods() if errorChecking.isInstalled(x, optionsPath)]))
+
+        # Add tags
+        for i in range(self.modList.count()):
+            item = self.modList.item(i)
+            modTags = self.saveManager.getTags(item.text())
+            if modTags is not None:
+                item.setData(ModRole.tags, modTags)
 
         for widget in (self.searchBar, self.modList, self.buttonBox):
             layout.addWidget(widget)
@@ -43,17 +51,33 @@ class SelectMod(Dialog):
         self.setLayout(layout)
     
     def search(self, input: str) -> None:
+        searchedTags = None
+
+        if input.startswith('tag:') and len(input) > 4:
+            splitStr = input.split(' ')
+            input = ' '.join(splitStr[1:])
+            searchedTags = splitStr[0][4:].split(',')
+
 
         results = self.modList.findItems(f'{input}*', qt.MatchFlag.MatchWildcard | qt.MatchFlag.MatchExactly)
 
-        for i in range(0, self.modList.count() + 1):
+        for i in range(self.modList.count()):
 
             item = self.modList.item(i)
+            if item is not None:
+                modTags: tuple[str] | None = item.data(ModRole.tags)
 
-            if item not in results:
-                self.modList.setRowHidden(i, True)
+            if searchedTags is not None and modTags is not None:
+                for tag in searchedTags:
+                    if tag in modTags and item in results:
+                        self.modList.setRowHidden(i, False)
+                    else:
+                        self.modList.setRowHidden(i, True)
             else:
-                self.modList.setRowHidden(i, False)
+                if item in results and searchedTags is None:
+                    self.modList.setRowHidden(i, False)
+                else:
+                    self.modList.setRowHidden(i, True)
     
     def accept(self) -> None:
 

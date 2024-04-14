@@ -29,7 +29,7 @@ class ExternalToolDisplay(qtw.QListWidget):
 
         if save:
             dupes = self.json.newTool(*url)
-            self.json.saveData()
+            self.json.saveJSON()
 
         for s in url:
 
@@ -52,15 +52,27 @@ class ExternalToolDisplay(qtw.QListWidget):
             notice.exec()
     
     def deleteItem(self, url: str) -> None:
-        
-        item = self.findItems(url, qt.MatchFlag.MatchContains)[0]
+        item = self.findItems(url, qt.MatchFlag.MatchExactly)
+        if item:
+            item = item[0]
+        else:
+            logging.error('ExternalToolDisplay.deleteItem(): Looked for %s and could not find it', url)
+            return
+
         self.takeItem(self.row(item))
 
         self.json.removeTool(url)
+        self.json.saveJSON()
 
     def changeName(self, newUrl: str, oldUrl: str) -> None:
-        item = self.findItems(oldUrl, qt.MatchFlag.MatchExactly)[0]
+        item = self.findItems(oldUrl, qt.MatchFlag.MatchExactly)
+        if item:
+            item = item[0]
+        else:
+            logging.error('ExternalToolDisplay.changeName(): Looked for %s and could not find it', oldUrl)
+            return
+
         item.setText(newUrl)
 
         self.json.changeTool(oldUrl, newUrl)
-        self.json.saveData()
+        self.json.saveJSON()

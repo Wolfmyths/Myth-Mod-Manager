@@ -91,7 +91,6 @@ You may download any version of Myth Mod Manager and view changelogs at the [rel
 
 # Future Plans
 
-+ Rewrite Settings UI
 + New Icon/Logo
 + Auto mod type detection
 + Multi-Language Support [See issue #44](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/44)

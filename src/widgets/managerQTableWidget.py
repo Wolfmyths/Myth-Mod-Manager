@@ -377,7 +377,7 @@ class ModListWidget(qtw.QTableWidget):
             
             for mod in disabledModsFolder:
 
-                if self.saveManager.has_section(mod):
+                if self.saveManager.hasMod(mod):
 
                     modType = self.saveManager.getType(mod)
                     

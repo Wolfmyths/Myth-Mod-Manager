@@ -3,7 +3,7 @@ import logging
 import os
 
 class JSONParser():
-    file: dict[str:list[str]] = None
+    file: dict = None
     def __init__(self, path: str, default: dict = {}) -> None:
         self.path = path
         self.default = default

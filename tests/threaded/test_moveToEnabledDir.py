@@ -3,7 +3,7 @@ import shutil
 
 from src.threaded.moveToEnabledDir import MoveToEnabledModDir
 from src.getPath import Pathing
-from src.save import OptionsManager, Save
+from src.save import OptionsManager
 
 
 def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> None:
@@ -18,13 +18,11 @@ def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod
 
     shutil.move(enabledDir, disabledDir)
 
-    worker = MoveToEnabledModDir('make game easy mod')
-    worker.saveManager = Save(createTemp_Mod_ini)
-    worker.optionsManager = parser
+    worker = MoveToEnabledModDir('make game easy mod', optionsPath=createTemp_Config_ini, savePath=createTemp_Mod_ini)
 
     worker.p = Pathing(createTemp_Config_ini)
 
     worker.start()
 
-    assert os.path.isdir(enabledDir)
-    assert not os.path.isdir(disabledDir)
+    assert os.path.exists(enabledDir)
+    assert not os.path.exists(disabledDir)

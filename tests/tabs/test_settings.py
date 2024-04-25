@@ -4,6 +4,7 @@ import pytest
 from pytestqt.qtbot import QtBot
 
 import PySide6.QtWidgets as qtw
+from PySide6.QtCore import Qt as qt
 
 from src.settings import Options
 from src.constant_vars import DARK, LIGHT, OptionKeys
@@ -49,14 +50,16 @@ def test_cancelChanges(create_Settings: Options) -> None:
 
     assert sum(list(create_Settings.optionChanged.values())) == 0
 
-def test_applySettings(create_Settings: Options) -> None:
-    create_Settings.optionsGeneral.colorThemeLight.setChecked(True)
+def test_applySettings(qtbot: QtBot, create_Settings: Options) -> None:
+    qtbot.addWidget(create_Settings)
+    qtbot.mouseClick(create_Settings.optionsGeneral.colorThemeDark, qt.MouseButton.LeftButton)
+
     create_Settings.optionsGeneral.gameDir.setText(MOCK_GAMEPATH)
     create_Settings.optionsGeneral.disabledModDir.setText(MOCK_DISMODS)
     
-    create_Settings.applySettings()
+    qtbot.mouseClick(create_Settings.applyButton, qt.MouseButton.LeftButton)
 
-    assert create_Settings.optionsManager.getTheme() == LIGHT
+    assert create_Settings.optionsManager.getTheme() == DARK
     assert create_Settings.optionsManager.getGamepath() == MOCK_GAMEPATH
     assert create_Settings.optionsManager.getDispath() == MOCK_DISMODS
 

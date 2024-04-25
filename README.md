@@ -69,7 +69,7 @@ If you still are suspicious, you can build the executable yourself with these st
 
 # Supported Platforms
 
-### Reguarding OS
+### Regarding OS
 
 Windows:
 

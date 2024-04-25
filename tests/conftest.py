@@ -6,7 +6,7 @@ from configparser import ConfigParser
 
 import pytest
 
-from src.constant_vars import OptionKeys, ModKeys, ModType
+from src.constant_vars import OptionKeys, ModKeys, ModType, LIGHT
 
 @pytest.fixture(scope='session')
 def getDir() -> str:
@@ -35,9 +35,9 @@ def createTemp_Mod_ini() -> Generator:
                                ModKeys.ignored.value : False},
             
             'make game easy mod' : {ModKeys.type.value : ModType.mods.value,
-                               ModKeys.modworkshopid.value : '2523',
-                               ModKeys.enabled.value : True,
-                               ModKeys.ignored.value : False}
+                                ModKeys.modworkshopid.value : '2523',
+                                ModKeys.enabled.value : True,
+                                ModKeys.ignored.value : False}
             }
 
     with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as tmp:
@@ -59,6 +59,7 @@ def createTemp_Config_ini(getDir: str) -> Generator:
     config.read(tmp_filename)
 
     config.add_section(OptionKeys.section.value)
+    config.set(OptionKeys.section.value, OptionKeys.color_theme.value, LIGHT)
     config.set(OptionKeys.section.value, OptionKeys.game_path.value, os.path.join(getDir, 'game_path'))
     config.set(OptionKeys.section.value, OptionKeys.dispath.value, os.path.join(getDir, 'game_path', 'disabledMods'))
     config.set(OptionKeys.section.value, OptionKeys.mmm_update_alert.value, str(False))

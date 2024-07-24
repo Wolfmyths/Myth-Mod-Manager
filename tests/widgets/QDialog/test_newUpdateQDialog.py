@@ -28,7 +28,7 @@ def test_succeeded(create_dialog: updateDetected) -> None:
     create_dialog.progressBar.show()
     create_dialog.autoUpdate.succeeded.emit()
 
-    assert create_dialog.message.text() == 'Installed!\nClick ok to exit and update Myth Mod Manager'
+    assert create_dialog.message.text() == 'Installation Successful!\nClick ok to exit and update Myth Mod Manager'
     assert create_dialog.progressBar.value() == create_dialog.progressBar.maximum()
     assert create_dialog.succeededState
     assert create_dialog.progressBar.isHidden()

@@ -1,6 +1,6 @@
 import os
-import sys
 
+from PySide6.QtCore import QCoreApplication as qapp
 import PySide6.QtWidgets as qtw
 
 from src.widgets.QDialog.QDialog import Dialog
@@ -15,7 +15,7 @@ class GamePathNotFound(Dialog):
 
         style = self.style()
 
-        self.setWindowTitle('Set gamepath')
+        self.setWindowTitle(qapp.translate('GamePathNotFound', 'Set game path'))
 
         self.optionsManager = OptionsManager(optionsPath)
 
@@ -31,7 +31,7 @@ class GamePathNotFound(Dialog):
         self.openExplorerButton.clicked.connect(self.openFileDialog)
 
         self.gameDir = qtw.QLineEdit(self.inputFrame)
-        self.gameDir.setPlaceholderText('PAYDAY 2 Game Directory')
+        self.gameDir.setPlaceholderText(qapp.translate('GamePathNotFound', 'PAYDAY 2 Game Directory'))
         self.gameDir.textChanged.connect(self.checkGamePath)
 
         for widget in (self.gameDir, self.openExplorerButton):
@@ -54,7 +54,10 @@ class GamePathNotFound(Dialog):
 
     def openFileDialog(self) -> None:
         dialog = qtw.QFileDialog()
-        url = dialog.getExistingDirectory(self, caption='Select PAYDAY 2 Directory')
+        url = dialog.getExistingDirectory(
+            self,
+            caption=qapp.translate('GamePathNotFound', 'Select PAYDAY 2 Directory')
+        )
 
         if os.path.isdir(url):
             self.gameDir.setText(url)

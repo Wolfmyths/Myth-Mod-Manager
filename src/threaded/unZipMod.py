@@ -3,11 +3,13 @@ import logging
 
 import patoolib
 
+from PySide6.QtCore import QCoreApplication as qapp
+
 from src.threaded.workerQObject import Worker
 from src.constant_vars import ModType
 
 class UnZipMod(Worker):
-    def __init__(self, *mods: tuple[str, ModType]):
+    def __init__(self, *mods: tuple[str, ModType]) -> None:
         super().__init__()
 
         self.mods = mods
@@ -31,7 +33,7 @@ class UnZipMod(Worker):
 
                 self.cancelCheck()
 
-                self.setCurrentProgress.emit(1, f"Unpacking {mod}")
+                self.setCurrentProgress.emit(1, qapp.translate("UnZipMod", "Unpacking") + f" {mod}")
 
                 logging.info('Unzipping %s to %s', src, modDestDict[modType])
 
@@ -44,7 +46,12 @@ class UnZipMod(Worker):
             self.succeeded.emit()
         
         except patoolib.util.PatoolError as e:
-            self.error.emit(f'An error was raised in FileMover.unZipMod():\n{e}\nTry extracting the mod manually first')
+            self.error.emit(
+                qapp.translate("UnZipMod", 'An error was raised in unZipMod:') +
+                f'\n{e}\n' +
+                qapp.translate("UnZipMod", 'Try extracting the mod manually first')
+            )
 
         except Exception as e:
-            self.error.emit(f'An error was raised in FileMover.unZipMod():\n{e}')
+            self.error.emit(
+                qapp.translate("UnZipMod", 'An error was raised in unZipMod:') + f'\n{e}') 

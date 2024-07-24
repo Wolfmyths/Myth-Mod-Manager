@@ -36,6 +36,7 @@ class OptionKeys(StrEnum):
     windowsize_w     = auto()
     windowsize_h     = auto()
     mmm_update_alert = auto()
+    lang             = auto()
 
     def all_keys() -> list[str]:
         # Splice removes section key
@@ -55,6 +56,9 @@ IS_SCRIPT = not getattr(sys, 'frozen', False)
 
 # Root Path
 ROOT_PATH = os.path.abspath(os.getcwd())
+
+# Lang Folder Path
+LANG_FOLDER_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'lang')
 
 # Icon Path
 ICON = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'icon.ico')
@@ -97,4 +101,4 @@ LIGHT = 'light'
 # Program Info
 PROGRAM_NAME = 'Myth Mod Manager'
 
-VERSION = semantic_version.Version(major=1, minor=5, patch=3)
+VERSION = semantic_version.Version(major=1, minor=6, patch=0)

@@ -41,6 +41,11 @@ def test_themeChanged(create_Settings: Options) -> None:
 
     assert create_Settings.optionChanged[OptionKeys.color_theme] == True
 
+def test_langChanged(create_Settings: Options) -> None:
+    create_Settings.optionsGeneral.langChanged('zh_CN')
+
+    assert create_Settings.optionChanged[OptionKeys.lang] == True
+
 def test_cancelChanges(create_Settings: Options) -> None:
     assert create_Settings.applyButton.isEnabled()
 
@@ -62,6 +67,7 @@ def test_applySettings(qtbot: QtBot, create_Settings: Options) -> None:
     assert create_Settings.optionsManager.getTheme() == DARK
     assert create_Settings.optionsManager.getGamepath() == MOCK_GAMEPATH
     assert create_Settings.optionsManager.getDispath() == MOCK_DISMODS
+    #assert create_Settings.optionsManager.getLang() == 'zh_CN' #TODO: Somehow get this to work
 
     assert sum(list(create_Settings.optionChanged.values())) == 0
     assert create_Settings.applyButton.isEnabled() == False

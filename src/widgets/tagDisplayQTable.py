@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
 
 if TYPE_CHECKING:
     from src.widgets.tagViewerQWidget import TagViewer
@@ -13,7 +13,6 @@ class TagDisplay(qtw.QTableWidget):
         super().__init__(parent=parent)
 
         self.setColumnCount(2)
-        self.setHorizontalHeaderLabels(('Name', 'Tags'))
         self.verticalHeader().hide()
         self.setEditTriggers(qtw.QAbstractItemView.EditTrigger.NoEditTriggers)
 
@@ -25,6 +24,16 @@ class TagDisplay(qtw.QTableWidget):
         horizontalHeader = self.horizontalHeader()
         horizontalHeader.setSectionResizeMode(0, qtw.QHeaderView.ResizeMode.ResizeToContents)
         horizontalHeader.setSectionResizeMode(1, qtw.QHeaderView.ResizeMode.Stretch)
+
+        self.applyStaticText()
+    
+    def applyStaticText(self) -> None:
+        self.setHorizontalHeaderLabels(
+            (
+                qapp.translate('TagDisplay', 'Name'),
+                qapp.translate('TagDisplay', 'Tags')
+            )
+        )
     
     # EVENT OVERRIDES
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:

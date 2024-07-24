@@ -4,7 +4,7 @@ import logging
 import sys
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Property
 import PySide6.QtGui as qtg
 
 from src.widgets.managerQTableWidget import ModListWidget
@@ -32,13 +32,13 @@ class ModManager(qtw.QWidget):
 
         self.setAcceptDrops(True)
 
-        self.refresh = qtw.QPushButton('Refresh Mods', self)
+        self.refresh = qtw.QPushButton(self)
         self.refresh.clicked.connect(lambda: self.modsTable.refreshMods())
 
-        self.openGameDir = qtw.QPushButton('Open Game Directory', self)
+        self.openGameDir = qtw.QPushButton(self)
         self.openGameDir.clicked.connect(lambda: errorChecking.startFile(self.optionsManager.getGamepath()))
 
-        self.startGame = qtw.QPushButton('Start PAYDAY 2', self)
+        self.startGame = qtw.QPushButton(self)
         self.startGame.clicked.connect(self.startPayday)
 
         modLabelLayout = qtw.QHBoxLayout()
@@ -47,13 +47,13 @@ class ModManager(qtw.QWidget):
 
         self.labelFrame = qtw.QFrame()
 
-        self.totalModsLabel = qtw.QLabel('Total Mods: 0', self)
+        self.totalModsLabel = qtw.QLabel(self)
 
-        self.modsLabel = qtw.QLabel('Mods: 0', self)
+        self.modsLabel = qtw.QLabel(self)
 
-        self.overrideLabel = qtw.QLabel('Mod_Overrides: 0', self)
+        self.overrideLabel = qtw.QLabel(self)
 
-        self.mapsLabel = qtw.QLabel('Maps: 0', self)
+        self.mapsLabel = qtw.QLabel(self)
 
         for widget in (self.totalModsLabel, self.modsLabel, self.overrideLabel, self.mapsLabel):
             modLabelLayout.addWidget(widget)
@@ -61,7 +61,6 @@ class ModManager(qtw.QWidget):
         self.labelFrame.setLayout(modLabelLayout)
 
         self.search = qtw.QLineEdit()
-        self.search.setPlaceholderText('Search... use "tag:" with no spaces to search for tags, use a comma "," to seperate tags')
         self.search.textChanged.connect(lambda x: self.modsTable.search(x))
 
         self.modsTable = ModListWidget(saveManagerPath, optionsManagerPath)
@@ -71,12 +70,21 @@ class ModManager(qtw.QWidget):
 
         for widget in (self.refresh, self.openGameDir, self.startGame, self.labelFrame, self.search, self.modsTable):
             layout.addWidget(widget)
+        
+        self.applyStaticText()
+        self.updateModCount()
 
         self.setLayout(layout)
     
-    def updateModCount(self):
+    def applyStaticText(self) -> None:
+        self.refresh.setText(qapp.translate("ModManager", "Refresh Mods"))
+        self.openGameDir.setText(qapp.translate("ModManager", 'Open Game Directory'))
+        self.startGame.setText(qapp.translate("ModManager", 'Start PAYDAY 2'))
+        self.search.setPlaceholderText(qapp.translate("ModManager", 'Search... use "tag:" with no spaces to search for tags, use a comma "," to seperate tags'))
+    
+    def updateModCount(self) -> None:
 
-        self.totalModsLabel.setText(f'Total Mods: {self.modsTable.rowCount()}')
+        self.totalModsLabel.setText(qapp.translate("ModManager", 'Total Mods') + f': {self.modsTable.rowCount()}')
 
         self.modsLabel.setText(f'Mods: {self.modsTable.getModTypeCount(ModType.mods)}')
 
@@ -84,13 +92,13 @@ class ModManager(qtw.QWidget):
 
         self.mapsLabel.setText(f'Maps: {self.modsTable.getModTypeCount(ModType.maps)}')
 
-    def startPayday(self):
+    def startPayday(self) -> None:
 
         gamePath: str = self.optionsManager.getGamepath()
 
         try:
             if not os.path.isabs(gamePath):
-                raise Exception('Path is not absolute')
+                raise Exception(qapp.translate("ModManager", 'Path is not absolute'))
 
             if sys.platform.startswith('win'):
 
@@ -105,10 +113,13 @@ class ModManager(qtw.QWidget):
 
         except Exception as e:
             logging.error('An error occured trying to start PAYDAY 2:\n%s', str(e))
-            notice = Notice(f'An error occured trying to start PAYDAY 2:\n{e}', 'Could not start PAYDAY 2 from MMM')
+
+            notice = Notice(
+                qapp.translate("ModManager", 'An error occured trying to start PAYDAY 2') + f':\n{e}',
+                qapp.translate("ModManager", 'Could not start PAYDAY 2 from MMM'))
             notice.exec()
 
-    def deselectAllShortcut(self):
+    def deselectAllShortcut(self) -> None:
         selectedItems = self.modsTable.selectedItems()
         if selectedItems:
             for item in selectedItems:

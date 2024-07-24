@@ -2,12 +2,14 @@ import logging
 import os
 import shutil
 
+from PySide6.QtCore import QCoreApplication as qapp
+
 from src.threaded.workerQObject import Worker
 
 from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG
 
 class DeleteMod(Worker):
-    def __init__(self, *mods: str, optionsPath: str = OPTIONS_CONFIG, savePath: str = MOD_CONFIG):
+    def __init__(self, *mods: str, optionsPath: str = OPTIONS_CONFIG, savePath: str = MOD_CONFIG) -> None:
         super().__init__(optionsPath=optionsPath, savePath=savePath)
 
         self.mods = mods
@@ -26,7 +28,7 @@ class DeleteMod(Worker):
 
                 self.cancelCheck()
 
-                self.setCurrentProgress.emit(1, f'Deleting {modName}')
+                self.setCurrentProgress.emit(1, qapp.translate('DeleteMod', 'Deleting') + f'{modName}')
 
                 enabled = self.saveManager.getEnabled(modName)
 
@@ -44,4 +46,4 @@ class DeleteMod(Worker):
             self.succeeded.emit()
 
         except Exception as e:
-            self.error.emit(f'An error has occured in deleteMod():\n{e}')
+            self.error.emit(qapp.translate('DeleteMod', 'An error was raised while deleting a mod:') + f'\n{e}')

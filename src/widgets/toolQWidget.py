@@ -1,7 +1,7 @@
 import logging
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QSize
+from PySide6.QtCore import Qt as qt, QSize, QCoreApplication as qapp
 
 from src.toolsData import ToolJSON
 from src.widgets.toolDisplayQWidget import ExternalTool
@@ -10,6 +10,7 @@ from src.widgets.QDialog.announcementQDialog import Notice
 from src.constant_vars import TOOLS_JSON
 
 class ExternalToolDisplay(qtw.QListWidget):
+    external_tools: list[ExternalTool] = []
     def __init__(self, json = TOOLS_JSON) -> None:
         super().__init__()
         logging.getLogger(__name__)
@@ -45,10 +46,13 @@ class ExternalToolDisplay(qtw.QListWidget):
             item.setSizeHint(QSize(245, 245))
 
             self.setItemWidget(item, frame)
+            self.external_tools.append(frame)
         
         if dupes:
-            notice = Notice(f'Shortcuts were not added because they already exist: {", ".join(dupes)}',
-                            'Duplicate shortcuts found')
+            notice = Notice(
+                qapp.translate('ExternalToolDisplay', 'Shortcuts were not added because they already exist:') + f' {", ".join(dupes)}',
+                qapp.translate('ExternalToolDisplay', 'Duplicate shortcuts found')
+            )
             notice.exec()
     
     def deleteItem(self, url: str) -> None:
@@ -59,7 +63,9 @@ class ExternalToolDisplay(qtw.QListWidget):
             logging.error('ExternalToolDisplay.deleteItem(): Looked for %s and could not find it', url)
             return
 
-        self.takeItem(self.row(item))
+        index = self.row(item)
+        self.external_tools.pop(index)
+        self.takeItem(index)
 
         self.json.removeTool(url)
         self.json.saveJSON()

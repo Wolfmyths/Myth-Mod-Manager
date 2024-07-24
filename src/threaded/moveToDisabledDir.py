@@ -1,6 +1,8 @@
 import os
 import logging
 
+from PySide6.QtCore import QCoreApplication as qapp
+
 from src.threaded.workerQObject import Worker
 
 from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG
@@ -24,7 +26,7 @@ class MoveToDisabledDir(Worker):
 
                 self.cancelCheck()
 
-                self.setCurrentProgress.emit(1, f'Disabling {mod}')
+                self.setCurrentProgress.emit(1, qapp.translate('MoveToDisabledDir', 'Disabling') + f' {mod}')
 
                 modDest = os.path.join(disabledModsPath, mod)
 
@@ -40,4 +42,4 @@ class MoveToDisabledDir(Worker):
             self.succeeded.emit()
 
         except Exception as e:
-            self.error.emit(f'An error occured while disabling a mod:\n{e}')
+            self.error.emit(qapp.translate('MoveToDisabledDir', 'An error occured while disabling a mod:') + f'\n{e}')

@@ -4,7 +4,7 @@ import logging
 
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
-from PySide6.QtCore import Qt as qt, Signal
+from PySide6.QtCore import Qt as qt, Signal, QCoreApplication as qapp
 
 from src.widgets.QMenu.profileQMenu import ProfileMenu
 from src.widgets.QDialog.insertStringQDialog import insertString
@@ -38,8 +38,6 @@ class ProfileList(qtw.QTreeWidget):
 
         self.setColumnCount(2)
 
-        self.setHeaderLabels(('Profile', 'Mod Count'))
-
         self.header().setSectionResizeMode(0, qtw.QHeaderView.ResizeMode.Stretch)
         self.header().setSectionResizeMode(1, qtw.QHeaderView.ResizeMode.Interactive)
 
@@ -48,6 +46,15 @@ class ProfileList(qtw.QTreeWidget):
         self.menu = ProfileMenu(self)
 
         self.updateView()
+        self.applyStaticText()
+
+    def applyStaticText(self) -> None:
+        self.setHeaderLabels(
+            (
+                qapp.translate('ProfileList', 'Profile'),
+                qapp.translate('ProfileList', 'Mod Count')
+            )
+        )
 
     def __getProfiles(self) -> list[str]:
         return [x.text(0) for x in self.findItems('*', qt.MatchFlag.MatchWildcard | qt.MatchFlag.MatchWrap | qt.MatchFlag.MatchRecursive) if self.isProfile(x)]
@@ -89,7 +96,7 @@ class ProfileList(qtw.QTreeWidget):
 
             return None
     
-    def applyProfileEvent(self):
+    def applyProfileEvent(self) -> None:
 
         selectedItem = self.__selectedItem()
 
@@ -205,7 +212,7 @@ class ProfileList(qtw.QTreeWidget):
             if not profile.isExpanded():
                 profile.setExpanded(True)
     
-    def removeMods(self):
+    def removeMods(self) -> None:
 
         mod = self.__selectedItem()
 
@@ -219,14 +226,14 @@ class ProfileList(qtw.QTreeWidget):
 
         profile.setText(1, str(int(profile.text(1)) - 1))
     
-    def copyModsToProfileMenu(self):
+    def copyModsToProfileMenu(self) -> None:
         qDialog = SelectProfile()
         qDialog.exec()
 
         if qDialog.result() and qDialog.profile:
             self.copyModsToProfile(qDialog.profile)
     
-    def copyModsToProfile(self, modsDestination: str):
+    def copyModsToProfile(self, modsDestination: str) -> None:
 
         selectedItem = self.__selectedItem()
 
@@ -243,7 +250,7 @@ class ProfileList(qtw.QTreeWidget):
         else:
             self.addMods(selectedItem.text(0))
     
-    def menuAddProfile(self):
+    def menuAddProfile(self) -> None:
         '''
         Prompts the user to ask what the profile
         should be before running `addProfile()`
@@ -309,9 +316,9 @@ class ProfileList(qtw.QTreeWidget):
 
         self.profileManager.removeProfile(toBeDeleted.text(0))
     
-    def editProfileMenu(self):
+    def editProfileMenu(self) -> None:
 
-        qDialog = insertString('New profile name:')
+        qDialog = insertString(qapp.translate('ProfileList', 'New profile name:'))
 
         while True:
             
@@ -329,11 +336,16 @@ class ProfileList(qtw.QTreeWidget):
 
                     logging.warning('A profile with the name %s already exists', qDialog.userInput)
 
-                    msg = Notice(f'A profile named {qDialog.userInput} already exists.', 
-                                 'Error: Duplicate profile name')
+                    msg = Notice(
+                        message=
+                        qapp.translate('ProfileList', 'A profile with that name already exists:') +
+                        f' {qDialog.userInput}', 
+
+                        headline=qapp.translate('ProfileList', 'Error: Duplicate profile name')
+                    )
                     msg.exec()
 
-    def editProfile(self, name: str):
+    def editProfile(self, name: str) -> None:
         '''Changes the name of a profile'''
 
         profile = self.__selectedItem()
@@ -344,7 +356,7 @@ class ProfileList(qtw.QTreeWidget):
 
         profile.setText(0, name)
 
-    def copyProfile(self):
+    def copyProfile(self) -> None:
 
         profileToCopy = self.__selectedItem()
 
@@ -357,7 +369,7 @@ class ProfileList(qtw.QTreeWidget):
 
         modsToCopy = [x.text(0) for x in mods]
 
-        qDialog = insertString('New profile name:')
+        qDialog = insertString(qapp.translate('ProfileList', 'New profile name:'))
 
         while True:
 
@@ -385,11 +397,16 @@ class ProfileList(qtw.QTreeWidget):
 
                     logging.warning('A profile with the name %s already exists', qDialog.userInput)
 
-                    msg = Notice(f'A profile named {qDialog.userInput} already exists.', 
-                                 'Error: Duplicate profile name')
+                    msg = Notice(
+                        message=
+                        qapp.translate('ProfileList', 'A profile with that name already exists:') +
+                        f' {qDialog.userInput}', 
+
+                        headline=qapp.translate('ProfileList', 'Error: Duplicate profile name')
+                    )
                     msg.exec()
 
-    def unselectShortcut(self):
+    def unselectShortcut(self) -> None:
         toBeUnselected = self.__selectedItem()
         if toBeUnselected:
             toBeUnselected.setSelected(False)

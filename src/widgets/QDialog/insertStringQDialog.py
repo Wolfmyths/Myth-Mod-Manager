@@ -1,4 +1,5 @@
 import PySide6.QtWidgets as qtw
+from PySide6.QtCore import QCoreApplication as qapp
 
 from src.widgets.QDialog.QDialog import Dialog
 
@@ -12,7 +13,7 @@ class insertString(Dialog):
 
         layout = qtw.QVBoxLayout()
 
-        self.setWindowTitle('Insert text')
+        self.setWindowTitle(qapp.translate('insertString', 'Insert text'))
 
         self.label = qtw.QLabel(prompt, self)
 

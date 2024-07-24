@@ -2,6 +2,8 @@ import os
 import shutil
 import logging
 
+from PySide6.QtCore import QCoreApplication as qapp
+
 from src.threaded.workerQObject import Worker
 from src.constant_vars import ModType, BACKUP_MODS, MODSIGNORE, MOD_CONFIG
 
@@ -43,7 +45,7 @@ class BackupMods(Worker):
 
                 self.setTotalProgress.emit(len(mods) + 3)
 
-                self.setCurrentProgress.emit(1, f'Validating backup folder paths')
+                self.setCurrentProgress.emit(1, qapp.translate('BackupMods', 'Validating backup folder paths'))
 
                 # Creating backup environment
                 for path in (self.bundledFilePath, bundledModsPath, bundledMapsPath):
@@ -62,7 +64,12 @@ class BackupMods(Worker):
 
                     self.cancelCheck()
 
-                    self.setCurrentProgress.emit(1, f'Copying {mod} to {BACKUP_MODS}')
+                    self.setCurrentProgress.emit(1,
+                        qapp.translate('BackupMods', 'Copying') +
+                        f' {mod} ' +
+                        qapp.translate('BackupMods', 'to') +
+                        f' {BACKUP_MODS}'
+                    )
 
                     modType = self.saveManager.getType(mod)
 
@@ -88,14 +95,18 @@ class BackupMods(Worker):
                 self.cancelCheck()
 
                 # Step 6: Zip Backup folder
-                self.setCurrentProgress.emit(1, f'Zipping to {self.bundledFilePath}\nThis might take some time...')
+                self.setCurrentProgress.emit(1,
+                    qapp.translate('BackupMods', 'Zipping to') +
+                    f' {self.bundledFilePath}\n' +
+                    qapp.translate('BackupMods', 'This might take some time...')
+                )
 
                 # This should overwrite if it already exists
                 shutil.make_archive(BACKUP_MODS, 'zip', self.bundledFilePath)
 
                 # Step 7: Cleanup
 
-                self.setCurrentProgress.emit(1, 'Cleanup')
+                self.setCurrentProgress.emit(1, qapp.translate('BackupMods', 'Cleanup'))
 
                 # Delete Folder
                 shutil.rmtree(self.bundledFilePath)
@@ -109,4 +120,7 @@ class BackupMods(Worker):
                     shutil.rmtree(self.bundledFilePath)
 
                 if not self.cancel:
-                    self.error.emit(f'Something went wrong in FileSaver.backupMods():\n{e}')
+                    self.error.emit(
+                        qapp.translate('BackupMods', 'An error was raised while backing up mods') +
+                        f':\n{e}'
+                    )

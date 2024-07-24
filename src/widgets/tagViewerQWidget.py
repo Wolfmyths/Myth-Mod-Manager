@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, QCoreApplication as qapp
 
 from src.constant_vars import ModRole, PROGRAM_NAME, ICON
 from src.widgets.QMenu.tagViewerQMenu import TagViewerMenu
@@ -21,7 +21,6 @@ class TagViewer(qtw.QWidget):
         self.managerTable = managerTable
 
         self.setWindowIcon(qtg.QIcon(ICON))
-        self.setWindowTitle(f'{PROGRAM_NAME}: Mod Tag Viewer')
 
         layout = qtw.QVBoxLayout()
 
@@ -36,10 +35,18 @@ class TagViewer(qtw.QWidget):
             layout.addWidget(widget)
         
         self.setLayout(layout)
+        self.applyStaticText()
+    
+    def applyStaticText(self) -> None:
+        self.setWindowTitle(f'{PROGRAM_NAME}: ' + qapp.translate('TagViewer', 'Mod Tag Viewer'))
     
     def deleteAllTags(self) -> None:
-        confirmation = Confirmation('Delete all tags',
-                                    'Are you sure you want to delete all of the tags associated with your mods?\n(This action cannot be reversed)')
+        confirmation = Confirmation(
+            qapp.translate('TagViewer', 'Delete all tags'),
+            qapp.translate('TagViewer', 'Are you sure you want to delete all of the tags associated with your mods?') +
+            '\n' +
+            qapp.translate('TagViewer', '(This action cannot be reversed)')
+        )
         confirmation.exec()
         if confirmation.result():
             self.managerTable.saveManager.clearTags()
@@ -83,7 +90,7 @@ class TagViewer(qtw.QWidget):
 
             self.refreshTable()
 
-    def refreshTable(self):
+    def refreshTable(self) -> None:
         if self.tagQTable.rowCount() > 0:
             self.tagQTable.setRowCount(0)
 
@@ -91,6 +98,7 @@ class TagViewer(qtw.QWidget):
             modNameItem = self.managerTable.item(i, 0)
             modTagsData: tuple[str] = modNameItem.data(ModRole.tags)
 
+            # TODO: Figure out what the point of this codeblock is, IDE says code is unreachable
             if modTagsData is None:
                 modTagsData = ()
             

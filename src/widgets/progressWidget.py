@@ -5,7 +5,7 @@ import logging
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QThread
+from PySide6.QtCore import QThread, QCoreApplication as qapp
 
 from src.widgets.QDialog.QDialog import Dialog
 from src.threaded.workerQObject import Worker
@@ -21,7 +21,7 @@ class ProgressWidget(Dialog):
         super().__init__()
         logging.getLogger(__name__)
 
-        self.setWindowTitle('Myth Mod Manager Task')
+        self.setWindowTitle(qapp.translate('ProgressWidget', 'Myth Mod Manager Task'))
 
         self.mode = mode
 
@@ -67,15 +67,18 @@ class ProgressWidget(Dialog):
         self.qthread.start()
         return super().exec()
 
-    def errorRaised(self, message: str):
+    def errorRaised(self, message: str) -> None:
         logging.error(message)
 
-        self.infoLabel.setText(f'{message}\nExit to continue')
+        self.infoLabel.setText(
+            f'{message}\n'+
+            qapp.translate('ProgressWidget', 'Exit to continue')
+        )
         self.qthread.exit(1)
 
-    def succeeded(self):
+    def succeeded(self) -> None:
         self.progressBar.setValue(self.progressBar.maximum())
-        self.infoLabel.setText('Done!')
+        self.infoLabel.setText(qapp.translate('ProgressWidget', 'Done!'))
 
         self.qthread.exit(0)
 
@@ -90,7 +93,7 @@ class ProgressWidget(Dialog):
             self.qthread.deleteLater()
             return super().closeEvent(arg__1)
     
-    def cancel(self):
+    def cancel(self) -> None:
         '''
         Sets the cancel flag to true in which FileMover() will exit the function
         after it's done a step and pass the success signal
@@ -103,7 +106,7 @@ class ProgressWidget(Dialog):
             self.reject()
 
         logging.info('Task %s was canceled', str(self.mode))
-        self.infoLabel.setText('Canceled, exit to continue')
+        self.infoLabel.setText(qapp.translate('ProgressWidget', 'Canceled, exit to continue'))
 
         self.mode.cancel = True
     

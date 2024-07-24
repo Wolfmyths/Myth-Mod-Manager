@@ -2,7 +2,7 @@ import logging
 import shutil
 import os
 
-from PySide6.QtCore import Signal, QObject
+from PySide6.QtCore import Signal, QObject, QCoreApplication as qapp
 
 from src.save import Save, OptionsManager
 from src.getPath import Pathing
@@ -42,7 +42,7 @@ class Worker(QObject):
             logging.info('%s was canceled', self.__class__)
             self.doneCanceling.emit()
 
-    def move(self, src: str, dest: str):
+    def move(self, src: str, dest: str) -> None:
         '''`shutil.move()` with some extra exception handling'''
 
         # Overwrite mod
@@ -66,26 +66,26 @@ class Worker(QObject):
                     
                     # Checking files for perm errors
                     for file in files:
-                        self.setCurrentProgress.emit(1, f'Checking file permissions of {file}')
+                        self.setCurrentProgress.emit(1, qapp.translate('Worker', 'Checking file permissions of') + f' {file}')
                         file_path = os.path.join(root, file)
                         errorChecking.permissionCheck(file_path)
                     
                     # Checking folders for perm errors
                     for dir in dirs:
-                        self.setCurrentProgress.emit(1, f'Checking folder permissions of {dir}')
+                        self.setCurrentProgress.emit(1, qapp.translate('Worker', 'Checking folder permissions of') + f' {dir}')
                         dir_path = os.path.join(root, dir)
                         errorChecking.permissionCheck(dir_path)
                     
                     # Checking mod directory for perm errors
-                    self.setCurrentProgress.emit(1, f'Checking folder permissions of {root}')
+                    self.setCurrentProgress.emit(1, qapp.translate('Worker', 'Checking folder permissions of') + f' {root}')
                     errorChecking.permissionCheck(root)
 
-                self.setCurrentProgress.emit(1, f'Fixing install for {os.path.basename(src)}')
+                self.setCurrentProgress.emit(1, qapp.translate('Worker', 'Fixing install for') + f' {os.path.basename(src)}')
                 # If shutil.move made a partial dir of the mod delete it
                 if os.path.exists(dest):
                     shutil.rmtree(dest, onerror=self.onError)
 
-    def onError(self, func, path, exc_info):
+    def onError(self, func, path, exc_info) -> None:
         """Used for `shutil.rmtree()`s `onerror` kwarg"""
 
         logging.warning('An error was raised in shutil:\n%s', exc_info)

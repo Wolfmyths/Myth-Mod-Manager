@@ -27,6 +27,9 @@ class ModContextMenu(qtw.QMenu):
 
         if self.wasLastClickLMB():
             func()
+    
+    def applyStaticText(self) -> None:
+        return
 
 # EVENT OVERRIDES
     def mousePressEvent(self, arg__1: qtg.QMouseEvent) -> None:

@@ -2,7 +2,7 @@ import logging
 
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
 from PySide6.QtNetwork import QNetworkReply
 
 from semantic_version import Version
@@ -24,7 +24,7 @@ class updateDetected(Dialog):
     def __init__(self, newVersion: Version, releaseNotes: str) -> None:
         super().__init__()
 
-        self.setWindowTitle('Update Notice')
+        self.setWindowTitle(qapp.translate('updateDetected', 'Update Notice'))
         
         self.setMinimumSize(450, 450)
 
@@ -43,19 +43,26 @@ class updateDetected(Dialog):
         self.autoUpdate.succeeded.connect(self.succeeded)
         self.autoUpdate.doneCanceling.connect(self.close)
 
-        self.message = qtw.QLabel(self, text=f'New update found: {newVersion}\nCurrent Version: {VERSION}\nDo you want to Update?')
+        self.message = qtw.QLabel(
+            self,
+            text=qapp.translate('updateDetected', 'New update found:') +
+                f' {newVersion}\n' +
+                qapp.translate('updateDetected', 'Current Version:') +
+                f' {VERSION}\n' +
+                qapp.translate('updateDetected', 'Do you want to Update?')
+        )
 
         self.changelog = qtw.QTextBrowser(self)
         self.changelog.setMarkdown(releaseNotes)
         self.changelog.setOpenExternalLinks(True)
 
-        self.viewWeb = qtw.QPushButton(text='View Release Notes on github.com', parent=self)
+        self.viewWeb = qtw.QPushButton(text=qapp.translate('updateDetected', 'View Release Notes on github.com'), parent=self)
         self.viewWeb.clicked.connect(lambda: openWebPage('https://github.com/Wolfmyths/Myth-Mod-Manager/releases/latest'))
 
         self.buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(self.buttons)
-        self.buttonBox.addButton('Do not ask again', qtw.QDialogButtonBox.ButtonRole.ActionRole)
+        self.buttonBox.addButton(qapp.translate('updateDetected', 'Do not ask again'), qtw.QDialogButtonBox.ButtonRole.ActionRole)
         self.buttonBox.buttons()[2].clicked.connect(self.doNotAskAgain)
         self.buttonBox.accepted.connect(self.okButton)
         self.buttonBox.rejected.connect(self.cancel)
@@ -65,7 +72,7 @@ class updateDetected(Dialog):
         
         self.setLayout(layout)
 
-    def okButton(self):
+    def okButton(self) -> None:
 
         if self.succeededState:
 
@@ -80,24 +87,28 @@ class updateDetected(Dialog):
 
             self.autoUpdate.start()
     
-    def errorRaised(self, message: str):
-        error = Notice(message, headline='Error')
+    def errorRaised(self, message: str) -> None:
+        error = Notice(message, headline=qapp.translate('updateDetected', 'Error'))
         error.exec()
 
         self.cancel()
         self.reject()
 
-    def succeeded(self):
+    def succeeded(self) -> None:
 
         self.progressBar.hide()
 
         self.progressBar.setValue(self.progressBar.maximum())
-        self.message.setText('Installed!\nClick ok to exit and update Myth Mod Manager')
+        self.message.setText(
+            qapp.translate('updateDetected', 'Installation Successful!') +
+            '\n' +
+            qapp.translate('updateDetected', 'Click ok to exit and update Myth Mod Manager')
+        )
 
         self.succeededState = True
         self.buttonBox.buttons()[0].setEnabled(True)
     
-    def cancel(self):
+    def cancel(self) -> None:
         '''
         Sets the cancel flag to true in which Update() will exit the function
         '''
@@ -107,7 +118,7 @@ class updateDetected(Dialog):
             self.reject()
 
         logging.info('Task %s was canceled...')
-        self.message.setText('Canceling... (Finishing current step)')
+        self.message.setText(qapp.translate('updateDetected', 'Canceling... (Finishing current step)'))
 
         self.autoUpdate.cancel = True
     

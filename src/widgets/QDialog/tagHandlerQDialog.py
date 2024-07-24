@@ -1,5 +1,5 @@
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
 
 from src.widgets.QDialog.QDialog import Dialog
 
@@ -18,7 +18,7 @@ class TagHandler(Dialog):
 
         self.input = qtw.QLineEdit()
         self.input.textChanged.connect(self.lineEditTextChanged)
-        self.input.setPlaceholderText('To specify multiple tags seperate them with a comma ","')
+        self.input.setPlaceholderText(qapp.translate('TagHandler', 'To specify multiple tags seperate them with a comma ","'))
 
         self.completer = qtw.QCompleter(self.allTags)
         self.completer.setFilterMode(qt.MatchFlag.MatchStartsWith)
@@ -42,11 +42,11 @@ class TagHandler(Dialog):
         self.setLayout(self.VBoxLayout)
 
     def addMode(self) -> None:
-        self.setWindowTitle('Add tag to mod')
+        self.setWindowTitle(qapp.translate('TagHandler', 'Add tag to mod'))
 
 
     def removeMode(self) -> None:
-        self.setWindowTitle('Remove tag from mod')
+        self.setWindowTitle(qapp.translate('TagHandler', 'Remove tag from mod'))
 
     
     def lineEditTextChanged(self) -> None:

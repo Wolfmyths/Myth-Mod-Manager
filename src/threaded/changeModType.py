@@ -1,12 +1,14 @@
 import logging
 import os
 
+from PySide6.QtCore import QCoreApplication as qapp
+
 import src.errorChecking as errorChecking
 from src.threaded.workerQObject import Worker
 from src.constant_vars import ModType
 
 class ChangeModType(Worker):
-    def __init__(self, *mods: tuple[str, ModType]):
+    def __init__(self, *mods: tuple[str, ModType]) -> None:
         super().__init__()
         logging.getLogger(__name__)
 
@@ -31,7 +33,7 @@ class ChangeModType(Worker):
 
                 mod = os.path.basename(modsDirPath)
 
-                self.setCurrentProgress.emit(1, f'Installing {mod}')
+                self.setCurrentProgress.emit(1, qapp.translate('ChangeModType', 'Installing') + f' {mod}')
 
                 # Setting the Destination path
                 if errorChecking.isTypeMod(ChosenDir):
@@ -43,4 +45,4 @@ class ChangeModType(Worker):
             self.succeeded.emit()
 
         except Exception as e:
-            self.error.emit(f'An error occured in changeModType:\n{e}')
+            self.error.emit(qapp.translate('ChangeModType', 'An error was raised while changing mod type:') + f'\n{e}')

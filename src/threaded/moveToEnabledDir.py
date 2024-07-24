@@ -1,13 +1,15 @@
 import logging
 import os
 
+from PySide6.QtCore import QCoreApplication as qapp
+
 from src.threaded.workerQObject import Worker
 
 from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG
 
 class MoveToEnabledModDir(Worker):
 
-    def __init__(self, *mods: str, optionsPath: str = OPTIONS_CONFIG, savePath: str = MOD_CONFIG):
+    def __init__(self, *mods: str, optionsPath: str = OPTIONS_CONFIG, savePath: str = MOD_CONFIG) -> None:
         super().__init__(optionsPath=optionsPath, savePath=savePath)
 
         self.mods = mods
@@ -25,7 +27,7 @@ class MoveToEnabledModDir(Worker):
 
                 self.cancelCheck()
 
-                self.setCurrentProgress.emit(1, f'Enabling {mod}')
+                self.setCurrentProgress.emit(1, qapp.translate('MoveToEnabledModDir', 'Enabling') + f' {mod}')
 
                 modPath = os.path.join(disabledModsPath, mod)
 
@@ -40,4 +42,4 @@ class MoveToEnabledModDir(Worker):
             self.succeeded.emit()
 
         except Exception as e:
-            self.error.emit(f'An error occured while enabling a mod:\n{e}')
+            self.error.emit(qapp.translate('MoveToEnabledModDir', 'An error occured while enabling a mod:') + f'\n{e}')

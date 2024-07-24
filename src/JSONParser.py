@@ -15,11 +15,11 @@ class JSONParser():
             
             self.loadJSON()
 
-    def loadJSON(self):
+    def loadJSON(self) -> None:
         with open(self.path, 'r') as f:
             self.file = json.loads(f.read())
 
-    def saveJSON(self):
+    def saveJSON(self) -> None:
         with open(self.path, 'w') as f:
             f.seek(0)
             f.write(json.dumps(self.file, indent=2))

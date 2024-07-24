@@ -50,11 +50,6 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 
 # Anti-Virus False Positives (And building the exe yourself)
 
-There have been multiple reports from users that anti virus programs believe the program contains
-a trojan.
-
-[This issue is being worked on](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/22)
-
 Rest assured, this program does not contain malicious code.
 
 **When a release is published, github builds the executable as seen [here](https://github.com/Wolfmyths/Myth-Mod-Manager/blob/main/.github/workflows), not me.**
@@ -86,6 +81,24 @@ Please report any issues found.
 
 It works with both steam and epic games versions.
 
+# Supported Languages
+
+The following languages are supported but may not be accurate.
+If you want to help contribute support for a language, [See issue #44](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/44) or read CONTRIBUTING.md and make a contribution.
+
+Deutsch
+English
+Español (españa)
+Français
+Italiano
+日本語
+한국인
+Nederlands
+Polski
+Português (Brasil)
+Русский
+中文（简体）
+
 # Download
 You may download any version of Myth Mod Manager and view changelogs at the [releases page](https://github.com/Wolfmyths/Myth-Mod-Manager/releases)
 
@@ -93,7 +106,7 @@ You may download any version of Myth Mod Manager and view changelogs at the [rel
 
 + New Icon/Logo
 + Auto mod type detection
-+ Multi-Language Support [See issue #44](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/44)
++ Improve Multi-Language Support [See issue #44](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/44)
 + Some kind of [modworkshop.net](https://modworkshop.net/g/payday-2) integration, see [issue #14](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/14)
 
 *Suggestions are appreciated!*

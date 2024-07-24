@@ -1,5 +1,5 @@
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
 
 from src.widgets.QDialog.QDialog import Dialog
 
@@ -13,7 +13,7 @@ class SelectProfile(Dialog):
     def __init__(self, profilePath: str = PROFILES_JSON) -> None:
         super().__init__()
 
-        self.setWindowTitle('Profile to copy mod(s) to:')
+        self.setWindowTitle(qapp.translate('SelectProfile', 'Profile to copy mod(s) to:'))
 
         layout = qtw.QVBoxLayout()
 
@@ -23,7 +23,7 @@ class SelectProfile(Dialog):
         self.profileList.setSelectionMode(qtw.QListWidget.SelectionMode.SingleSelection)
 
         self.searchBar = qtw.QLineEdit()
-        self.searchBar.setPlaceholderText('Search...')
+        self.searchBar.setPlaceholderText(qapp.translate('SelectProfile', 'Search...'))
         self.searchBar.textChanged.connect(lambda x: self.search(x))
 
         profileManager = ProfileManager(profilePath)

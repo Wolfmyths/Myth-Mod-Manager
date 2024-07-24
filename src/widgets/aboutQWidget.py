@@ -2,7 +2,7 @@ import os
 import logging
 
 import PySide6.QtGui as qtg
-from PySide6.QtCore import Qt as qt, QSize
+from PySide6.QtCore import Qt as qt, QSize, QCoreApplication as qapp
 import PySide6.QtWidgets as qtw
 
 from src.save import OptionsManager
@@ -28,10 +28,6 @@ class About(qtw.QWidget):
         self.kofiLabel = qtw.QPushButton(self.buttonFrame)
         self.modworkshopLabel = qtw.QPushButton(self.buttonFrame)
 
-        self.githubLabel.setToolTip('Visit Github Repository')
-        self.kofiLabel.setToolTip('Support Wolfmyths on Ko-Fi')
-        self.modworkshopLabel.setToolTip('Visit Modworkshop Page')
-
         self.githubLabel.clicked.connect(lambda: openWebPage('https://github.com/Wolfmyths/Myth-Mod-Manager'))
         self.kofiLabel.clicked.connect(lambda: openWebPage('https://ko-fi.com/C0C4MJZS9'))
         self.modworkshopLabel.clicked.connect(lambda: openWebPage('https://modworkshop.net/mod/43276'))
@@ -47,23 +43,29 @@ class About(qtw.QWidget):
 
         self.updateIcons(self.options.getTheme())
 
-        self.aboutLabel = qtw.QLabel(self, text=
-f'''
-{PROGRAM_NAME} {VERSION} is an open-source mod manager for PAYDAY 2 created by Wolfmyths
-
-The goal of this program is to streamline the proccess of PAYDAY 2 mod managment
-without hassle of juggling multiple file explorers.
-
-Suggestions are greatly appreciated on modworkshop.net and github
-
-''')
+        self.aboutLabel = qtw.QLabel(self)
         self.aboutLabel.setWordWrap(True)
+        self.aboutLabel.setContentsMargins(30,0,30,0)
         self.aboutLabel.setAlignment(qt.AlignmentFlag.AlignTop)
 
         for widget in (self.buttonFrame, self.aboutLabel):
             layout.addWidget(widget)
 
+        self.applyStaticText()
+
         self.setLayout(layout)
+    
+    def applyStaticText(self) -> None:
+        self.githubLabel.setToolTip(qapp.translate('About', 'Visit Github Repository'))
+        self.kofiLabel.setToolTip(qapp.translate('About', 'Support Wolfmyths on Ko-Fi'))
+        self.modworkshopLabel.setToolTip(qapp.translate('About','Visit Modworkshop Page'))
+
+        self.aboutLabel.setText('\n\n'.join([
+            '',
+            f'{PROGRAM_NAME} {VERSION} ' + qapp.translate('About', 'is an open-source mod manager for PAYDAY 2 created by Wolfmyths.'),
+            qapp.translate('About', 'The goal of this program is to streamline the proccess of PAYDAY 2 mod managment without hassle of juggling multiple file explorers.'),
+            qapp.translate('About', 'Suggestions are greatly appreciated on modworkshop.net and github.')
+        ]))
     
     def updateIcons(self, mode: str) -> None:
 

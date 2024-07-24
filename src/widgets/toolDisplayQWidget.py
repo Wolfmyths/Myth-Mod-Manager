@@ -2,7 +2,7 @@ import os
 import logging
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, Signal
+from PySide6.QtCore import Qt as qt, Signal, QCoreApplication as qapp
 
 from src.widgets.QDialog.announcementQDialog import Notice
 from src.widgets.QDialog.deleteWarningQDialog import Confirmation
@@ -34,14 +34,12 @@ class ExternalTool(qtw.QFrame):
 
         self.editToolButton = qtw.QPushButton(icon=editIcon, parent=self.optionsFrame)
         self.editToolButton.setSizePolicy(qtw.QSizePolicy.Policy.Fixed, qtw.QSizePolicy.Policy.Fixed)
-        self.editToolButton.setToolTip('Set slot to a different external tool')
         self.editToolButton.pressed.connect(self.editToolURL)
 
         deleteIcon = style.standardIcon(style.StandardPixmap.SP_DialogDiscardButton)
 
         self.deleteToolButton = qtw.QPushButton(icon=deleteIcon, parent=self.optionsFrame)
         self.deleteToolButton.setSizePolicy(qtw.QSizePolicy.Policy.Fixed, qtw.QSizePolicy.Policy.Fixed)
-        self.deleteToolButton.setToolTip('Delete external tool shortcut')
         self.deleteToolButton.pressed.connect(self.deleteExternalTool)
 
         for widget in (self.editToolButton, self.deleteToolButton):
@@ -51,13 +49,19 @@ class ExternalTool(qtw.QFrame):
 
         self.startToolButton = qtw.QPushButton(text=self.__trimBasename(self.toolURL), parent=self)
         self.startToolButton.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding)
-        self.startToolButton.setToolTip('Start external tool')
         self.startToolButton.pressed.connect(self.startExternalTool)
 
         for widget in (self.optionsFrame, self.startToolButton):
             self.vlayout.addWidget(widget)
 
         self.setLayout(self.vlayout)
+
+        self.applyStaticText()
+    
+    def applyStaticText(self) -> None:
+        self.editToolButton.setToolTip(qapp.translate('ExternalTool', 'Set slot to a different external tool'))
+        self.deleteToolButton.setToolTip(qapp.translate('ExternalTool', 'Delete external tool shortcut'))
+        self.startToolButton.setToolTip(qapp.translate('ExternalTool', 'Start external tool'))
 
     def __trimBasename(self, path: str) -> str:
         '''`os.path.basename()` includes `.exe`, this removes that'''
@@ -66,8 +70,8 @@ class ExternalTool(qtw.QFrame):
     def editToolURL(self) -> None:
         dialog = qtw.QFileDialog()
         new_url = dialog.getOpenFileUrl(None, 
-                                       caption='Select new external tool',
-                                       filter='Executables (*.exe *.bat *.sh);;Any (*)')
+                                       caption=qapp.translate('ExternalTool', 'Select new external tool'),
+                                       filter=qapp.translate('ExternalTool', 'Executables') + '(*.exe *.bat *.sh);;Any (*)')
         
         new_urlLocalFile = new_url[0].toLocalFile()
 
@@ -81,8 +85,10 @@ class ExternalTool(qtw.QFrame):
 
     def deleteExternalTool(self, ask: bool = True) -> None:
         if ask:
-            notice = Confirmation('Delete tool shortcut',
-                                  'Are you sure you want to delete this shortcut?')
+            notice = Confirmation(
+                qapp.translate('ExternalTool','Delete tool shortcut'),
+                qapp.translate('ExternalTool','Are you sure you want to delete this shortcut?')
+            )
             notice.exec()
 
             if notice.result():
@@ -92,8 +98,10 @@ class ExternalTool(qtw.QFrame):
         try:
             errorChecking.startFile(self.toolURL)
         except Exception as e:
-            errorMessage = 'An error has occured starting an external tool'
-            logging.error('%s: %s\n%s', errorMessage, self.toolURL, str(e))
+            logging.error('%s: %s\n%s', 'An error was raised starting an external tool', self.toolURL, str(e))
 
-            notice = Notice(errorMessage, 'startExternalTool() Error')
+            notice = Notice(
+                qapp.translate('ExternalTool', 'An error was raised starting an external tool'),
+                'startExternalTool() ' + qapp.translate('ExternalTool', 'Error')
+            )
             notice.exec()

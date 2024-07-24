@@ -7,6 +7,8 @@ import subprocess
 
 from semantic_version import Version
 
+from PySide6.QtCore import QCoreApplication as qapp
+
 from src.widgets.QDialog.announcementQDialog import Notice
 
 from src.getPath import Pathing
@@ -24,7 +26,7 @@ def openWebPage(link: str) -> bool:
 
         logging.error('Could not open web browser:\n%s', link)
 
-        notice = Notice(f'Could not open to {link}')
+        notice = Notice(qapp.translate("ErrorChecking", 'Could not open to') + f' {link}')
         notice.exec()
     
     return outcome
@@ -122,7 +124,9 @@ def startFile(path: str) -> None:
 
     try:
         if not os.path.isabs(path):
-            raise Exception('Please use a full path to the program you are starting.')
+            raise Exception(
+                qapp.translate("ErrorChecking", 'Please use a full path to the program you are starting.')
+            )
 
         if sys.platform.startswith('win'):
             os.startfile(path)
@@ -133,5 +137,9 @@ def startFile(path: str) -> None:
 
     except Exception as e:
         logging.error('Error in errorChecking.startFile(%s): %s', path, str(e))
-        notice = Notice(f'Error in errorChecking.startFile({path}): {e}', 'Could not start program')
+
+        notice = Notice(
+            qapp.translate("ErrorChecking", 'Error in') + f' errorChecking.startFile({path}): {e}',
+            qapp.translate("ErrorChecking", 'Could not start program')
+        )
         notice.exec()

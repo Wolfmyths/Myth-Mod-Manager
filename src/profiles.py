@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
+from PySide6.QtCore import QCoreApplication as qapp
 
 import src.errorChecking as errorChecking
 
@@ -35,7 +36,7 @@ class modProfile(qtw.QWidget):
         
         self.setLayout(layout)
 
-    def applyMods(self, mods: list[str]):
+    def applyMods(self, mods: list[str]) -> None:
 
         enableMods = ProgressWidget(MoveToEnabledModDir(*[x for x in mods if errorChecking.isInstalled(x)]))
         enableMods.exec()
@@ -54,5 +55,9 @@ class modProfile(qtw.QWidget):
         notInstalledMods = [x for x in mods if not errorChecking.isInstalled(x)]
 
         if notInstalledMods:
-            notice = Notice(f'The following mods were not applied because they are not installed:\n{" ,".join(notInstalledMods)}', 'Info: Some mods were not applied')
+            notice = Notice(
+                qapp.translate("modProfile", 'The following mods were not applied because they are not installed:') + 
+                f'\n{" ,".join(notInstalledMods)}',
+                qapp.translate("modProfile", 'Profile: Some mods were not applied')
+            )
             notice.exec()

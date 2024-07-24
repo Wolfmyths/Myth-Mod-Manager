@@ -3,7 +3,7 @@ import logging
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
 
 from src.widgets.QMenu.managerQMenu import ManagerMenu
 from src.widgets.progressWidget import ProgressWidget
@@ -48,8 +48,6 @@ class ModListWidget(qtw.QTableWidget):
         self.setColumnWidth(2, 100)
         self.setColumnWidth(3, 100)
 
-        self.setHorizontalHeaderLabels(('Name', 'Type', 'Enabled', 'Version'))
-
         horizontalHeader = self.horizontalHeader()
 
         horizontalHeader.sectionClicked.connect(lambda x: self.sort(x))
@@ -67,9 +65,35 @@ class ModListWidget(qtw.QTableWidget):
         self.verticalHeader().hide()
 
         self.contextMenu = ManagerMenu(self)
+        self.tagViewer = None
+
+        self.applyStaticText()
     
+    def applyStaticText(self) -> None:
+        self.setHorizontalHeaderLabels((
+            qapp.translate("ModListWidget", 'Name'),
+            qapp.translate("ModListWidget", 'Type'),
+            qapp.translate("ModListWidget", 'Enabled'),
+            qapp.translate("ModListWidget", 'Version'))
+        )
+
+        # Update Enabled Item Tags
+        enabled_text = self.horizontalHeaderItem(2).text()
+        disabled_text = qapp.translate("ModListWidget", 'Disabled')
+
+        for i, item in enumerate(self.getEnabledItems()):
+            if self.saveManager.getEnabled(self.getNameItem(i).text()):
+                item.setText(enabled_text)
+            else:
+                item.setText(disabled_text)
+
     def getEnabledItem(self, row: int) -> qtw.QTableWidgetItem:
         return self.item(row, 2)
+    
+    def getEnabledItems(self) -> list[qtw.QTableWidgetItem]:
+        return [
+            self.getEnabledItem(x) for x in range(self.rowCount())
+        ]
     
     def getNameItem(self, row: int) -> qtw.QTableWidgetItem:
         return self.item(row, 0)
@@ -157,7 +181,7 @@ class ModListWidget(qtw.QTableWidget):
 
                 case 'enabled': # The key to this value should be a boolean
 
-                    value = 'Enabled' if value else 'Disabled'
+                    value = qapp.translate('ModListWidget', 'Enabled') if value else qapp.translate('ModListWidget', 'Disabled')
                     self.setItem(self.rowCount() - 1, 2, qtw.QTableWidgetItem(value))
                 
                 case 'version':
@@ -195,7 +219,7 @@ class ModListWidget(qtw.QTableWidget):
 
                 self.saveManager.setEnabled(modName, False)
 
-                self.getEnabledItem(row).setText('Disabled')
+                self.getEnabledItem(row).setText(qapp.translate("ModListWidget", 'Disabled'))
 
             else:
                 logging.info('%s is already disabled in the save file', modName)
@@ -249,7 +273,7 @@ class ModListWidget(qtw.QTableWidget):
             if os.path.isdir(self.p.mod(modType, modName)):
                 self.saveManager.setEnabled(modName, True)
 
-                self.getEnabledItem(row).setText('Enabled')
+                self.getEnabledItem(row).setText(qapp.translate("ModListWidget", 'Enabled'))
         
         self.saveManager.saveJSON()
 
@@ -407,10 +431,14 @@ class ModListWidget(qtw.QTableWidget):
             errorChecking.openWebPage(f'https://modworkshop.net/mod/{assetID}')
     
     def checkModUpdate(self) -> None:
+        notice_title = qapp.translate("ModListWidget", 'Mod Update Check Results')
         def updateDetected(newVersion: str) -> None:
-            Notice(f'New version for {modName} is found!\nLocal: {modVersion}\nModworkshop: {newVersion}', 'Mod Update Check Results').exec()
+            Notice(
+                qapp.translate("ModListWidget", 'A new version has been found for') + f' {modName}!' + '\n' + qapp.translate("ModListWidget", 'Local') + f': {modVersion}\nModworkshop: {newVersion}',
+                notice_title
+            ).exec()
         def uptoDate() -> None:
-            Notice(f'{modName} is up to date', 'Mod Update Check Results').exec()
+            Notice(modName + ' ' + qapp.translate("ModListWidget", 'is up to date'), notice_title).exec()
 
         item = self.getSelectedNameItems()[0]
         modName = self.getNameItem(self.row(item)).text()

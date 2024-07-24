@@ -1,7 +1,7 @@
 import os
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
 
 from src.widgets.QDialog.QDialog import Dialog
 
@@ -14,7 +14,7 @@ class newModLocation(Dialog):
     def __init__(self, *modName: str) -> None:
         super().__init__()
 
-        self.setWindowTitle('Installing mods')
+        self.setWindowTitle(qapp.translate('newModLocation', 'Installing mods'))
 
         self.setMaximumSize(400, 850)
         self.setMinimumSize(320, 180)
@@ -24,7 +24,10 @@ class newModLocation(Dialog):
                             
         layout = qtw.QVBoxLayout()
 
-        self.label = qtw.QLabel(self, text='Please select where the mods should be installed:')
+        self.label = qtw.QLabel(
+            self,
+            text=qapp.translate('newModLocation', 'Please select where the mods should be installed:')
+        )
 
         scrollArea = qtw.QScrollArea(self)
         scrollArea.setWidgetResizable(True)
@@ -84,7 +87,7 @@ class newModLocation(Dialog):
     def changeOkButtonState(self, bool: bool) -> None:
         self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok).setEnabled(bool)
     
-    def isAllChecked(self):
+    def isAllChecked(self) -> None:
 
         groups: list[qtw.QGroupBox] = self.findChildren(qtw.QGroupBox)
 

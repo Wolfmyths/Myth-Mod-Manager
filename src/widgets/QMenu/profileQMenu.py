@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import PySide6.QtGui as qtg
+from PySide6.QtCore import QCoreApplication as qapp
 
 from src.widgets.QMenu.QMenu import ModContextMenu
 
@@ -20,14 +21,14 @@ class ProfileMenu(ModContextMenu):
         qParent.modRightclicked.connect(self.modRightClicked)
         qParent.noneRightclicked.connect(self.noneRightClicked)
 
-        self.profileApply = qtg.QAction('Apply Profile', self)
-        self.profileAdd = qtg.QAction('Add Profile', self)
-        self.profileRemove = qtg.QAction('Remove Profile', self)
-        self.profileEdit = qtg.QAction('Change Profile Name', self)
-        self.profileCopy = qtg.QAction('Copy Profile', self)
-        self.modAdd = qtg.QAction('Add Mods', self)
-        self.modRemove = qtg.QAction('Remove Mod', self)
-        self.copyModsTo = qtg.QAction('Copy mod(s) to...', self)
+        self.profileApply = qtg.QAction(self)
+        self.profileAdd = qtg.QAction(self)
+        self.profileRemove = qtg.QAction(self)
+        self.profileEdit = qtg.QAction(self)
+        self.profileCopy = qtg.QAction(self)
+        self.modAdd = qtg.QAction(self)
+        self.modRemove = qtg.QAction(self)
+        self.copyModsTo = qtg.QAction(self)
 
         self.profileApply.triggered.connect(lambda: self.callFunc(self.qParent.applyProfileEvent))
         self.profileAdd.triggered.connect(lambda: self.callFunc(self.qParent.menuAddProfile))
@@ -49,21 +50,33 @@ class ProfileMenu(ModContextMenu):
         
         self.actionsTuple = tuple(self.actions())
 
-    def profileRightClicked(self):
+        self.applyStaticText()
+
+    def applyStaticText(self) -> None:
+        self.profileApply.setText(qapp.translate('ProfileMenu', 'Apply Profile'))
+        self.profileAdd.setText(qapp.translate('ProfileMenu', 'Add Profile'))
+        self.profileRemove.setText(qapp.translate('ProfileMenu', 'Remove Profile'))
+        self.profileEdit.setText(qapp.translate('ProfileMenu', 'Change Profile Name'))
+        self.profileCopy.setText(qapp.translate('ProfileMenu', 'Copy Profile'))
+        self.modAdd.setText(qapp.translate('ProfileMenu', 'Add Mods'))
+        self.modRemove.setText(qapp.translate('ProfileMenu', 'Remove Mod'))
+        self.copyModsTo.setText(qapp.translate('ProfileMenu', 'Copy mod(s) to...'))
+
+    def profileRightClicked(self) -> None:
         for action in self.actionsTuple:
             if action in self.profileButtons:
                 action.setVisible(True)
             else:
                 action.setVisible(False)
     
-    def modRightClicked(self):
+    def modRightClicked(self) -> None:
         for action in self.actionsTuple:
             if action in self.modButtons:
                 action.setVisible(True)
             else:
                 action.setVisible(False)
     
-    def noneRightClicked(self):
+    def noneRightClicked(self) -> None:
         self.profileAdd.setVisible(True)
 
         for action in self.actionsTuple:

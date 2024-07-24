@@ -89,3 +89,7 @@ def test_OptionsMethods(createTemp_Config_ini: str) -> None:
     options.setMMMUpdateAlert(False)
     options.writeData()
     assert options.getMMMUpdateAlert() == False
+
+    options.setLang('language')
+    options.writeData()
+    assert options.getLang() == 'language'

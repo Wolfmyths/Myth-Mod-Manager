@@ -3,7 +3,7 @@ import logging
 from typing import TextIO, Sequence
 from configparser import ConfigParser
 
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, QLocale
 
 from src.JSONParser import JSONParser
 from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG, ModType, LIGHT, MODS_DISABLED_PATH_DEFAULT, ModKeys, OptionKeys
@@ -11,7 +11,7 @@ from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG, ModType, LIGHT, MODS_D
 class Save(JSONParser):
     '''Manages the data of each mod'''
 
-    def __init__(self, path=MOD_CONFIG):
+    def __init__(self, path=MOD_CONFIG) -> None:
         super().__init__(path=path)
 
     def mods(self) -> list[str]:
@@ -178,7 +178,7 @@ class OptionsManager():
     config = ConfigParser()
     file = OPTIONS_CONFIG
 
-    def __init__(self, file=OPTIONS_CONFIG):
+    def __init__(self, file=OPTIONS_CONFIG) -> None:
 
         OptionsManager.file = file
 
@@ -273,3 +273,11 @@ class OptionsManager():
     def setWindowSize(size: QSize = QSize(800, 800)) -> None:
         OptionsManager.config.set(OptionKeys.section.value, OptionKeys.windowsize_w.value, str(size.width()))
         OptionsManager.config.set(OptionKeys.section.value, OptionKeys.windowsize_h.value, str(size.height()))
+    
+    @staticmethod
+    def getLang() -> str:
+        return OptionsManager.config.get(OptionKeys.section.value, OptionKeys.lang.value, fallback='en_US')
+
+    @staticmethod
+    def setLang(lang: str = 'en_US') -> None:
+        OptionsManager.config.set(OptionKeys.section.value, OptionKeys.lang.value, lang)

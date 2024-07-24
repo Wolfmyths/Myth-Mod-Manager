@@ -1,5 +1,5 @@
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
 
 from src.widgets.QDialog.QDialog import Dialog
 
@@ -14,7 +14,7 @@ class SelectMod(Dialog):
     def __init__(self, savePath: str = MOD_CONFIG, optionsPath: str = OPTIONS_CONFIG) -> None:
         super().__init__()
 
-        self.setWindowTitle('Mods to be added:')
+        self.setWindowTitle(qapp.translate('SelectMod', 'Mods to be added:'))
 
         layout = qtw.QVBoxLayout()
 
@@ -24,7 +24,7 @@ class SelectMod(Dialog):
         self.modList.setSelectionMode(qtw.QListWidget.SelectionMode.MultiSelection)
 
         self.searchBar = qtw.QLineEdit()
-        self.searchBar.setPlaceholderText('Search... use "tag:" with no spaces to search for tags, use a comma "," to seperate tags')
+        self.searchBar.setPlaceholderText(qapp.translate('SelectMod', 'Search... use "tag:" with no spaces to search for tags, use a comma "," to seperate tags'))
         self.searchBar.textChanged.connect(lambda x: self.search(x))
 
         self.saveManager = Save(savePath)

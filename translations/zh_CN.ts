@@ -213,7 +213,7 @@
     <message>
         <location filename="../src/main_window.py" line="65"/>
         <source>Manager</source>
-        <translation>经理</translation>
+        <translation>管理</translation>
     </message>
     <message>
         <location filename="../src/main_window.py" line="66"/>
@@ -286,7 +286,7 @@
         <location filename="../src/widgets/managerQTableWidget.py" line="185"/>
         <location filename="../src/widgets/managerQTableWidget.py" line="222"/>
         <source>Disabled</source>
-        <translation>残疾</translation>
+        <translation>缺少文件</translation>
     </message>
     <message>
         <location filename="../src/widgets/managerQTableWidget.py" line="76"/>
@@ -341,7 +341,7 @@
     <message>
         <location filename="../src/manager.py" line="81"/>
         <source>Open Game Directory</source>
-        <translation>开放式游戏目录</translation>
+        <translation>打开游戏目录</translation>
     </message>
     <message>
         <location filename="../src/manager.py" line="82"/>

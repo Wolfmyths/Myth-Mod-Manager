@@ -1,66 +1,62 @@
 import os
 import stat
-import requests
 import logging
+import webbrowser
+import sys
+import subprocess
 
 from semantic_version import Version
 
-from save import OptionsManager
-from widgets.newUpdateQDialog import updateDetected
-from constant_vars import OPTIONS_GAMEPATH, MODS_DISABLED_PATH_DEFAULT, VERSION, OPTIONS_DISPATH, OPTIONS_SECTION, TYPE_ALL
+from PySide6.QtCore import QCoreApplication as qapp, Slot
+
+from src.widgets.QDialog.announcementQDialog import Notice
+
+from src.getPath import Pathing
+from src.save import OptionsManager
+from src.constant_vars import ModType, OPTIONS_CONFIG
 
 logging.getLogger(__name__)
 
-def validGamePath() -> bool:
-    '''Gets the gamepath from OPTIONS_CONFIG and checks if the paths contains the PAYDAY 2 exe'''
+@Slot(str)
+def openWebPage(link: str) -> bool:
+    '''`webbrowser.open_new_tab()` but with some exception handling, returns a bool depending if it failed or not'''
 
-    optionsManager = OptionsManager()
+    outcome = webbrowser.open_new_tab(link)
 
-    gamePath = optionsManager.getOption(OPTIONS_GAMEPATH)
+    if not outcome:
 
-    if gamePath is None:
+        logging.error('Could not open web browser:\n%s', link)
 
-        logging.warning('There is no gamepath')
-        return False
+        notice = Notice(qapp.translate("ErrorChecking", 'Could not open to') + f' {link}')
+        notice.exec()
+    
+    return outcome
 
-    else:
-        logging.info('Gamepath: %s', gamePath)
+def createModDirs(optionsPath: str = OPTIONS_CONFIG) -> None:
+    path = Pathing(optionsPath)
+    disPath = OptionsManager(optionsPath).getDispath()
 
-    return os.path.exists(os.path.join(gamePath, 'payday2_win32_release.exe'))
+    for modDir in (path.maps(), path.mod_overrides(), path.mods(), disPath):
+        if not os.path.isdir(modDir):
+            os.mkdir(modDir)
 
-def createDisabledModFolder() -> None:
-    '''
-    Checks if the OPTIONS_DISPATH path exists, if not, it will try to create a directory there.
+def isInstalled(mod: str, optionsPath: str = OPTIONS_CONFIG) -> bool:
+    '''Checks if the mod is installed on the system'''
 
-    If that fails then it will make a directory at the default location if it isn't already there.
+    installed = False
 
-    During an exception it will also overwrite the current OPTIONS_DISPATH with the default value
-    to get rid of a faulty path.
-    '''
+    path = Pathing(optionsPath)
 
-    optionsManager = OptionsManager()
+    possiblePaths = (path.maps(), path.mod_overrides(), path.mods(), OptionsManager(optionsPath).getDispath())
 
-    path = optionsManager.getOption(OPTIONS_DISPATH, fallback=MODS_DISABLED_PATH_DEFAULT)
+    for path in possiblePaths:
 
-    if not os.path.exists(path):
-        logging.debug('Disabled Mod Folder does not exist')
+        if os.path.isdir(os.path.join(path, mod)):
+            installed = True
+            break
 
-        try:
-
-            os.mkdir(path)
-
-        except (FileNotFoundError):
-
-            logging.warning('The following path for disabled mods was not found: %s\nUsing default path: %s', path, MODS_DISABLED_PATH_DEFAULT)
-
-            optionsManager[OPTIONS_SECTION][OPTIONS_DISPATH] = MODS_DISABLED_PATH_DEFAULT
-
-            optionsManager.writeData()
-
-            if not os.path.exists(MODS_DISABLED_PATH_DEFAULT):
-                logging.warning('Default disabled mod path was not found, creating new one...')
-                
-                os.mkdir(MODS_DISABLED_PATH_DEFAULT)
+    logging.debug('errorChecking.isInstalled(): %s, %s', mod, installed)
+    return installed
 
 def getFileType(filePath: str) -> str | bool:
     '''
@@ -71,7 +67,7 @@ def getFileType(filePath: str) -> str | bool:
     If FileNotFoundError is raised, it returns False
     '''
 
-    output = None
+    output = False
 
     try:
 
@@ -91,56 +87,14 @@ def getFileType(filePath: str) -> str | bool:
     except FileNotFoundError:
         logging.warning('The file extension not valid and will be ignored: %s', filePath.split('/')[-1])
 
-        output = False
-
     finally:
         return output
 
 def isPrerelease(version: Version) -> bool:
-    return len(version.prerelease) != 0
+    return version.prerelease != ()
 
-def checkUpdate() -> int:
-    '''
-    Checks for latest update and returns the result value of the updateDetected() QDialog Widget
-
-    If the request.get() raises an exception, return 0
-    '''
-
-    try:
-        # If the version is a pre-release, then look for latest pre-release updates as well
-        # If there is an error raised here in the code's execution then it's because this version does not have a release page yet
-        if isPrerelease(VERSION):
-
-            data = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases').json()
-
-            latestVersion = Version.coerce(data[0]['tag_name'])
-
-        else:
-
-            latestVersion = requests.get('https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest').json()['tag_name']
-            latestVersion = Version.coerce(latestVersion)
-
-        logging.info('Latest Version: %s', latestVersion)
-
-    except Exception as e:
-        logging.error('Issue in errorChecking.checkUpdate():\n%s', str(e))
-
-        return 0
-
-    if latestVersion > VERSION:
-
-            notice = updateDetected(latestVersion)
-            notice.exec()
-            result = notice.result()
-
-    else:
-
-        result = 0
-
-    return result
-
-def isTypeMod(type: str):
-    return type in TYPE_ALL
+def isTypeMod(modType: ModType) -> bool:
+    return isinstance(modType, ModType)
 
 def permissionCheck(src: str) -> int:
     '''
@@ -153,7 +107,7 @@ def permissionCheck(src: str) -> int:
     permission = str(oct(os.stat(src).st_mode))[-3:]
 
     if int(permission) != 777:
-        logging.info('Permission error found, fixing...')
+        logging.warning('Permission error found, fixing...')
         os.chmod(src, stat.S_IRWXU)
 
         result = 0
@@ -163,3 +117,31 @@ def permissionCheck(src: str) -> int:
         result = 1
     
     return result
+
+@Slot(str)
+def startFile(path: str) -> None:
+    '''A cross-platform version of `os.startfile()`'''
+
+    logging.info('Starting program "%s"', path)
+
+    try:
+        if not os.path.isabs(path):
+            raise Exception(
+                qapp.translate("ErrorChecking", 'Please use a full path to the program you are starting.')
+            )
+
+        if sys.platform.startswith('win'):
+            os.startfile(path)
+        else:
+            cmd = 'open' if sys.platform == 'darwin' else 'xdg-open'
+            returnCode = subprocess.run([cmd, path], shell=True)
+            returnCode.check_returncode()
+
+    except Exception as e:
+        logging.error('Error in errorChecking.startFile(%s): %s', path, str(e))
+
+        notice = Notice(
+            qapp.translate("ErrorChecking", 'Error in') + f' errorChecking.startFile({path}): {e}',
+            qapp.translate("ErrorChecking", 'Could not start program')
+        )
+        notice.exec()

@@ -16,3 +16,4 @@ echo Running Pyinstaller
 pyinstaller --clean %Spec% --distpath ./%disFolder%
 
 echo Installation Finished!
+pause

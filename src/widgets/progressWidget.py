@@ -1,108 +1,126 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
 import logging
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import QThread, QCoreApplication as qapp, Slot
 
-from fileMover import FileMover
-from widgets.announcementQDialog import Notice
-from constant_vars import ICON
+from src.widgets.QDialog.QDialog import Dialog
+from src.threaded.workerQObject import Worker
+if TYPE_CHECKING:
+    from src.threaded.workerQObject import Worker
 
-class StartFileMover(qtw.QDialog):
+class ProgressWidget(Dialog):
     '''
-    This is a QDialog object to show the progress of functions in FileMover()
-
-    The parameters in this class are used to pass onto FileMover()
-
-    Possible parameters for mode:
-    
-    + 0 : moveToDisabledDir(*mods: str)
-    + 1 : moveToEnableModDir(*mods: str)
-    + 2 : changeModType(*mods: Tuple[QUrl, str])
-    + 3 : unZipMod(*mods: Tuple[QUrl, str])
-    + 4 : deleteMod(*modName: str)
-    + 5 : backupMods()
+    QDialog object to show the progress of threaded functions
     '''
 
-    def __init__(self, mode: int, *args) -> None:
+    def __init__(self, mode: Worker) -> None:
         super().__init__()
+        logging.getLogger(__name__)
 
-        self.setWindowFlag(qt.WindowType.WindowStaysOnTopHint, True)
-        self.setWindowIcon(qtg.QIcon(ICON))
+        self.setWindowTitle(qapp.translate('ProgressWidget', 'Myth Mod Manager Task'))
 
         self.mode = mode
 
-        logging.getLogger(__name__)
-
-        self.setWindowTitle('Myth Mod Manager Task')
-
-        self.fileMover = FileMover(mode, *args)
-        self.fileMover.error.connect(lambda x: self.errorRaised(x))
-
         layout = qtw.QVBoxLayout()
 
-        self.warningLabel = qtw.QLabel(self)
+        # Label
+        self.infoLabel = qtw.QLabel(self)
 
+        # Progress bar
         self.progressBar = qtw.QProgressBar()
-        self.fileMover.setTotalProgress.connect(lambda x: self.progressBar.setMaximum(x))
-        self.fileMover.setCurrentProgress.connect(lambda x, y: self.updateProgressBar(x, y))
-        self.fileMover.addTotalProgress.connect(lambda x: self.progressBar.setMaximum(self.progressBar.maximum() + x))
 
-        self.fileMover.succeeded.connect(lambda: self.succeeded())
-
-        buttons = qtw.QDialogButtonBox.Cancel
+        # Button
+        buttons = qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(buttons)
-        self.buttonBox.rejected.connect(lambda: self.cancel())
+        self.buttonBox.rejected.connect(self.cancel)
 
-        for widget in (self.warningLabel, self.progressBar, self.buttonBox):
+        for widget in (self.infoLabel, self.progressBar, self.buttonBox):
             layout.addWidget(widget)
         
         self.setLayout(layout)
+
+        self.__initMode()
+    
+    def __initMode(self) -> None:
+        # Create QThread
+        self.qthread = QThread()
+        self.qthread.started.connect(self.mode.start)
+
+        # Move task to QThread
+        self.mode.moveToThread(self.qthread)
+
+        # Connect signals
+        self.mode.setTotalProgress.connect(lambda x: self.progressBar.setMaximum(x))
+        self.mode.setCurrentProgress.connect(lambda x, y: self.updateProgressBar(x, y))
+        self.mode.addTotalProgress.connect(lambda x: self.progressBar.setMaximum(self.progressBar.maximum() + x))
+        self.mode.doneCanceling.connect(self.reject)
+        self.mode.error.connect(lambda x: self.errorRaised(x))
+        self.mode.succeeded.connect(self.succeeded)
     
     def exec(self) -> int:
 
-        self.fileMover.start()
+        self.qthread.start()
         return super().exec()
-    
-    def errorRaised(self, message: str):
-        error = Notice(message, headline='Error')
-        error.exec()
 
-        self.cancel()
-        self.close()
+    @Slot(str)
+    def errorRaised(self, message: str) -> None:
+        logging.error(message)
 
-    def succeeded(self):
+        self.infoLabel.setText(
+            f'{message}\n'+
+            qapp.translate('ProgressWidget', 'Exit to continue')
+        )
+        self.qthread.exit(1)
+
+    @Slot()
+    def succeeded(self) -> None:
         self.progressBar.setValue(self.progressBar.maximum())
-        self.warningLabel.setText('Done!')
+        self.infoLabel.setText(qapp.translate('ProgressWidget', 'Done!'))
 
-        self.fileMover.terminate()
-        self.fileMover.deleteLater()
+        self.qthread.exit(0)
 
         self.accept()
     
     def closeEvent(self, arg__1: qtg.QCloseEvent) -> None:
 
-        if self.fileMover.isRunning():
+        if self.qthread.isRunning():
             self.cancel()
         else:
+            self.mode.deleteLater()
+            self.qthread.deleteLater()
             return super().closeEvent(arg__1)
     
-    def cancel(self):
+    @Slot()
+    def cancel(self) -> None:
         '''
         Sets the cancel flag to true in which FileMover() will exit the function
         after it's done a step and pass the success signal
         '''
 
-        logging.info('Task %s was canceled...', self.mode)
-        self.warningLabel.setText('Canceling... (Finishing current step)')
+        isModeCanceled = self.mode.cancel
 
-        self.fileMover.cancel = True
+        if isModeCanceled:
+            self.qthread.exit(2)
+            self.reject()
+
+        logging.info('Task %s was canceled', str(self.mode))
+        self.infoLabel.setText(qapp.translate('ProgressWidget', 'Canceled, exit to continue'))
+
+        self.mode.cancel = True
     
-    def updateProgressBar(self, x, y):
+    @Slot(int, str)
+    def updateProgressBar(self, x: int, y: str) -> None:
+        '''
+        Adds progress to the current progress
+        bar value and changes the text of the label
+        '''
 
         newValue = x + self.progressBar.value()
 
-        self.warningLabel.setText(y)
+        self.infoLabel.setText(y)
         self.progressBar.setValue(newValue)

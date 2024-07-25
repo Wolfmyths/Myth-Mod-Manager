@@ -1,37 +1,37 @@
-
 import os
 import subprocess
 import logging
+import sys
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
+import PySide6.QtGui as qtg
 
-from widgets.tableWidget import ModListWidget
-from widgets.announcementQDialog import Notice
-from save import Save, OptionsManager
-import errorChecking
-from constant_vars import TYPE_MODS, TYPE_MODS_OVERRIDE, OPTIONS_GAMEPATH, START_PAYDAY_PATH, MOD_TABLE_OBJECT, TYPE_MAPS
+from src.widgets.managerQTableWidget import ModListWidget
+from src.widgets.QDialog.announcementQDialog import Notice
+from src.save import Save, OptionsManager
+import src.errorChecking as errorChecking
+from src.constant_vars import ModType, MOD_CONFIG, OPTIONS_CONFIG
 
 class ModManager(qtw.QWidget):
 
-    def __init__(self) -> None:
+    def __init__(self, saveManagerPath = MOD_CONFIG, optionsManagerPath = OPTIONS_CONFIG) -> None:
         super().__init__()
 
-        self.saveManager = Save()
-        self.optionsManager = OptionsManager()
+        self.setObjectName('manager')
+
+        self.saveManager = Save(saveManagerPath)
+        self.optionsManager = OptionsManager(optionsManagerPath)
 
         layout = qtw.QVBoxLayout()
 
         self.setAcceptDrops(True)
 
-        self.refresh = qtw.QPushButton('Refresh Mods', self)
-        self.refresh.clicked.connect(lambda: self.modsTable.refreshMods())
+        self.refresh = qtw.QPushButton(self)
 
-        self.openGameDir = qtw.QPushButton('Open Game Directory', self)
-        self.openGameDir.clicked.connect(lambda: os.startfile(self.optionsManager.getOption(OPTIONS_GAMEPATH)))
+        self.openGameDir = qtw.QPushButton(self)
 
-        self.startGame = qtw.QPushButton('Start PAYDAY 2', self)
-        self.startGame.clicked.connect(lambda: self.startPayday())
+        self.startGame = qtw.QPushButton(self)
 
         modLabelLayout = qtw.QHBoxLayout()
         modLabelLayout.setSpacing(100)
@@ -53,47 +53,85 @@ class ModManager(qtw.QWidget):
         self.labelFrame.setLayout(modLabelLayout)
 
         self.search = qtw.QLineEdit()
-        self.search.setPlaceholderText('Search...')
-        self.search.textChanged.connect(lambda x: self.modsTable.search(x))
 
-        self.modsTable = ModListWidget()
-        self.modsTable.itemChanged.connect(lambda: self.updateModCount())
-        
-        self.modsTable.setObjectName(MOD_TABLE_OBJECT)
+        self.modsTable = ModListWidget(saveManagerPath, optionsManagerPath)
 
         self.modsTable.refreshMods()
 
         for widget in (self.refresh, self.openGameDir, self.startGame, self.labelFrame, self.search, self.modsTable):
             layout.addWidget(widget)
+        
+        self.applyStaticText()
+        self.updateModCount()
+
+        self.refresh.clicked.connect(lambda: self.modsTable.refreshMods(True))
+        self.openGameDir.clicked.connect(lambda: errorChecking.startFile(self.optionsManager.getGamepath()))
+        self.startGame.clicked.connect(self.startPayday)
+        self.search.textChanged.connect(lambda x: self.modsTable.search(x))
+        self.modsTable.itemChanged.connect(self.updateModCount)
+
+        # Shortcuts
+        self.selectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+A"), self)
+        self.selectAllShortCut.activated.connect(self.modsTable.selectAll)
+
+        self.deselectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+D"), self)
+        self.deselectAllShortCut.activated.connect(self.deselectAllShortcut)
 
         self.setLayout(layout)
     
-    def updateModCount(self):
+    def applyStaticText(self) -> None:
+        self.refresh.setText(qapp.translate("ModManager", "Refresh Mods"))
+        self.openGameDir.setText(qapp.translate("ModManager", 'Open Game Directory'))
+        self.startGame.setText(qapp.translate("ModManager", 'Start PAYDAY 2'))
+        self.search.setPlaceholderText(qapp.translate("ModManager", 'Search... use "tag:" with no spaces to search for tags, use a comma "," to seperate tags'))
+    
+    @Slot()
+    def updateModCount(self) -> None:
 
-        self.totalModsLabel.setText(f'Total Mods: {self.modsTable.rowCount()}')
+        self.totalModsLabel.setText(qapp.translate("ModManager", 'Total Mods') + f': {self.modsTable.rowCount()}')
 
-        self.modsLabel.setText(f'Mods: {self.modsTable.getModTypeCount(TYPE_MODS)}')
+        self.modsLabel.setText(f'Mods: {self.modsTable.getModTypeCount(ModType.mods)}')
 
-        self.overrideLabel.setText(f'Mod_Overrides: {self.modsTable.getModTypeCount(TYPE_MODS_OVERRIDE)}')
+        self.overrideLabel.setText(f'Mod_Overrides: {self.modsTable.getModTypeCount(ModType.mods_override)}')
 
-        self.mapsLabel.setText(f'Maps: {self.modsTable.getModTypeCount(TYPE_MAPS)}')
+        self.mapsLabel.setText(f'Maps: {self.modsTable.getModTypeCount(ModType.maps)}')
 
-    def startPayday(self):
+    @Slot()
+    def startPayday(self) -> None:
 
-        if errorChecking.validGamePath():
+        gamePath: str = self.optionsManager.getGamepath()
 
-            gamePath = self.optionsManager.getOption(OPTIONS_GAMEPATH)
+        try:
+            if not os.path.isabs(gamePath):
+                raise Exception(qapp.translate("ModManager", 'Path is not absolute'))
 
-            drive = gamePath[0].lower()
+            if sys.platform.startswith('win'):
 
-            # Starts START_PAYDAY.bat
-            # First argument is to change the directory to the game's directory
-            # Second argument the drive for the cd command
-            # Third argument is the exe name
-            subprocess.call([START_PAYDAY_PATH, gamePath, drive, 'payday2_win32_release.exe'])
-        else:
-            
-            logging.error('Could not start PAYDAY 2, could not find payday2_win32_release.exe in:\n%s', gamePath)
+                gameExe = 'payday2_win32_release.exe'
 
-            notice = Notice(f'Could not find payday2_win32_release.exe in:\n{gamePath}', 'Error: Invalid Gamepath')
+                # TODO: Permission error is raised without shell=True, can this be avoided?
+                cmd = subprocess.run([gamePath[0:2].upper(), '&&', 'cd', gamePath, '&&', gameExe], shell=True)
+                cmd.check_returncode()
+            else:
+                gameExe = 'payday2_release'
+                errorChecking.startFile(os.path.join(gamePath, gameExe))
+
+        except Exception as e:
+            logging.error('An error occured trying to start PAYDAY 2:\n%s', str(e))
+
+            notice = Notice(
+                qapp.translate("ModManager", 'An error occured trying to start PAYDAY 2') + f':\n{e}',
+                qapp.translate("ModManager", 'Could not start PAYDAY 2 from MMM'))
             notice.exec()
+
+    @Slot()
+    def deselectAllShortcut(self) -> None:
+        selectedItems = self.modsTable.selectedItems()
+        if selectedItems:
+            for item in selectedItems:
+                item.setSelected(False)
+
+    def keyPressEvent(self, event: qtg.QKeyEvent) -> None:
+        if event.key() == qt.Key.Key_Delete and self.modsTable.selectedItems():
+            self.modsTable.deleteItem()
+        return super().keyPressEvent(event)

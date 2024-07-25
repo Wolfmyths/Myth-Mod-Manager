@@ -32,9 +32,15 @@ MANIFEST
 *.manifest
 *.exe
 
-# Save files
+# Save files `mods.ini` is an older version of how mod data was stored
 config.ini
 mods.ini
+mods.json
+profiles.json
+externalshortcuts.json
+
+# Pyinstaller Output Directory
+Myth Mod Manager/
 
 # Disabled Mods Directory
 disabled-mods/

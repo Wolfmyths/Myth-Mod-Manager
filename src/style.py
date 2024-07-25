@@ -1,7 +1,6 @@
-
 import logging
 
-from constant_vars import LIGHT, DARK
+from src.constant_vars import LIGHT, DARK
 
 class StyleManager():
 
@@ -18,9 +17,30 @@ class StyleManager():
                 font-family: Bahnschrift;
             }}
 
+            QMenu {{
+                background-color: {1};
+            }}
+
+            QMenu::item {{
+                padding: 5px 25px 5px 20px;
+                border: 1px solid transparent;
+            }}
+
             QMenu::item:selected {{
                 background: {2};
                 color: {1};
+            }}
+
+            QMenu::item:disabled {{
+                background: {1};
+                color: {0};
+            }}
+
+            QMenu::separator {{
+                height: 2px;
+                background: {2};
+                margin-left: 5px;
+                margin-right: 5px;
             }}
 
             QLineEdit {{
@@ -39,6 +59,11 @@ class StyleManager():
             QPushButton:pressed, QPushButton::checked {{
                 border-color: {1};
                 background: {2};
+                color: {1};
+            }}
+
+            QPushButton::disabled {{
+                background: {0};
                 color: {1};
             }}
 
@@ -71,6 +96,40 @@ class StyleManager():
 
             QTabWidget::pane {{
                 border-top: 3px solid {2};
+            }}
+
+            QTreeView {{
+                alternate-background-color: {2};
+                border: none;
+            }}
+
+            QTreeView::item {{
+                border: none;
+                padding: 5px;
+            }}
+
+            QTreeView::item:selected {{
+                background: {2};
+            }}
+
+            QListView {{
+                selection-background-color: {2};
+                background-color: {1};
+                border-color: {0};
+                border-width: 2px;
+            }}
+
+            QListView::item {{
+                border-color: {1};
+                padding: 5px;
+            }}
+
+            QListView::item:selected {{
+                background: {2};
+            }}
+
+            QAbstractItemView {{
+                outline: 0;
             }}
 
             QScrollArea {{
@@ -142,7 +201,28 @@ class StyleManager():
             }}
 
             QGroupBox {{
-                border: 15px solid {0};
+                background-color: none;
+
+                border: 2px solid {1};
+                border-radius: 0px;
+                margin-top: 1ex;
+            }}
+
+            QGroupBox::title {{
+                subcontrol-origin: margin;
+                padding: 0 3px;
+            }}
+
+            QFrame#externaltool {{
+                background-color: {2};
+                border: 2px solid {3};
+                border-radius: 4px;
+                padding: 2px;
+            }}
+
+            QFrame#optionsframe {{
+                background-color: {2};
+                border: none;
             }}
             '''
 

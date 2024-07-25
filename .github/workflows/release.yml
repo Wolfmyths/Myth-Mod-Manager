@@ -14,21 +14,10 @@ jobs:
 
     steps:
         - name: Checkout code
-          uses: actions/checkout@v3
-        
-        - name: Clone Pyinstaller Repo
-          run: |
-            gh repo clone pyinstaller/pyinstaller
-            dir ./
-        
-        - name: Setup MinGW-64x
-          uses: egor-tensin/setup-mingw@v2
-        
-        - name: Compile Pyinstaller
-          run: python ./waf --gcc all
-
+          uses: actions/checkout@v4
+         
         - name: Set up Python
-          uses: actions/setup-python@v3
+          uses: actions/setup-python@v5
           with:
             python-version: 3.11
 
@@ -45,7 +34,7 @@ jobs:
           run: tar -a -c -f Myth-Mod-Manager.zip "Myth Mod Manager/Myth Mod Manager.exe"
 
         - name: Upload Myth Mod Manager to Latest Release Assets
-          uses: softprops/action-gh-release@v1
+          uses: softprops/action-gh-release@v2
           if: startsWith(github.ref, 'refs/tags/')
           with:
             files: Myth-Mod-Manager.zip

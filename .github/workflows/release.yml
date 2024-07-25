@@ -25,10 +25,7 @@ jobs:
           run: pip install -r requirements.txt
         
         - name: Update Translation Binaries
-          run: .\utils\update_qm_files.py
-        
-        - name: Build with PyInstaller
-          run: pyinstaller --clean main.spec --distpath "./Myth Mod Manager"
-        
-        - name: Zip Myth Mod Manager
-          run: tar -a -c -f Myth-Mod-Manager.zip "Myth Mod Manager/Myth Mod Manager.exe"
+          run: |
+            dir .\src\lang
+            .\utils\update_qm_files.py
+            dir .\src\lang

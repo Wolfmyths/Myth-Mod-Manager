@@ -8,6 +8,8 @@ def update_qm_files() -> None:
     files = glob.glob(os.path.join('.', 'translations', '*.ts'))
     trans_bi_dir = os.path.join('.', 'src', 'lang')
 
+    print(os.listdir(trans_bi_dir))
+
     for file_name in files:
         print('Converting ' + file_name)
         file_name_bi = file_name[:-2] + 'qm'

@@ -3,7 +3,7 @@ import logging
 import sys
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QCoreApplication as qapp, Signal, Qt, QTranslator
+from PySide6.QtCore import QCoreApplication as qapp, Signal, Qt, QTranslator, Slot
 
 from src.widgets.progressWidget import ProgressWidget
 from src.threaded.backupMods import BackupMods
@@ -19,7 +19,7 @@ from src.api.checkUpdate import checkUpdate
 
 from src import errorChecking
 
-language_string_to_code: dict = {
+language_string_to_code: dict[str:str] = {
     'Deutsch'            : 'de_DE',
     'English'            : 'en_US',
     'Español (españa)'   : 'es_ES',
@@ -138,6 +138,7 @@ class Options(qtw.QWidget):
         self.sectionsList.item(2).setText(qapp.translate('Options', 'Shortcuts'))
         self.sectionsList.item(3).setText(qapp.translate('Options', 'Misc'))
 
+    @Slot(str, bool)
     def settingsChanged(self, key: OptionKeys, value: bool) -> None:
         self.optionChanged[key] = value
 
@@ -154,6 +155,7 @@ class Options(qtw.QWidget):
         for k in list(self.optionChanged.keys()):
             self.optionChanged[k] = False
 
+    @Slot()
     def applySettings(self) -> None:
         if self.optionChanged.get(OptionKeys.game_path):
             self.optionsManager.setGamepath(self.optionsGeneral.gameDir.text())
@@ -195,6 +197,8 @@ class Options(qtw.QWidget):
 
         self.optionsManager.writeData()
 
+    @Slot()
+    @Slot(bool)
     def cancelChanges(self, reset: bool = False) -> None:
         '''
         Resets any pending changes if that option has a pending change.
@@ -340,27 +344,33 @@ class OptionsGeneral(OptionsSectionBase):
         self.updateAlertCheckbox.setText(qapp.translate("OptionsGeneral", 'Update alerts on startup'))
         self.checkUpdateButton.setText(qapp.translate("OptionsGeneral", "Check for updates"))
 
+    @Slot(str)
     def gamePathChanged(self, path: str) -> None:
         changed = True if path != self.optionsManager.getGamepath() else False
         self.pendingChanges.emit(OptionKeys.game_path, changed)
     
+    @Slot(str)
     def disPathChanged(self, path: str) -> None:
         changed = True if path != self.optionsManager.getDispath() else False
         self.pendingChanges.emit(OptionKeys.dispath, changed)
     
+    @Slot(str)
     def langChanged(self, lang: str) -> None:
         changed = True if lang != self.optionsManager.getLang() else False
         self.pendingChanges.emit(OptionKeys.lang, changed)
     
+    @Slot(str)
     def themeChanged(self, theme: str) -> None:
         changed = True if theme != self.optionsManager.getTheme() else False
         self.pendingChanges.emit(OptionKeys.color_theme, changed)
     
+    @Slot()
     def setUpdateAlert(self) -> None:
         changed = True if self.updateAlertCheckbox.isChecked() != self.optionsManager.getMMMUpdateAlert() else False
         self.pendingChanges.emit(OptionKeys.mmm_update_alert, changed)
     
     def checkUpdate(self) -> None:
+        @Slot(str, str)
         def updateFound(latestVersion: str, changelog: str) -> None:
             notice = updateDetected(latestVersion, changelog)
             notice.rejected.connect(lambda: self.checkUpdateButton.setText(qapp.translate("OptionsGeneral", 'Check for updates')))
@@ -394,6 +404,7 @@ class OptionsIgnoredMods(OptionsSectionBase):
         
         self.setLayout(layout)
     
+    @Slot()
     def updateModIgnoreLabel(self) -> None:
         self.ignoredModsLabel.setText(qapp.translate("OptionsIgnoredMods", 'Hidden Mods:') + f' {self.ignoredModsListWidget.count()}')
 
@@ -474,11 +485,13 @@ class OptionsMisc(OptionsSectionBase):
         self.modLog.setText(qapp.translate("OptionsMisc", "Open Mod Crash Logs..."))
         self.modLog.setToolTip(qapp.translate("OptionsMisc", "Opens the crash log directory that BLT uses"))
     
+    @Slot()
     def openCrashLogBLT(self) -> None:
         modPath = Pathing().mods()
 
         errorChecking.startFile(os.path.join(modPath, 'logs'))
     
+    @Slot()
     def openCrashLogs(self) -> None:
 
         if sys.platform.startswith('win'):
@@ -490,6 +503,7 @@ class OptionsMisc(OptionsSectionBase):
             )
             notice.exec()
     
+    @Slot()
     def startBackupMods(self) -> None:
         
         startFileMover = ProgressWidget(BackupMods())

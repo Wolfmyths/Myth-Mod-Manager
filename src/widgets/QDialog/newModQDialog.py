@@ -1,7 +1,7 @@
 import os
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
 
 from src.widgets.QDialog.QDialog import Dialog
 
@@ -87,6 +87,7 @@ class newModLocation(Dialog):
     def changeOkButtonState(self, bool: bool) -> None:
         self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok).setEnabled(bool)
     
+    @Slot()
     def isAllChecked(self) -> None:
 
         groups: list[qtw.QGroupBox] = self.findChildren(qtw.QGroupBox)
@@ -128,10 +129,12 @@ class newModLocation(Dialog):
 
             count += 1
 
+    @Slot()
     def accept(self) -> None:
         self.getData()
         return super().accept()
     
+    @Slot()
     def reject(self) -> None:
         self.setResult(0)
         return super().reject()

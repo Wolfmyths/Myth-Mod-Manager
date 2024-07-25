@@ -1,7 +1,7 @@
 import os
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
 
 from src.widgets.toolQWidget import ExternalToolDisplay
 
@@ -27,6 +27,7 @@ class ToolManager(qtw.QWidget):
     def applyStaticText(self) -> None:
         self.addToolButton.setText(qapp.translate("ToolManager", "Add Tool"))
 
+    @Slot()
     def createTools(self) -> None:
         dialog = qtw.QFileDialog()
         urls = dialog.getOpenFileUrl(self,

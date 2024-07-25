@@ -5,7 +5,7 @@ import logging
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QThread, QCoreApplication as qapp
+from PySide6.QtCore import QThread, QCoreApplication as qapp, Slot
 
 from src.widgets.QDialog.QDialog import Dialog
 from src.threaded.workerQObject import Worker
@@ -67,6 +67,7 @@ class ProgressWidget(Dialog):
         self.qthread.start()
         return super().exec()
 
+    @Slot(str)
     def errorRaised(self, message: str) -> None:
         logging.error(message)
 
@@ -76,6 +77,7 @@ class ProgressWidget(Dialog):
         )
         self.qthread.exit(1)
 
+    @Slot()
     def succeeded(self) -> None:
         self.progressBar.setValue(self.progressBar.maximum())
         self.infoLabel.setText(qapp.translate('ProgressWidget', 'Done!'))
@@ -93,6 +95,7 @@ class ProgressWidget(Dialog):
             self.qthread.deleteLater()
             return super().closeEvent(arg__1)
     
+    @Slot()
     def cancel(self) -> None:
         '''
         Sets the cancel flag to true in which FileMover() will exit the function
@@ -110,6 +113,7 @@ class ProgressWidget(Dialog):
 
         self.mode.cancel = True
     
+    @Slot(int, str)
     def updateProgressBar(self, x: int, y: str) -> None:
         '''
         Adds progress to the current progress

@@ -2,7 +2,7 @@ import os
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QCoreApplication as qapp, QEvent
+from PySide6.QtCore import QCoreApplication as qapp, QEvent, Slot
 
 from src.manager import ModManager
 from src.tools import ToolManager
@@ -68,6 +68,7 @@ class MainWindow(qtw.QMainWindow):
         tab.setTabText(3, qapp.translate('MainWindow', 'Options'))
         tab.setTabText(4, qapp.translate('MainWindow', 'About'))
 
+    @Slot(str, str)
     def updateDetected(self, latestVersion: str, changelog: str) -> None:
         notice = updateDetected(latestVersion, changelog)
         notice.exec()
@@ -76,14 +77,7 @@ class MainWindow(qtw.QMainWindow):
             errorChecking.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
             qapp.quit()
 
-    def closeEvent(self, event: qtg.QCloseEvent) -> None:
-        self.optionsManager.setWindowSize(self.size())
-        self.optionsManager.writeData()
-
-        if isinstance(self.app, qtw.QApplication):
-            self.app.closeAllWindows()
-        return super().closeEvent(event)
-
+    @Slot()
     def languageChange(self) -> None:
         self.applyStaticText()
 
@@ -112,6 +106,14 @@ class MainWindow(qtw.QMainWindow):
         self.options.optionsGeneral.applyStaticText()
         self.options.shortcuts.applyStaticText()
         self.options.optionsMisc.applyStaticText()
+
+    def closeEvent(self, event: qtg.QCloseEvent) -> None:
+        self.optionsManager.setWindowSize(self.size())
+        self.optionsManager.writeData()
+
+        if isinstance(self.app, qtw.QApplication):
+            self.app.closeAllWindows()
+        return super().closeEvent(event)
 
     def event(self, event: QEvent) -> None:
         if event.type() == QEvent.Type.LanguageChange:

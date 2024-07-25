@@ -1,7 +1,7 @@
 import logging
 import os
 
-from PySide6.QtCore import QCoreApplication as qapp
+from PySide6.QtCore import QCoreApplication as qapp, Slot
 
 from src.threaded.workerQObject import Worker
 
@@ -14,6 +14,7 @@ class MoveToEnabledModDir(Worker):
 
         self.mods = mods
 
+    @Slot()
     def start(self) -> None:
         '''Returns a mod to their respective directory'''
 

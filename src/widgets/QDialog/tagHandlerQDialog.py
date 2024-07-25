@@ -1,5 +1,5 @@
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
 
 from src.widgets.QDialog.QDialog import Dialog
 
@@ -44,11 +44,10 @@ class TagHandler(Dialog):
     def addMode(self) -> None:
         self.setWindowTitle(qapp.translate('TagHandler', 'Add tag to mod'))
 
-
     def removeMode(self) -> None:
         self.setWindowTitle(qapp.translate('TagHandler', 'Remove tag from mod'))
 
-    
+    @Slot()
     def lineEditTextChanged(self) -> None:
         okButton = self.buttonBox.buttons()[0]
 

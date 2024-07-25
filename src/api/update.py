@@ -5,7 +5,7 @@ import json
 import sys
 
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
-from PySide6.QtCore import QObject, QUrl, Signal
+from PySide6.QtCore import QObject, QUrl, Signal, Slot
 
 from src.constant_vars import ROOT_PATH, OLD_EXE
 
@@ -56,7 +56,7 @@ class Update(QObject):
 
         reply.finished.connect(self.__handle_assetURL_fetch)
 
-    
+    @Slot()
     def __handle_assetURL_fetch(self) -> None:
 
         self.__replyErrorCheck()
@@ -78,6 +78,7 @@ class Update(QObject):
         assetReply = self.network.get(QNetworkRequest(QUrl(assetUrl)))
         assetReply.finished.connect(self.__download_assets)
     
+    @Slot()
     def __download_assets(self) -> None:
 
         self.__replyErrorCheck()
@@ -112,6 +113,7 @@ class Update(QObject):
             updateReply.downloadProgress.connect(lambda x, y: self.downloading.emit(x, y))
             updateReply.finished.connect(self.__install_update)
     
+    @Slot()
     def __install_update(self) -> None:
 
         self.__replyErrorCheck()
@@ -163,14 +165,16 @@ class Update(QObject):
 
         self.deleteLater()
     
-    def __cancelCheck(self):
+    @Slot()
+    def __cancelCheck(self) -> None:
 
         if self.cancel:
 
             self.doneCanceling.emit()
             self.deleteLater()
     
-    def __replyErrorCheck(self):
+    @Slot()
+    def __replyErrorCheck(self) -> None:
         reply: QNetworkReply = self.sender()
 
         if reply.error() != QNetworkReply.NetworkError.NoError:

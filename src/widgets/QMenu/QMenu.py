@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt
+from PySide6.QtCore import Qt as qt, Slot
 
 if TYPE_CHECKING:
     import PySide6.QtGui as qtg
@@ -19,6 +19,7 @@ class ModContextMenu(qtw.QMenu):
         '''For ignoring right click inputs when the menu is open'''
         return self.lastClicked == qt.MouseButton.LeftButton and self.lastReleased == qt.MouseButton.LeftButton
     
+    @Slot()
     def callFunc(self, func: Callable[[], None]) -> None:
         '''
         Calls a function that as long as the user

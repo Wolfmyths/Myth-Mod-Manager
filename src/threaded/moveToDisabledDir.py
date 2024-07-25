@@ -1,7 +1,7 @@
 import os
 import logging
 
-from PySide6.QtCore import QCoreApplication as qapp
+from PySide6.QtCore import QCoreApplication as qapp, Slot
 
 from src.threaded.workerQObject import Worker
 
@@ -13,6 +13,7 @@ class MoveToDisabledDir(Worker):
 
         self.mods = mods
 
+    @Slot()
     def start(self) -> None:
         '''Moves a mod to the disabled folder'''
 

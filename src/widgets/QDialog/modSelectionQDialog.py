@@ -1,5 +1,5 @@
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
 
 from src.widgets.QDialog.QDialog import Dialog
 
@@ -50,6 +50,7 @@ class SelectMod(Dialog):
         
         self.setLayout(layout)
     
+    @Slot(str)
     def search(self, input: str) -> None:
         searchedTags = None
 
@@ -79,6 +80,7 @@ class SelectMod(Dialog):
                 else:
                     self.modList.setRowHidden(i, True)
     
+    @Slot()
     def accept(self) -> None:
 
         self.setResult(1)
@@ -86,6 +88,7 @@ class SelectMod(Dialog):
         self.mods = [x.text() for x in self.modList.selectedItems()]
         return super().accept()
     
+    @Slot()
     def reject(self) -> None:
         self.setResult(0)
         return super().reject()

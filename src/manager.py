@@ -4,7 +4,7 @@ import logging
 import sys
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Property
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
 import PySide6.QtGui as qtg
 
 from src.widgets.managerQTableWidget import ModListWidget
@@ -19,11 +19,6 @@ class ModManager(qtw.QWidget):
         super().__init__()
 
         self.setObjectName('manager')
-        self.selectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+A"), self)
-        self.selectAllShortCut.activated.connect(lambda: self.modsTable.selectAll())
-
-        self.deselectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+D"), self)
-        self.deselectAllShortCut.activated.connect(self.deselectAllShortcut)
 
         self.saveManager = Save(saveManagerPath)
         self.optionsManager = OptionsManager(optionsManagerPath)
@@ -33,13 +28,10 @@ class ModManager(qtw.QWidget):
         self.setAcceptDrops(True)
 
         self.refresh = qtw.QPushButton(self)
-        self.refresh.clicked.connect(lambda: self.modsTable.refreshMods())
 
         self.openGameDir = qtw.QPushButton(self)
-        self.openGameDir.clicked.connect(lambda: errorChecking.startFile(self.optionsManager.getGamepath()))
 
         self.startGame = qtw.QPushButton(self)
-        self.startGame.clicked.connect(self.startPayday)
 
         modLabelLayout = qtw.QHBoxLayout()
         modLabelLayout.setSpacing(100)
@@ -61,10 +53,8 @@ class ModManager(qtw.QWidget):
         self.labelFrame.setLayout(modLabelLayout)
 
         self.search = qtw.QLineEdit()
-        self.search.textChanged.connect(lambda x: self.modsTable.search(x))
 
         self.modsTable = ModListWidget(saveManagerPath, optionsManagerPath)
-        self.modsTable.itemChanged.connect(self.updateModCount)
 
         self.modsTable.refreshMods()
 
@@ -74,6 +64,19 @@ class ModManager(qtw.QWidget):
         self.applyStaticText()
         self.updateModCount()
 
+        self.refresh.clicked.connect(lambda: self.modsTable.refreshMods(True))
+        self.openGameDir.clicked.connect(lambda: errorChecking.startFile(self.optionsManager.getGamepath()))
+        self.startGame.clicked.connect(self.startPayday)
+        self.search.textChanged.connect(lambda x: self.modsTable.search(x))
+        self.modsTable.itemChanged.connect(self.updateModCount)
+
+        # Shortcuts
+        self.selectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+A"), self)
+        self.selectAllShortCut.activated.connect(self.modsTable.selectAll)
+
+        self.deselectAllShortCut = qtg.QShortcut(qtg.QKeySequence("Ctrl+D"), self)
+        self.deselectAllShortCut.activated.connect(self.deselectAllShortcut)
+
         self.setLayout(layout)
     
     def applyStaticText(self) -> None:
@@ -82,6 +85,7 @@ class ModManager(qtw.QWidget):
         self.startGame.setText(qapp.translate("ModManager", 'Start PAYDAY 2'))
         self.search.setPlaceholderText(qapp.translate("ModManager", 'Search... use "tag:" with no spaces to search for tags, use a comma "," to seperate tags'))
     
+    @Slot()
     def updateModCount(self) -> None:
 
         self.totalModsLabel.setText(qapp.translate("ModManager", 'Total Mods') + f': {self.modsTable.rowCount()}')
@@ -92,6 +96,7 @@ class ModManager(qtw.QWidget):
 
         self.mapsLabel.setText(f'Maps: {self.modsTable.getModTypeCount(ModType.maps)}')
 
+    @Slot()
     def startPayday(self) -> None:
 
         gamePath: str = self.optionsManager.getGamepath()
@@ -119,6 +124,7 @@ class ModManager(qtw.QWidget):
                 qapp.translate("ModManager", 'Could not start PAYDAY 2 from MMM'))
             notice.exec()
 
+    @Slot()
     def deselectAllShortcut(self) -> None:
         selectedItems = self.modsTable.selectedItems()
         if selectedItems:

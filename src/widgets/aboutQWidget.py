@@ -2,7 +2,7 @@ import os
 import logging
 
 import PySide6.QtGui as qtg
-from PySide6.QtCore import Qt as qt, QSize, QCoreApplication as qapp
+from PySide6.QtCore import Qt as qt, QSize, QCoreApplication as qapp, Slot
 import PySide6.QtWidgets as qtw
 
 from src.save import OptionsManager
@@ -67,6 +67,7 @@ class About(qtw.QWidget):
             qapp.translate('About', 'Suggestions are greatly appreciated on modworkshop.net and github.')
         ]))
     
+    @Slot(str)
     def updateIcons(self, mode: str) -> None:
 
         themeIsLight: bool = mode == LIGHT

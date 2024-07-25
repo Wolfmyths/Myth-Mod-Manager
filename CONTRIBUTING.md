@@ -51,8 +51,8 @@ Here is what a translation entry looks like:
 </context>
 ```
 
-The only thing you have to edit is the text in between the <translation> container.
-The text in between the <source> container is the original text from the code.
+The only thing you have to edit is the text in between the `<translation>` container.
+The text in between the `<source>` container is the original text from the code.
 
 If you are going to improve English text go to the next section.
 
@@ -65,7 +65,7 @@ The number one rule is to NOT HAVE ANY LINE BREAKS OR ESCAPE CHARACTERS in the s
 To fix a typo in the program, you have to unfortunately find it in the source code which is located in `./src`.
 If you aren't familiar with programming or python, create an issue and someone or me (wolfmyths) will fix it.
 
-When you see text that is to be translated, it will look like this:
+When you see text that is to be translated, it will look like this in the code:
 ```py
 qapp.translate('Options', 'General')
 ```
@@ -83,14 +83,14 @@ To create a new language you can copy and paste `en_US.ts` and then rename the f
 
 The naming convention of .ts files are [ISO 649 set 1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) language codes and [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) territory codes seperated by an underscore. The wiki has all the language/territory codes documented.
 
-Open the file and go to line 3, you will see a attribute to the <TS> container tag called `language`. Replace `en_US` with the file name of your language/territory of choice. 
+Open the file and go to line 3, you will see a attribute to the `<TS>` container tag called `language`. Replace `en_US` with the file name of your language/territory of choice. 
 
 The rest of the process requires a little bit of manual work.
 However, there are external python scripts that have been created to help with the process.
 
 In the utils folder of this repo, there is a file called `scrape_translations_needed.py`.
 The script looks through a .ts file, checks for missing translations, and then outputs the English text of the missing translations line-by-line in a .txt.
-It also updates all .ts files' <source> container tags.
+It also updates all .ts files' `<source>` container tags.
 
 To use the script, make sure you have python and the packages in `requirements.txt` installed.
 Open up your command prompt and follow these steps:

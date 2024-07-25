@@ -73,7 +73,9 @@ qapp.translate('Options', 'General')
 The first argument is context for .ts files, the second is the actual text itself
 
 After you have fixed the typo, update the .ts files by opening your terminal and inputting this command:
-`util/scrape_translations_needed.py -u`
+```shell
+util/scrape_translations_needed.py -u
+```
 
 Make sure you changed directory to the repo otherwise it probably won't work!
 
@@ -93,9 +95,10 @@ The script looks through a .ts file, checks for missing translations, and then o
 It also updates all .ts files' `<source>` container tags.
 
 To use the script, make sure you have python and the packages in `requirements.txt` installed.
-Open up your command prompt and follow these steps:
-1. Change directory to the repo
-2. Use the command `util/scrape_translations_needed.py -e -u`
+Open up your command prompt, change your directory to the repo and use this command:
+```shell
+util/scrape_translations_needed.py -e -u
+```
 
 The -e flag is if you want to export the missing translations.
 The -u flag is if you want to update the .ts files' source language.
@@ -112,15 +115,22 @@ There are a couple things to consider before translating:
 + Do not use line breaks in translation entries
 
 After you have translated your script you can now go back to your terminal and type the following command:
-`util/update_ts_files path_to_ts_file path_to_translation_file`
+```shell
+util/update_ts_files path_to_ts_file path_to_translation_file
+```
 
 The script will update the specified ts file and replace the missing translations with the ones in the translation file and you have your translation!
+
 However the computer won't be able to use this file unless we convert it into a .qm file, which is fairly simple.
 
-Enter this command: `pyside6-lrelease path_to_ts_file -qm ./src/lang/ts_file_name.qm`
+Enter this command:
+```shell
+pyside6-lrelease path_to_ts_file -qm ./src/lang/ts_file_name.qm
+```
 
 All that's left is to add it into the source code, which is located in `src/settings.py`.
 On the top of the script you should see a variable named `language_string_to_code`.
+
 Add a new entry to the variable and follow the example of the other entries.
 Make sure the key value (the one of the left) is translated.
 

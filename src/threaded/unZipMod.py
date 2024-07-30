@@ -3,7 +3,7 @@ import logging
 
 import patoolib
 
-from PySide6.QtCore import QCoreApplication as qapp
+from PySide6.QtCore import QCoreApplication as qapp, Slot
 
 from src.threaded.workerQObject import Worker
 from src.constant_vars import ModType
@@ -14,6 +14,7 @@ class UnZipMod(Worker):
 
         self.mods = mods
 
+    @Slot()
     def start(self) -> None:
         '''Extracts a mod and puts it into a destination based off the ModType Enum given'''
 

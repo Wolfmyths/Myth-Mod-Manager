@@ -2,7 +2,7 @@ import logging
 import shutil
 import os
 
-from PySide6.QtCore import Signal, QObject, QCoreApplication as qapp
+from PySide6.QtCore import Signal, QObject, QCoreApplication as qapp, Slot
 
 from src.save import Save, OptionsManager
 from src.getPath import Pathing

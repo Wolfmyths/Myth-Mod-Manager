@@ -24,21 +24,28 @@ def create_mod_dirs() -> Generator:
 
 @pytest.fixture(scope='module')
 def createTemp_Mod_ini() -> Generator:
-    data = {'super fun mod' : {ModKeys.type.value : ModType.maps.value,
-                               ModKeys.modworkshopid.value : '3453',
-                               ModKeys.enabled.value : True,
-                               ModKeys.ignored.value : False},
+    data = {
+        'super fun mod' : {
+            ModKeys.type.value : ModType.maps.value,
+            ModKeys.modworkshopid.value : '3453',
+            ModKeys.enabled.value : True,
+            ModKeys.ignored.value : False
+        },
 
-            'best mod ever' : {ModKeys.type.value : ModType.mods_override.value,
-                               ModKeys.modworkshopid.value : '',
-                               ModKeys.enabled.value : True,
-                               ModKeys.ignored.value : False},
+        'best mod ever' : {
+            ModKeys.type.value : ModType.mods_override.value,
+            ModKeys.modworkshopid.value : '',
+            ModKeys.enabled.value : True,
+            ModKeys.ignored.value : False
+        },
             
-            'make game easy mod' : {ModKeys.type.value : ModType.mods.value,
-                                ModKeys.modworkshopid.value : '2523',
-                                ModKeys.enabled.value : True,
-                                ModKeys.ignored.value : False}
-            }
+        'make game easy mod' : {
+            ModKeys.type.value : ModType.mods.value,
+            ModKeys.modworkshopid.value : '2523',
+            ModKeys.enabled.value : True,
+            ModKeys.ignored.value : False
+        }
+    }
 
     with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as tmp:
         tmp_name = tmp.name

@@ -1,7 +1,7 @@
 import json
 import logging
 
-from PySide6.QtCore import QObject, QUrl, Signal
+from PySide6.QtCore import QObject, QUrl, Signal, Slot
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 from semantic_version import Version
@@ -37,6 +37,7 @@ class checkUpdate(QObject):
         self.reply = network.get(request)
         self.reply.finished.connect(self.__reply_handler)
     
+    @Slot()
     def __reply_handler(self) -> None:
         reply: QNetworkReply = self.sender()
 

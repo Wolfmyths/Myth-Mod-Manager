@@ -7,7 +7,7 @@ import subprocess
 
 from semantic_version import Version
 
-from PySide6.QtCore import QCoreApplication as qapp
+from PySide6.QtCore import QCoreApplication as qapp, Slot
 
 from src.widgets.QDialog.announcementQDialog import Notice
 
@@ -17,6 +17,7 @@ from src.constant_vars import ModType, OPTIONS_CONFIG
 
 logging.getLogger(__name__)
 
+@Slot(str)
 def openWebPage(link: str) -> bool:
     '''`webbrowser.open_new_tab()` but with some exception handling, returns a bool depending if it failed or not'''
 
@@ -117,6 +118,7 @@ def permissionCheck(src: str) -> int:
     
     return result
 
+@Slot(str)
 def startFile(path: str) -> None:
     '''A cross-platform version of `os.startfile()`'''
 

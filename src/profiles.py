@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
-from PySide6.QtCore import QCoreApplication as qapp
+from PySide6.QtCore import QCoreApplication as qapp, Slot
 
 import src.errorChecking as errorChecking
 
@@ -29,13 +29,14 @@ class modProfile(qtw.QWidget):
         self.profileDisplay.applyProfile.connect(lambda x: self.applyMods(x))
 
         self.deselectAllShortcut = qtg.QShortcut(qtg.QKeySequence("Ctrl+D"), self)
-        self.deselectAllShortcut.activated.connect(lambda: self.profileDisplay.unselectShortcut())
+        self.deselectAllShortcut.activated.connect(self.profileDisplay.unselectShortcut)
 
         for widget in (self.profileDisplay, ):
             layout.addWidget(widget)
         
         self.setLayout(layout)
 
+    @Slot(list)
     def applyMods(self, mods: list[str]) -> None:
 
         enableMods = ProgressWidget(MoveToEnabledModDir(*[x for x in mods if errorChecking.isInstalled(x)]))

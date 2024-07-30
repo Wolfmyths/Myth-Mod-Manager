@@ -2,7 +2,7 @@ import logging
 
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
 from PySide6.QtNetwork import QNetworkReply
 
 from semantic_version import Version
@@ -72,6 +72,7 @@ class updateDetected(Dialog):
         
         self.setLayout(layout)
 
+    @Slot()
     def okButton(self) -> None:
 
         if self.succeededState:
@@ -87,6 +88,7 @@ class updateDetected(Dialog):
 
             self.autoUpdate.start()
     
+    @Slot(str)
     def errorRaised(self, message: str) -> None:
         error = Notice(message, headline=qapp.translate('updateDetected', 'Error'))
         error.exec()
@@ -94,6 +96,7 @@ class updateDetected(Dialog):
         self.cancel()
         self.reject()
 
+    @Slot()
     def succeeded(self) -> None:
 
         self.progressBar.hide()
@@ -108,6 +111,7 @@ class updateDetected(Dialog):
         self.succeededState = True
         self.buttonBox.buttons()[0].setEnabled(True)
     
+    @Slot()
     def cancel(self) -> None:
         '''
         Sets the cancel flag to true in which Update() will exit the function
@@ -122,6 +126,7 @@ class updateDetected(Dialog):
 
         self.autoUpdate.cancel = True
     
+    @Slot()
     def doNotAskAgain(self) -> None:
         logging.info('Do not alert me to updates button was pressed')
         options = OptionsManager()
@@ -129,6 +134,7 @@ class updateDetected(Dialog):
         options.writeData()
         self.cancel()
     
+    @Slot(int, int)
     def downloadStarted(self, current: int, total: int) -> None:
 
         if self.autoUpdate.cancel:
@@ -144,7 +150,8 @@ class updateDetected(Dialog):
 
         self.lastIterBytes = current
         
-    
+    @Slot(int)
+    @Slot(int, str)
     def updateProgressBar(self, value: int, step: str = '') -> None:
 
         newValue = value + self.progressBar.value()

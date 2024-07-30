@@ -2,7 +2,7 @@ import logging
 import os
 import shutil
 
-from PySide6.QtCore import QCoreApplication as qapp
+from PySide6.QtCore import QCoreApplication as qapp, Slot
 
 from src.threaded.workerQObject import Worker
 
@@ -14,6 +14,7 @@ class DeleteMod(Worker):
 
         self.mods = mods
 
+    @Slot()
     def start(self) -> None:
         '''Removes the mod(s) from the user's computer'''
 

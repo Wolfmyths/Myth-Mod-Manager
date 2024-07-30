@@ -1,5 +1,5 @@
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
 
 from src.widgets.QDialog.QDialog import Dialog
 
@@ -41,6 +41,7 @@ class SelectProfile(Dialog):
         
         self.setLayout(layout)
     
+    @Slot(str)
     def search(self, input: str) -> None:
 
         results = self.profileList.findItems(f'{input}*', qt.MatchFlag.MatchWildcard | qt.MatchFlag.MatchExactly)
@@ -54,6 +55,7 @@ class SelectProfile(Dialog):
             else:
                 self.profileList.setRowHidden(i, False)
     
+    @Slot()
     def accept(self) -> None:
 
         self.setResult(1)
@@ -65,6 +67,7 @@ class SelectProfile(Dialog):
 
         return super().accept()
     
+    @Slot()
     def reject(self) -> None:
         self.setResult(0)
         return super().reject()

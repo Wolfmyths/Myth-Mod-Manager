@@ -15,7 +15,7 @@ def test_testSave(createTemp_Mod_ini: str, modName: str) -> None:
 
     assert save.hasMod(modName)
     assert save.hasModOption(modName, ModKeys.type.value)
-    assert save.hasModOption(modName, ModKeys.modworkshopid.value)
+    assert save.hasModOption(modName, ModKeys.modworkshopid.value) is not False
 
 def test_saveMethods(createTemp_Mod_ini: str) -> None:
 
@@ -26,11 +26,11 @@ def test_saveMethods(createTemp_Mod_ini: str) -> None:
     # Testing setters and getters (get/setType() is tested through the use of addMods())
     save.setEnabled(modName, False)
     assert save.hasModOption(modName, ModKeys.enabled.value)
-    assert save.getEnabled(modName) == False
+    assert not save.getEnabled(modName)
 
     save.setIgnored(modName, True)
     assert save.hasModOption(modName, ModKeys.ignored.value)
-    assert save.getIgnored(modName) == True
+    assert save.getIgnored(modName)
 
     save.setModWorkshopAssetID(modName, '12345')
     assert save.hasModOption(modName, ModKeys.modworkshopid.value)
@@ -49,7 +49,7 @@ def test_saveMethods(createTemp_Mod_ini: str) -> None:
     save.removeMods(*modsList)
     
     for mod in modsList:
-        assert save.hasMod(mod) == False
+        assert not save.hasMod(mod)
     
     save.clearModData()
 
@@ -88,7 +88,7 @@ def test_OptionsMethods(createTemp_Config_ini: str) -> None:
 
     options.setMMMUpdateAlert(False)
     options.writeData()
-    assert options.getMMMUpdateAlert() == False
+    assert not options.getMMMUpdateAlert()
 
     options.setLang('language')
     options.writeData()

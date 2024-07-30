@@ -1,7 +1,7 @@
 import logging
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QSize, QCoreApplication as qapp
+from PySide6.QtCore import Qt as qt, QSize, QCoreApplication as qapp, Slot
 
 from src.toolsData import ToolJSON
 from src.widgets.toolDisplayQWidget import ExternalTool
@@ -55,6 +55,7 @@ class ExternalToolDisplay(qtw.QListWidget):
             )
             notice.exec()
     
+    @Slot(str)
     def deleteItem(self, url: str) -> None:
         item = self.findItems(url, qt.MatchFlag.MatchExactly)
         if item:
@@ -70,6 +71,7 @@ class ExternalToolDisplay(qtw.QListWidget):
         self.json.removeTool(url)
         self.json.saveJSON()
 
+    @Slot(str, str)
     def changeName(self, newUrl: str, oldUrl: str) -> None:
         item = self.findItems(oldUrl, qt.MatchFlag.MatchExactly)
         if item:

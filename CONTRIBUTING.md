@@ -51,8 +51,8 @@ Here is what a translation entry looks like:
 </context>
 ```
 
-The only thing you have to edit is the text in between the <translation> container.
-The text in between the <source> container is the original text from the code.
+The only thing you have to edit is the text in between the `<translation>` container.
+The text in between the `<source>` container is the original text from the code.
 
 If you are going to improve English text go to the next section.
 
@@ -65,7 +65,7 @@ The number one rule is to NOT HAVE ANY LINE BREAKS OR ESCAPE CHARACTERS in the s
 To fix a typo in the program, you have to unfortunately find it in the source code which is located in `./src`.
 If you aren't familiar with programming or python, create an issue and someone or me (wolfmyths) will fix it.
 
-When you see text that is to be translated, it will look like this:
+When you see text that is to be translated, it will look like this in the code:
 ```py
 qapp.translate('Options', 'General')
 ```
@@ -73,7 +73,9 @@ qapp.translate('Options', 'General')
 The first argument is context for .ts files, the second is the actual text itself
 
 After you have fixed the typo, update the .ts files by opening your terminal and inputting this command:
-`util/scrape_translations_needed.py -u`
+```shell
+util/scrape_translations_needed.py -u
+```
 
 Make sure you changed directory to the repo otherwise it probably won't work!
 
@@ -83,19 +85,20 @@ To create a new language you can copy and paste `en_US.ts` and then rename the f
 
 The naming convention of .ts files are [ISO 649 set 1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) language codes and [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) territory codes seperated by an underscore. The wiki has all the language/territory codes documented.
 
-Open the file and go to line 3, you will see a attribute to the <TS> container tag called `language`. Replace `en_US` with the file name of your language/territory of choice. 
+Open the file and go to line 3, you will see a attribute to the `<TS>` container tag called `language`. Replace `en_US` with the file name of your language/territory of choice. 
 
 The rest of the process requires a little bit of manual work.
 However, there are external python scripts that have been created to help with the process.
 
 In the utils folder of this repo, there is a file called `scrape_translations_needed.py`.
 The script looks through a .ts file, checks for missing translations, and then outputs the English text of the missing translations line-by-line in a .txt.
-It also updates all .ts files' <source> container tags.
+It also updates all .ts files' `<source>` container tags.
 
 To use the script, make sure you have python and the packages in `requirements.txt` installed.
-Open up your command prompt and follow these steps:
-1. Change directory to the repo
-2. Use the command `util/scrape_translations_needed.py -e -u`
+Open up your command prompt, change your directory to the repo and use this command:
+```shell
+util/scrape_translations_needed.py -e -u
+```
 
 The -e flag is if you want to export the missing translations.
 The -u flag is if you want to update the .ts files' source language.
@@ -112,15 +115,22 @@ There are a couple things to consider before translating:
 + Do not use line breaks in translation entries
 
 After you have translated your script you can now go back to your terminal and type the following command:
-`util/update_ts_files path_to_ts_file path_to_translation_file`
+```shell
+util/update_ts_files path_to_ts_file path_to_translation_file
+```
 
 The script will update the specified ts file and replace the missing translations with the ones in the translation file and you have your translation!
+
 However the computer won't be able to use this file unless we convert it into a .qm file, which is fairly simple.
 
-Enter this command: `pyside6-lrelease path_to_ts_file -qm ./src/lang/ts_file_name.qm`
+Enter this command:
+```shell
+pyside6-lrelease path_to_ts_file -qm ./src/lang/ts_file_name.qm
+```
 
 All that's left is to add it into the source code, which is located in `src/settings.py`.
 On the top of the script you should see a variable named `language_string_to_code`.
+
 Add a new entry to the variable and follow the example of the other entries.
 Make sure the key value (the one of the left) is translated.
 

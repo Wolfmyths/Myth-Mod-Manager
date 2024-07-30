@@ -2,7 +2,7 @@ import os
 import logging
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, Signal, QCoreApplication as qapp
+from PySide6.QtCore import Qt as qt, Signal, QCoreApplication as qapp, Slot
 
 from src.widgets.QDialog.announcementQDialog import Notice
 from src.widgets.QDialog.deleteWarningQDialog import Confirmation
@@ -67,6 +67,7 @@ class ExternalTool(qtw.QFrame):
         '''`os.path.basename()` includes `.exe`, this removes that'''
         return os.path.basename(path).split('.')[0]
 
+    @Slot()
     def editToolURL(self) -> None:
         dialog = qtw.QFileDialog()
         new_url = dialog.getOpenFileUrl(None, 
@@ -83,6 +84,8 @@ class ExternalTool(qtw.QFrame):
 
             self.nameChanged.emit(new_urlLocalFile, old_url)
 
+    @Slot()
+    @Slot(bool)
     def deleteExternalTool(self, ask: bool = True) -> None:
         if ask:
             notice = Confirmation(
@@ -94,6 +97,7 @@ class ExternalTool(qtw.QFrame):
             if notice.result():
                 self.deleted.emit(self.toolURL)
 
+    @Slot()
     def startExternalTool(self) -> None:
         try:
             errorChecking.startFile(self.toolURL)

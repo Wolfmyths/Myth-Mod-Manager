@@ -86,18 +86,7 @@ It works with both steam and epic games versions.
 The following languages are supported but may not be accurate.
 If you want to help contribute support for a language, [See issue #44](https://github.com/Wolfmyths/Myth-Mod-Manager/issues/44) or read CONTRIBUTING.md and make a contribution.
 
-Deutsch
-English
-Español (españa)
-Français
-Italiano
-日本語
-한국인
-Nederlands
-Polski
-Português (Brasil)
-Русский
-中文（简体）
+Deutsch, English, Español (españa), Français, Italiano, 日本語, 한국인, Nederlands, Polski Português (Brasil), Русский, 中文（简体）
 
 # Download
 You may download any version of Myth Mod Manager and view changelogs at the [releases page](https://github.com/Wolfmyths/Myth-Mod-Manager/releases)

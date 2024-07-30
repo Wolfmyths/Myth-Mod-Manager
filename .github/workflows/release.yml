@@ -1,4 +1,3 @@
-
 name: Build into Executables And Release
 
 on:

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
-from PySide6.QtCore import Signal, Qt as qt
+from PySide6.QtCore import Signal, Qt as qt, Slot
 
 from src.widgets.QMenu.ignoreModListQMenu import IgnoredModsQMenu
 
@@ -27,6 +27,7 @@ class IgnoredMods(qtw.QListWidget):
 
         self.setSelectionMode(self.SelectionMode.ExtendedSelection)
 
+    @Slot()
     def refreshList(self) -> None:
         self.clear()
         items = [x for x in self.saveManager.mods() if self.saveManager.getIgnored(x)]

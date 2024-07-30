@@ -1,4 +1,5 @@
 import PySide6.QtWidgets as qtw
+from PySide6.QtCore import Slot
 
 from src.widgets.QDialog.QDialog import Dialog
 
@@ -23,10 +24,12 @@ class Confirmation(Dialog):
         
         self.setLayout(layout)
     
+    @Slot()
     def accept(self) -> None:
         self.setResult(1)
         return super().accept()
     
+    @Slot()
     def reject(self) -> None:
         self.setResult(0)
         return super().reject()

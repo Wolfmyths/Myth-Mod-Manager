@@ -3,7 +3,7 @@ import logging
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, Signal
 
 from src.widgets.QMenu.managerQMenu import ManagerMenu
 from src.widgets.progressWidget import ProgressWidget
@@ -21,11 +21,12 @@ from src.threaded.unZipMod import UnZipMod
 from src.getPath import Pathing
 import src.errorChecking as errorChecking
 from src.save import Save, OptionsManager
-from src.constant_vars import MODSIGNORE, ModType, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, LIGHT, MOD_CONFIG, OPTIONS_CONFIG, ModRole, ModKeys
+from src.constant_vars import MODSIGNORE, ModType, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, LIGHT, MOD_CONFIG, OPTIONS_CONFIG, ModRole
 from src.api.api import findModworkshopAssetID, findModVersion
 from src.api.checkModUpdate import checkModUpdate
 
 class ModListWidget(qtw.QTableWidget):
+    modHidden = Signal()
 
     def __init__(self, savePath: str = MOD_CONFIG, optionsPath: str = OPTIONS_CONFIG) -> None:
         super().__init__()
@@ -116,6 +117,8 @@ class ModListWidget(qtw.QTableWidget):
         if errorChecking.isTypeMod(modType):
             return len(self.findItems(modType.value, qt.MatchFlag.MatchExactly))
     
+    @Slot(int)
+    @Slot(int, bool)
     def sort(self, header: int, changeAscending = True) -> None:
         '''
         Sorts the table widget based on the header selected.
@@ -281,6 +284,8 @@ class ModListWidget(qtw.QTableWidget):
     def isMultipleSelected(self) -> bool:
         return len(self.selectedItems()) > 1
     
+    @Slot()
+    @Slot(bool)
     def refreshMods(self, sorting: bool = True) -> None:
         '''Refreshes the mod lists in the manager'''
 
@@ -432,11 +437,13 @@ class ModListWidget(qtw.QTableWidget):
     
     def checkModUpdate(self) -> None:
         notice_title = qapp.translate("ModListWidget", 'Mod Update Check Results')
+        @Slot(str)
         def updateDetected(newVersion: str) -> None:
             Notice(
                 qapp.translate("ModListWidget", 'A new version has been found for') + f' {modName}!' + '\n' + qapp.translate("ModListWidget", 'Local') + f': {modVersion}\nModworkshop: {newVersion}',
                 notice_title
             ).exec()
+        @Slot()
         def uptoDate() -> None:
             Notice(modName + ' ' + qapp.translate("ModListWidget", 'is up to date'), notice_title).exec()
 
@@ -477,6 +484,7 @@ class ModListWidget(qtw.QTableWidget):
         
         self.saveManager.saveJSON()
 
+        self.modHidden.emit()
         self.itemChanged.emit(items[0])
 
     def viewTags(self) -> None:
@@ -484,12 +492,14 @@ class ModListWidget(qtw.QTableWidget):
         self.tagViewer.tagChanged.connect(lambda x, y: self.updateTags(x, y))
         self.tagViewer.show()
     
+    @Slot(str, tuple)
     def updateTags(self, mod: str, tags: tuple[str]) -> None:
         items = self.findItems(mod, qt.MatchFlag.MatchFixedString)
         if items:
             item = items[0]
             item.setData(ModRole.tags, sorted(tags))
 
+    @Slot(str)
     def search(self, input: str) -> None:
         searchedTags = None
 
@@ -518,6 +528,7 @@ class ModListWidget(qtw.QTableWidget):
                 else:
                     self.setRowHidden(i, True)
     
+    @Slot(str)
     def swapIcons(self, mode: str) -> None:
 
         newIcon = MODWORKSHOP_LOGO_W if mode == LIGHT else MODWORKSHOP_LOGO_B

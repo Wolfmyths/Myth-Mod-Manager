@@ -2,7 +2,7 @@ import os
 import shutil
 import logging
 
-from PySide6.QtCore import QCoreApplication as qapp
+from PySide6.QtCore import QCoreApplication as qapp, Slot
 
 from src.threaded.workerQObject import Worker
 from src.constant_vars import ModType, BACKUP_MODS, MODSIGNORE, MOD_CONFIG
@@ -11,6 +11,7 @@ class BackupMods(Worker):
 
     bundledFilePath = os.path.join(os.path.abspath(os.curdir), BACKUP_MODS)
 
+    @Slot()
     def start(self) -> None:
             '''Takes all of the mods and compresses them into a zip file, the output is in the exe directory'''
 

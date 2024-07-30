@@ -1,6 +1,6 @@
 import os
 
-from PySide6.QtCore import QCoreApplication as qapp
+from PySide6.QtCore import QCoreApplication as qapp, Slot
 import PySide6.QtWidgets as qtw
 
 from src.widgets.QDialog.QDialog import Dialog
@@ -52,6 +52,7 @@ class GamePathNotFound(Dialog):
 
         self.setLayout(layout)
 
+    @Slot()
     def openFileDialog(self) -> None:
         dialog = qtw.QFileDialog()
         url = dialog.getExistingDirectory(
@@ -62,6 +63,7 @@ class GamePathNotFound(Dialog):
         if os.path.isdir(url):
             self.gameDir.setText(url)
 
+    @Slot()
     def checkGamePath(self) -> None:
 
         gamePath = self.gameDir.text()
@@ -75,11 +77,13 @@ class GamePathNotFound(Dialog):
 
             okButton.setEnabled(False)
     
+    @Slot()
     def accept(self) -> None:
         self.optionsManager.setGamepath(self.gameDir.text())
         self.optionsManager.writeData()
         return super().accept()
 
+    @Slot()
     def reject(self) -> None:
 
         if isinstance(self.QParent, qtw.QApplication):

@@ -3,33 +3,45 @@ import logging
 from typing import TextIO, Sequence
 from configparser import ConfigParser
 
-from PySide6.QtCore import QSize, QLocale
+from PySide6.QtCore import QSize
 
 from src.JSONParser import JSONParser
 from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG, ModType, LIGHT, MODS_DISABLED_PATH_DEFAULT, ModKeys, OptionKeys
 
-class Save(JSONParser):
+class Save():
     '''Manages the data of each mod'''
 
-    def __init__(self, path=MOD_CONFIG) -> None:
-        super().__init__(path=path)
+    jsonParser: JSONParser = JSONParser(MOD_CONFIG)
 
-    def mods(self) -> list[str]:
-        return list(self.file.keys())
+    def __init__(self, file=MOD_CONFIG) -> None:
+        Save.jsonParser.path = file
+        Save.jsonParser.loadJSON()
+
+    @staticmethod
+    def saveJSON() -> None:
+        Save.jsonParser.saveJSON()
+
+    @staticmethod
+    def mods() -> list[str]:
+        return list(Save.jsonParser.file.keys())
     
-    def hasModOption(self, mod: str, option: str) -> bool:
-        if self.hasMod(mod):
-            return self.getMod(mod).get(option, None) is not None
+    @staticmethod
+    def hasModOption(mod: str, option: str) -> bool:
+        if Save.hasMod(mod):
+            return option in Save.getMod(mod)
 
         return False
 
-    def hasMod(self, mod: str) -> bool:
-        return self.getMod(mod) is not None
+    @staticmethod
+    def hasMod(mod: str) -> bool:
+        return Save.getMod(mod) is not None
 
-    def getMod(self, mod: str) -> dict | None:
-        return self.file.get(mod, None)
+    @staticmethod
+    def getMod(mod: str) -> dict:
+        return Save.jsonParser.file.get(mod, None)
 
-    def addMods(self, *mods: tuple[list[str], ModType]) -> None:
+    @staticmethod
+    def addMods(*mods: tuple[list[str], ModType]) -> None:
         '''
         Saves new mods to the config file
 
@@ -41,108 +53,120 @@ class Save(JSONParser):
         for arg in mods:
             for mod in arg[0]:
 
-                if not self.hasMod(mod):
+                if not Save.hasMod(mod):
                     logging.info('Adding new mod to %s: %s', MOD_CONFIG, mod)
-                    self.file[mod] = {}
+                    Save.jsonParser.file[mod] = {}
 
-                self.setEnabled(mod)
-                self.setType(mod, arg[1])
+                Save.setEnabled(mod)
+                Save.setType(mod, arg[1])
 
-    def getEnabled(self, mod: str) -> bool:
+    @staticmethod
+    def getEnabled(mod: str) -> bool:
         fallback = True
-        if self.hasMod(mod):
-            return self.getMod(mod).get(ModKeys.enabled.value, fallback)
+        if Save.hasMod(mod):
+            return Save.getMod(mod).get(ModKeys.enabled.value, fallback)
         return fallback
 
-    def setEnabled(self, mod: str, value: bool = True) -> None:
-        if self.hasMod(mod):
-            self.getMod(mod)[ModKeys.enabled.value] = value
+    @staticmethod
+    def setEnabled(mod: str, value: bool = True) -> None:
+        if Save.hasMod(mod):
+            Save.getMod(mod)[ModKeys.enabled.value] = value
 
-    def getIgnored(self, mod: str) -> bool:
+    @staticmethod
+    def getIgnored(mod: str) -> bool:
         fallback = False
-        if self.hasMod(mod):
-            return self.getMod(mod).get(ModKeys.ignored.value, fallback)
+        if Save.hasMod(mod):
+            return Save.getMod(mod).get(ModKeys.ignored.value, fallback)
         else:
             return fallback
 
-    def setIgnored(self, mod: str, value: bool = False) -> None:
-        if self.hasMod(mod):
-            self.getMod(mod)[ModKeys.ignored.value] = value
+    @staticmethod
+    def setIgnored(mod: str, value: bool = False) -> None:
+        if Save.hasMod(mod):
+            Save.getMod(mod)[ModKeys.ignored.value] = value
     
-    def getType(self, mod: str) -> ModType | None:
+    @staticmethod
+    def getType(mod: str) -> ModType | None:
         '''
         Converts the string into a `ModType` then returns it.
         Returns `None` if the mod doesn't have a type.
         '''
 
-        if not self.hasMod(mod):
+        if not Save.hasMod(mod):
             logging.error('save.GetType: %s does not exist in the files', mod)
             return
 
-        modType = self.getMod(mod).get(ModKeys.type.value)
+        modType = Save.getMod(mod).get(ModKeys.type.value)
 
-        if modType is not None:
+        if modType:
             return ModType(modType)
         else:
             return None
     
-    def setType(self, mod: str, type: ModType) -> None:
-        if self.hasMod(mod):
-            self.getMod(mod)[ModKeys.type.value] = type
+    @staticmethod
+    def setType(mod: str, type: ModType) -> None:
+        if Save.hasMod(mod):
+            Save.getMod(mod)[ModKeys.type.value] = type
     
-    def getModworkshopAssetID(self, mod: str) -> str:
+    @staticmethod
+    def getModworkshopAssetID(mod: str) -> str:
         fallback = ''
-        if self.hasMod(mod):
-            return self.getMod(mod).get(ModKeys.modworkshopid, fallback)
+        if Save.hasMod(mod):
+            return Save.getMod(mod).get(ModKeys.modworkshopid, fallback)
         else:
             return fallback
     
-    def setModWorkshopAssetID(self, mod: str, id: str = '') -> None:
-        if self.hasMod(mod):
-            self.getMod(mod)[ModKeys.modworkshopid.value] = id
+    @staticmethod
+    def setModWorkshopAssetID(mod: str, id: str = '') -> None:
+        if Save.hasMod(mod):
+            Save.getMod(mod)[ModKeys.modworkshopid.value] = id
     
-    def getTags(self, mod: str) -> list[str]:
+    @staticmethod
+    def getTags(mod: str) -> list[str]:
         fallback = []
-        if self.hasMod(mod):
-            tags = self.getMod(mod).get(ModKeys.tags.value, fallback)
+        if Save.hasMod(mod):
+            tags = Save.getMod(mod).get(ModKeys.tags.value, fallback)
             return tags if tags is not None else fallback
         else:
             return fallback
     
-    def getAllTags(self) -> list[str]:
+    @staticmethod
+    def getAllTags() -> list[str]:
         allTags = set()
-        for mod in self.mods():
-            if not self.getTags(mod):
+        for mod in Save.mods():
+            if not Save.getTags(mod):
                 continue
-            for tag in self.getTags(mod):
+            for tag in Save.getTags(mod):
                 allTags.add(tag)
 
         return sorted(list(allTags))
     
-    def setTags(self, tags: Sequence[str], *mods: str) -> None:
+    @staticmethod
+    def setTags(tags: Sequence[str], *mods: str) -> None:
         if not tags:
             for mod in mods:
-                if self.hasMod(mod):
-                    self.getMod(mod)[ModKeys.tags] = None
+                if Save.hasMod(mod):
+                    Save.getMod(mod)[ModKeys.tags] = None
             return
 
         for mod in mods:
-            if not self.hasMod(mod):
+            if not Save.hasMod(mod):
                 continue
 
-            currentTags = self.getTags(mod)
+            currentTags = Save.getTags(mod)
             if currentTags is None:
                 currentTags = []
 
             updatedTags = list(set(tags + currentTags))
             logging.info('Setting the tags of %s from %s to %s', mod, currentTags, updatedTags)
 
-            self.getMod(mod)[ModKeys.tags.value] = updatedTags
+            Save.getMod(mod)[ModKeys.tags.value] = updatedTags
     
-    def removeTags(self, tags: Sequence[str], *mods: str) -> None:
+    @staticmethod
+    def removeTags(tags: Sequence[str], *mods: str) -> None:
         logging.info('Removing the tags %s from %')
         for mod in mods:
-            modTags = self.getTags(mod)
+            modTags = Save.getTags(mod)
 
             if not modTags:
                 continue
@@ -150,27 +174,30 @@ class Save(JSONParser):
             updatedTags = [x for x in modTags if x not in tags]
             logging.info('Removing the tags of %s from %s to %s', mod, modTags, updatedTags)
 
-            self.getMod(mod)[ModKeys.tags] = updatedTags
+            Save.getMod(mod)[ModKeys.tags] = updatedTags
     
-    def clearTags(self) -> None:
+    @staticmethod
+    def clearTags() -> None:
         logging.info('CLEARING ALL TAGS')
-        for mod in self.mods():
-            self.getMod(mod)[ModKeys.tags] = None
+        for mod in Save.mods():
+            Save.getMod(mod)[ModKeys.tags] = None
 
-    def removeMods(self, *mods: str) -> None:
+    @staticmethod
+    def removeMods(*mods: str) -> None:
         '''Removes mods from MOD_CONFIG'''
 
         logging.info('Removing mod(s): %s', ', '.join(mods))
 
         for mod in mods:
-            self.file.pop(mod, None)
+            Save.jsonParser.file.pop(mod, None)
 
-    def clearModData(self) -> None:
+    @staticmethod
+    def clearModData() -> None:
         '''Wipes the MOD_CONFIG's data'''
 
         logging.info('DELETING ALL MODS FROM %s', MOD_CONFIG)
 
-        self.file = self.default
+        Save.jsonParser.file = Save.jsonParser.default
 
 class OptionsManager():
     '''Manages Program's Settings'''

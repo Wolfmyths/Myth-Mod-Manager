@@ -3,7 +3,7 @@ import logging
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, Signal
 
 from src.widgets.QMenu.managerQMenu import ManagerMenu
 from src.widgets.progressWidget import ProgressWidget
@@ -21,11 +21,12 @@ from src.threaded.unZipMod import UnZipMod
 from src.getPath import Pathing
 import src.errorChecking as errorChecking
 from src.save import Save, OptionsManager
-from src.constant_vars import MODSIGNORE, ModType, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, LIGHT, MOD_CONFIG, OPTIONS_CONFIG, ModRole, ModKeys
+from src.constant_vars import MODSIGNORE, ModType, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, LIGHT, MOD_CONFIG, OPTIONS_CONFIG, ModRole
 from src.api.api import findModworkshopAssetID, findModVersion
 from src.api.checkModUpdate import checkModUpdate
 
 class ModListWidget(qtw.QTableWidget):
+    modHidden = Signal()
 
     def __init__(self, savePath: str = MOD_CONFIG, optionsPath: str = OPTIONS_CONFIG) -> None:
         super().__init__()
@@ -125,8 +126,6 @@ class ModListWidget(qtw.QTableWidget):
         If `header` is equal to `self.sortState['col']`
         reverse the order unless specified with `changeAscending`.
         '''
-
-        print(header)
 
         if header == self.sortState['col'] and changeAscending:
 
@@ -485,6 +484,7 @@ class ModListWidget(qtw.QTableWidget):
         
         self.saveManager.saveJSON()
 
+        self.modHidden.emit()
         self.itemChanged.emit(items[0])
 
     def viewTags(self) -> None:

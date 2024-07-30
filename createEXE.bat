@@ -9,9 +9,6 @@ set Spec="main.spec"
 echo Installing Dependencies
 pip install -r %Txt%
 
-echo Installing Pyinstaller
-pip install pyinstaller
-
 echo Running Pyinstaller
 pyinstaller --clean %Spec% --distpath ./%disFolder%
 

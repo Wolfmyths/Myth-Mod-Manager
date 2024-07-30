@@ -24,7 +24,8 @@ def create_mod_dirs() -> Generator:
 
 @pytest.fixture(scope='module')
 def createTemp_Mod_ini() -> Generator:
-    data = {'super fun mod' : {
+    data = {
+        'super fun mod' : {
             ModKeys.type.value : ModType.maps.value,
             ModKeys.modworkshopid.value : '3453',
             ModKeys.enabled.value : True,

@@ -115,7 +115,7 @@ class ModManager(qtw.QWidget):
             success, exit_code = QProcess.startDetached(os.path.join(gamePath, gameExe), [], gamePath)
 
             if not success:
-                return Exception(
+                raise Exception(
                     qapp.translate("ModManager", "Exit code:") + f' {exit_code}'
                 )
 

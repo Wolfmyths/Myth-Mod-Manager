@@ -1,11 +1,10 @@
 import os
-import subprocess
 import logging
 import sys
 from typing import List
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, QProcess
 import PySide6.QtGui as qtg
 
 from src.widgets.managerQTableWidget import ModListWidget
@@ -90,7 +89,7 @@ class ModManager(qtw.QWidget):
         self.openGameDir.setText(qapp.translate("ModManager", 'Open Game Directory'))
         self.startGame.setText(qapp.translate("ModManager", 'Start PAYDAY 2'))
         self.search.setPlaceholderText(qapp.translate("ModManager", 'Search... use "tag:" with no spaces to search for tags, use a comma "," to seperate tags'))
-    
+
     @Slot()
     def updateModCount(self) -> None:
 
@@ -111,16 +110,14 @@ class ModManager(qtw.QWidget):
             if not os.path.isabs(gamePath):
                 raise Exception(qapp.translate("ModManager", 'Path is not absolute'))
 
-            if sys.platform.startswith('win'):
+            gameExe = 'payday2_win32_release.exe' if sys.platform.startswith('win') else 'payday2_release'
 
-                gameExe = 'payday2_win32_release.exe'
+            success, exit_code = QProcess.startDetached(os.path.join(gamePath, gameExe), [], gamePath)
 
-                # TODO: Permission error is raised without shell=True, can this be avoided?
-                cmd: subprocess.CompletedProcess[bytes] = subprocess.run([gamePath[0:2].upper(), '&&', 'cd', gamePath, '&&', gameExe], shell=True)
-                cmd.check_returncode()
-            else:
-                gameExe = 'payday2_release'
-                errorChecking.startFile(os.path.join(gamePath, gameExe))
+            if not success:
+                return Exception(
+                    qapp.translate("ModManager", "Exit code:") + f' {exit_code}'
+                )
 
         except Exception as e:
             logging.error('An error occured trying to start PAYDAY 2:\n%s', str(e))

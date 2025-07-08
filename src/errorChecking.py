@@ -2,12 +2,11 @@ import os
 import stat
 import logging
 import webbrowser
-import sys
-import subprocess
 
 from semantic_version import Version
 
-from PySide6.QtCore import QCoreApplication as qapp, Slot
+from PySide6.QtCore import QCoreApplication as qapp, Slot, QUrl
+from PySide6.QtGui import QDesktopServices
 
 from src.widgets.QDialog.announcementQDialog import Notice
 
@@ -131,12 +130,11 @@ def startFile(path: str) -> None:
                 qapp.translate("ErrorChecking", 'Please use a full path to the program you are starting.')
             )
 
-        if sys.platform.startswith('win'):
-            os.startfile(path)
-        else:
-            cmd = 'open' if sys.platform == 'darwin' else 'xdg-open'
-            returnCode: subprocess.CompletedProcess[bytes] = subprocess.run([cmd, path], shell=True)
-            returnCode.check_returncode()
+        returnCode: bool = QDesktopServices.openUrl(QUrl(f"file:///{path}"))
+        if not returnCode:
+            raise Exception(
+                qapp.translate("ErrorChecking", "Someting went wrong opening with given path")
+            )
 
     except Exception as e:
         logging.error('Error in errorChecking.startFile(%s): %s', path, str(e))

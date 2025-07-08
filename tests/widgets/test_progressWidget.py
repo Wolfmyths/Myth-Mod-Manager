@@ -6,7 +6,7 @@ from src.threaded.workerQObject import Worker
 
 @pytest.fixture(scope='function')
 def create_progressWidget(createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator:
-    worker = Worker(createTemp_Config_ini, createTemp_Mod_ini)
+    worker = Worker()
     widget = ProgressWidget(worker)
 
     yield widget

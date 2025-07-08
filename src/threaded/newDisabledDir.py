@@ -5,12 +5,10 @@ from PySide6.QtCore import QCoreApplication as qapp, Slot
 
 from src.threaded.workerQObject import Worker
 
-from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG
-
 class NewDisabledDir(Worker):
 
-    def __init__(self, old_path: str, new_path: str, optionsPath: str = OPTIONS_CONFIG, savePath: str = MOD_CONFIG) -> None:
-        super().__init__(optionsPath=optionsPath, savePath=savePath)
+    def __init__(self, old_path: str, new_path: str) -> None:
+        super().__init__()
 
         self.old_path: str = old_path
         self.new_path: str = new_path

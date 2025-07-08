@@ -5,18 +5,14 @@ import pytest
 
 from PySide6.QtCore import QMutex
 
+from pytestqt.qtbot import QtBot
+
 from src.threaded.unZipMod import UnZipMod
 from src.constant_vars import ModType
-from src.getPath import Pathing
-from src.save import OptionsManager, Save
 
 #TODO: Everything seems to work but the assert statement
 @pytest.mark.skip
-def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> None:
-    parser = OptionsManager(createTemp_Config_ini)
-    parser.setGamepath(create_mod_dirs)
-    parser.writeData()
-
+def test_thread(qtbot: QtBot, create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> None:
     zip_path: str = os.path.join(create_mod_dirs, 'zip')
     os.mkdir(zip_path)
     shutil.make_archive(zip_path, 'zip')
@@ -25,14 +21,11 @@ def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod
 
     mutex = QMutex()
     worker = UnZipMod((url, ModType.mods))
-    worker.optionsManager = parser
-    worker.saveManager = Save(createTemp_Mod_ini)
     worker.mutex = mutex
 
-    worker.p = Pathing(createTemp_Config_ini)
+    with qtbot.wait_signal(worker.succeeded):
+        worker.start()
 
-    worker.start()
-
-    assert os.path.isdir(os.path.join(create_mod_dirs, 'mods', 'zip'))
+    assert os.path.isdir(os.path.join(create_mod_dirs, 'mods', 'zip')) is True
 
     worker.deleteLater()

@@ -6,7 +6,7 @@ from src.constant_vars import ModType
 
 def test_manager(qtbot: QtBot, createTemp_Mod_ini: str, createTemp_Config_ini: str) -> None:
 
-    widget = ModManager(createTemp_Mod_ini, createTemp_Config_ini)
+    widget = ModManager()
     qtbot.addWidget(widget)
 
     modsCount: int | None = widget.modsTable.getModTypeCount(ModType.mods)

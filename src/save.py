@@ -11,19 +11,20 @@ from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG, ModType, LIGHT, MODS_D
 class Save():
     '''Manages the data of each mod'''
 
-    jsonParser: JSONParser = JSONParser(MOD_CONFIG)
+    _file: dict = {}
+    _path: str = ''
 
     def __init__(self, file=MOD_CONFIG) -> None:
-        Save.jsonParser.path = file
-        Save.jsonParser.loadJSON()
+        Save._path = file
+        Save._file = JSONParser.loadJSON(file)
 
     @staticmethod
     def saveJSON() -> None:
-        Save.jsonParser.saveJSON()
+        JSONParser.saveJSON(Save._path, Save._file)
 
     @staticmethod
     def mods() -> list[str]:
-        return list(Save.jsonParser.file.keys())
+        return list(Save._file.keys())
     
     @staticmethod
     def hasModOption(mod: str, option: str) -> bool:
@@ -38,7 +39,7 @@ class Save():
 
     @staticmethod
     def getMod(mod: str) -> dict:
-        return Save.jsonParser.file.get(mod, None)
+        return Save._file.get(mod, None)
 
     @staticmethod
     def addMods(*mods: tuple[list[str], ModType]) -> None:
@@ -55,7 +56,7 @@ class Save():
 
                 if not Save.hasMod(mod):
                     logging.info('Adding new mod to %s: %s', MOD_CONFIG, mod)
-                    Save.jsonParser.file[mod] = {}
+                    Save._file[mod] = {}
 
                 Save.setEnabled(mod)
                 Save.setType(mod, arg[1])
@@ -189,7 +190,7 @@ class Save():
         logging.info('Removing mod(s): %s', ', '.join(mods))
 
         for mod in mods:
-            Save.jsonParser.file.pop(mod, None)
+            Save._file.pop(mod, None)
 
     @staticmethod
     def clearModData() -> None:
@@ -197,13 +198,13 @@ class Save():
 
         logging.info('DELETING ALL MODS FROM %s', MOD_CONFIG)
 
-        Save.jsonParser.file = Save.jsonParser.default
+        Save._file = {}
 
 class OptionsManager():
     '''Manages Program's Settings'''
 
     config = ConfigParser()
-    file = OPTIONS_CONFIG
+    file: str = ''
 
     def __init__(self, file=OPTIONS_CONFIG) -> None:
 
@@ -237,7 +238,7 @@ class OptionsManager():
         if sort:
             value = sorted(value)
 
-        list_ = delimiter.join(value)
+        list_: str = delimiter.join(value)
 
         OptionsManager.config.set(section, option, list_)
     

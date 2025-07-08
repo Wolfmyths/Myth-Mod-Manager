@@ -17,7 +17,7 @@ MODS = (
 
 @pytest.fixture(scope='module')
 def create_modListWidget(createTemp_Mod_ini: str, createTemp_Config_ini: str) -> Generator:
-    widget = ModListWidget(createTemp_Mod_ini, createTemp_Config_ini)
+    widget = ModListWidget()
 
     widget.addMod(name=MODS[0][0], type=MODS[0][1], enabled=MODS[0][2], version=MODS[0][3], tags=MODS[0][4])
     widget.addMod(name=MODS[1][0], type=MODS[1][1], enabled=MODS[1][2], version=MODS[1][3], tags=MODS[1][4])

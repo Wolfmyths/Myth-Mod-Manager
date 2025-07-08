@@ -3,7 +3,7 @@ from pytestqt.qtbot import QtBot
 from src.widgets.QDialog.profileSelectionQDialog import SelectProfile
 
 def test_dialog(qtbot: QtBot, createTemp_Profiles_ini: str) -> None:
-    widget = SelectProfile(createTemp_Profiles_ini)
+    widget = SelectProfile()
     qtbot.addWidget(widget)
 
     assert widget.profileList.count() == 1

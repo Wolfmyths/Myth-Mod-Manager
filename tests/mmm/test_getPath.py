@@ -2,6 +2,7 @@ import os
 
 import pytest
 
+from src.save import OptionsManager
 from src.constant_vars import ModType
 from src.getPath import Pathing
 
@@ -22,14 +23,14 @@ ARGS: list[tuple[ModType, str, str]] = [
 ]
 
 def test_getPath_ModDirs(createTemp_Config_ini: str, create_mod_dirs: str) -> None:
-    path = Pathing(createTemp_Config_ini)
+    OptionsManager(createTemp_Config_ini)
 
-    assert path.maps() == os.path.join(create_mod_dirs, 'Maps')
-    assert path.mods() == os.path.join(create_mod_dirs, 'mods')
-    assert path.mod_overrides() == os.path.join(create_mod_dirs, 'assets', 'mod_overrides')
+    assert Pathing.maps() == os.path.join(create_mod_dirs, 'Maps')
+    assert Pathing.mods() == os.path.join(create_mod_dirs, 'mods')
+    assert Pathing.mod_overrides() == os.path.join(create_mod_dirs, 'assets', 'mod_overrides')
 
 @pytest.mark.parametrize(PARAMETERS, ARGS)
 def test_getPath_Mod(type: str, modName: str, expected_outcome: str, createTemp_Config_ini: str, create_mod_dirs: str) -> None:
-    path = Pathing(createTemp_Config_ini)
+    OptionsManager(createTemp_Config_ini)
 
-    assert path.mod(type, modName) == os.path.join(create_mod_dirs, expected_outcome)
+    assert Pathing.mod(type, modName) == os.path.join(create_mod_dirs, expected_outcome)

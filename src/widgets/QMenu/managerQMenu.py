@@ -5,6 +5,7 @@ import PySide6.QtGui as qtg
 from PySide6.QtCore import QCoreApplication as qapp, Slot
 from PySide6.QtWidgets import QTableWidgetItem
 
+from src.save import Save
 from src.widgets.QMenu.QMenu import ModContextMenu
 
 if TYPE_CHECKING:
@@ -96,7 +97,7 @@ class ManagerMenu(ModContextMenu):
             event.accept()
             return
 
-        if self.qParent.saveManager.getModworkshopAssetID(selectedItems[0].text()):
+        if Save.getModworkshopAssetID(selectedItems[0].text()):
             self.visitModPage.setEnabled(True)
             self.checkUpdate.setEnabled(True)
         else:

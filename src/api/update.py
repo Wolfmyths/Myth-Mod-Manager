@@ -43,14 +43,14 @@ class Update(QObject):
     def start(self) -> None:
         logging.info('Updating program...')
 
-        link = 'https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest'
+        LINK = 'https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest'
 
-        logging.info('Fetching assets_url at %s', link)
+        logging.info('Fetching assets_url at %s', LINK)
 
         self.setTotalProgress.emit(6)
 
         self.network = QNetworkAccessManager()
-        request = QNetworkRequest(QUrl(link))
+        request = QNetworkRequest(QUrl(LINK))
         
         self.setCurrentProgress.emit(1, 'Getting asset_URL')
 

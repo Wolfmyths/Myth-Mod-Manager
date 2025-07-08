@@ -8,21 +8,14 @@ from pytestqt.qtbot import QtBot
 
 from src.threaded.changeModType import ChangeModType
 from src.constant_vars import ModType
-from src.getPath import Pathing
-from src.save import OptionsManager, Save
+from src.save import OptionsManager
 
 @pytest.fixture(scope="module")
 def create_worker(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator:
-    parser = OptionsManager(createTemp_Config_ini)
-    parser.setGamepath(create_mod_dirs)
-    parser.writeData()
-
     url: str = os.path.join(create_mod_dirs, 'mods', 'make game easy mod')
     url2: str = os.path.join(create_mod_dirs, 'assets', 'mod_overrides', 'best mod ever')
     mutex = QMutex()
     worker = ChangeModType((url, ModType.mods_override), (url2, ModType.mods))
-    worker.saveManager = Save(createTemp_Mod_ini)
-    worker.p = Pathing(createTemp_Config_ini)
     worker.mutex = mutex
 
     yield worker

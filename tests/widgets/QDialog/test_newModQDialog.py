@@ -12,7 +12,7 @@ def test_dialog(qtbot: QtBot, create_mod_dirs: str) -> None:
         os.path.join(create_mod_dirs, 'mods', 'super fun mod'),
         os.path.join(create_mod_dirs, 'mod_overrides', 'best mod ever'),
         os.path.join(create_mod_dirs, 'maps', 'make game easy mod')
-        ]
+    ]
     
     widget = newModLocation(*list_of_paths)
     qtbot.addWidget(widget)
@@ -34,6 +34,8 @@ def test_dialog(qtbot: QtBot, create_mod_dirs: str) -> None:
 
     widget.buttonBox.accepted.emit()
 
-    assert widget.typeDict == {'super fun mod' : ModType.mods,
-                               'best mod ever' : ModType.mods_override,
-                               'make game easy mod': ModType.maps}
+    assert widget.typeDict == {
+        'super fun mod' : ModType.mods,
+        'best mod ever' : ModType.mods_override,
+        'make game easy mod': ModType.maps
+    }

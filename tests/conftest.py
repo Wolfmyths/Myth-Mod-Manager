@@ -6,37 +6,44 @@ from configparser import ConfigParser
 
 import pytest
 
+from src.profileManager import ProfileManager
+from src.toolsData import ToolJSON
+from src.save import Save, OptionsManager
 from src.constant_vars import OptionKeys, ModKeys, ModType, LIGHT
+
+MOCK_MOD_NAME_1 = 'make game easy mod'
+MOCK_MOD_NAME_2 = 'best mod ever'
+MOCK_MOD_NAME_3 = 'super fun mod'
 
 @pytest.fixture(scope='module')
 def create_mod_dirs() -> Generator:
     with tempfile.TemporaryDirectory() as tmp_dir:
-        os.makedirs(os.path.join(tmp_dir, 'mods', 'make game easy mod'))
-        os.makedirs(os.path.join(tmp_dir, 'assets', 'mod_overrides', 'best mod ever'))
-        os.makedirs(os.path.join(tmp_dir, 'maps', 'super fun mod'))
+        os.makedirs(os.path.join(tmp_dir, 'mods', MOCK_MOD_NAME_1))
+        os.makedirs(os.path.join(tmp_dir, 'assets', 'mod_overrides', MOCK_MOD_NAME_2))
+        os.makedirs(os.path.join(tmp_dir, 'maps', MOCK_MOD_NAME_3))
         os.mkdir(os.path.join(tmp_dir, 'disabledMods'))
         os.mkdir(os.path.join(tmp_dir, 'newDisabledMods'))
-        
+
         yield tmp_dir
 
 @pytest.fixture(scope='module')
 def createTemp_Mod_ini() -> Generator:
     data: dict[str, ModType | str | bool] = {
-        'super fun mod' : {
+        MOCK_MOD_NAME_3 : {
             ModKeys.type.value : ModType.maps.value,
             ModKeys.modworkshopid.value : '3453',
             ModKeys.enabled.value : True,
             ModKeys.ignored.value : False
         },
 
-        'best mod ever' : {
+        MOCK_MOD_NAME_2 : {
             ModKeys.type.value : ModType.mods_override.value,
             ModKeys.modworkshopid.value : '',
             ModKeys.enabled.value : True,
             ModKeys.ignored.value : False
         },
             
-        'make game easy mod' : {
+        MOCK_MOD_NAME_1 : {
             ModKeys.type.value : ModType.mods.value,
             ModKeys.modworkshopid.value : '2523',
             ModKeys.enabled.value : True,
@@ -49,7 +56,12 @@ def createTemp_Mod_ini() -> Generator:
 
         tmp.write(json.dumps(data))
 
+    Save(tmp_name)
+
     yield tmp_name
+
+    Save._file = {}
+    Save._path = ''
 
     os.remove(tmp_name)
 
@@ -71,7 +83,13 @@ def createTemp_Config_ini(create_mod_dirs: str) -> Generator:
     with open(tmp_filename, 'w') as f:
         config.write(f)
 
+    OptionsManager.config = config
+    OptionsManager.file = tmp_filename
+
     yield tmp_filename
+
+    OptionsManager.config = ConfigParser()
+    OptionsManager.file = ''
 
     os.remove(tmp_filename)
 
@@ -85,7 +103,12 @@ def createTemp_Profiles_ini() -> Generator:
 
         tmp.write(json.dumps(data))
 
+    ProfileManager(tmp_name)
+
     yield tmp_name
+
+    ProfileManager._file = {}
+    ProfileManager._path = ''
 
     os.remove(tmp_name)
 
@@ -99,6 +122,11 @@ def createTemp_externalShortcuts_ini() -> Generator:
 
         tmp.write(json.dumps(data))
 
+    ToolJSON(tmp_name)
+
     yield tmp_name
+
+    ToolJSON._file = {}
+    ToolJSON._path = ''
 
     os.remove(tmp_name)

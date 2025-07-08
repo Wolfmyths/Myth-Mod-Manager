@@ -2,69 +2,87 @@ from src.JSONParser import JSONParser
 
 from src.constant_vars import PROFILES_JSON
 
-class ProfileManager(JSONParser):
-    file: dict[str:list[str]] = None
-    def __init__(self, path: str = PROFILES_JSON) -> None:
-        super().__init__(path)
-    
-    def __str__(self) -> str:
+class ProfileManager():
+    _file: dict[str:list[str]] = None
+    _path: str = ''
 
-        if self.file is not None:
-            output = str(self.file.items())
+    def __init__(self, path: str = PROFILES_JSON) -> None:
+        ProfileManager._file = JSONParser.loadJSON(path)
+        ProfileManager._path = path
+    
+    def __str__() -> str:
+
+        if ProfileManager._file is not None:
+            output = str(ProfileManager._file.items())
         else:
             output = 'None'
         
         return output
     
-    def getMods(self, profile: str) -> list[str]:
-        return self.file.get(profile)
-    
-    def getJSON(self) -> dict[str: list[str]]:
-        return self.file
+    @staticmethod
+    def _save() -> None:
+        JSONParser.saveJSON(PROFILES_JSON, ProfileManager._file)
 
-    def addProfile(self, *profiles: str) -> None:
+    @staticmethod
+    def get_profile_names() -> list[str]:
+        return list(ProfileManager._file.keys())
+
+    @staticmethod
+    def getMods(profile: str) -> list[str]:
+        return ProfileManager._file.get(profile)
+    
+    @staticmethod
+    def getJSON() -> dict[str: list[str]]:
+        return ProfileManager._file
+
+    @staticmethod
+    def addProfile(*profiles: str) -> None:
 
         for profile in profiles:
-            self.file[profile] = []
+            ProfileManager._file[profile] = []
 
-        self.saveJSON()
+        ProfileManager._save()
 
-    def removeProfile(self, *profiles: str) -> None:
+    @staticmethod
+    def removeProfile(*profiles: str) -> None:
 
         for profile in profiles:
-            self.file.pop(profile)
+            ProfileManager._file.pop(profile)
 
-        self.saveJSON()
+        ProfileManager._save()
     
-    def changeProfile(self, oldName: str, newName: str) -> None:
+    @staticmethod
+    def changeProfile(oldName: str, newName: str) -> None:
 
-        oldNameDict: list[str] = self.getMods(oldName)
+        oldNameDict: list[str] = ProfileManager.getMods(oldName)
 
-        self.file.pop(oldName)
+        ProfileManager._file.pop(oldName)
 
-        self.file[newName] = oldNameDict
+        ProfileManager._file[newName] = oldNameDict
 
-        self.saveJSON()
+        ProfileManager._save()
 
-    def addMod(self, profile: str, *mods: str) -> None:
-        currentMods: list[str] = self.getMods(profile)
+    @staticmethod
+    def addMod(profile: str, *mods: str) -> None:
+        currentMods: list[str] = ProfileManager.getMods(profile)
 
         newMods: list[str] = [x for x in mods]
         
 
-        updatedMods = list(set(currentMods + newMods))
+        updatedMods: list[str] = list(set(currentMods + newMods))
 
-        self.file[profile] = updatedMods
+        ProfileManager._file[profile] = updatedMods
 
-        self.saveJSON()
+        ProfileManager._save()
 
-    def removeMod(self, profile: str, *mods: str) -> None:
+    @staticmethod
+    def removeMod(profile: str, *mods: str) -> None:
 
-        currentMods: list[str] = self.getMods(profile)
+        currentMods: list[str] = ProfileManager.getMods(profile)
 
         for mod in mods:
             currentMods.remove(mod)
         
-        self.file[profile] = currentMods
+        ProfileManager._file[profile] = currentMods
 
-        self.saveJSON()
+        ProfileManager._save()

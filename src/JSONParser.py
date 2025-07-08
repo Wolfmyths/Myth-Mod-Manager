@@ -3,27 +3,33 @@ import logging
 import os
 
 class JSONParser():
-    file: dict = None
-    def __init__(self, path: str = '', default: dict = {}) -> None:
-        self.path: str = path
-        self.default = default
+    @staticmethod
+    def loadJSON(path: str, fallback: dict = {}) -> dict:
+        file: dict = {}
+
         try:
-            self.loadJSON()
+            file = JSONParser._loadJSON(path)
+            
         except (json.decoder.JSONDecodeError, FileNotFoundError) as e:
             logging.error(f'{e}')
-            with open(self.path, 'w') as f:
-                f.write(json.dumps(default))
-            
-            self.loadJSON()
 
-    def loadJSON(self) -> None:
-        with open(self.path, 'r') as f:
-            self.file = json.loads(f.read())
+            with open(path, 'w') as f:
+                f.write(json.dumps(fallback))
+                file = JSONParser._loadJSON(path)
 
-    def saveJSON(self) -> None:
-        with open(self.path, 'w') as f:
+        finally:    
+            return file
+
+    @staticmethod
+    def saveJSON(path: str, data: dict) -> None:
+        with open(path, 'w') as f:
             f.seek(0)
-            f.write(json.dumps(self.file, indent=2))
+            f.write(json.dumps(data, indent=2))
             f.truncate()
         
-        logging.info('%s has been saved.', os.path.basename(self.path))
+        logging.info('%s has been saved.', os.path.basename(path))
+    
+    @staticmethod
+    def _loadJSON(path: str) -> dict:
+        with open(path, 'r') as f:
+            return json.loads(f.read())

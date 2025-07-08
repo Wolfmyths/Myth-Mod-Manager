@@ -8,7 +8,6 @@ from PySide6.QtCore import Signal, Qt as qt, Slot
 from src.widgets.QMenu.ignoreModListQMenu import IgnoredModsQMenu
 
 from src.save import Save
-from src.constant_vars import MOD_CONFIG
 
 if TYPE_CHECKING:
     from src.settings import Options
@@ -18,10 +17,8 @@ class IgnoredMods(qtw.QListWidget):
     itemsRemoved = Signal()
     itemsChanged = Signal()
 
-    def __init__(self, parent: Options = None, savePath = MOD_CONFIG) -> None:
+    def __init__(self, parent: Options = None) -> None:
         super().__init__(parent)
-
-        self.saveManager = Save(savePath)
 
         self.contextMenu = IgnoredModsQMenu(self)
 
@@ -31,7 +28,7 @@ class IgnoredMods(qtw.QListWidget):
     def refreshList(self) -> None:
         self.clear()
         items: list[str] = [
-            x for x in self.saveManager.mods() if self.saveManager.getIgnored(x)
+            x for x in Save.mods() if Save.getIgnored(x)
         ]
         self.addItems(items)
         self.itemsChanged.emit()
@@ -52,13 +49,13 @@ class IgnoredMods(qtw.QListWidget):
         itemsInList: list[qtw.QListWidgetItem] = self.getItems()
 
         for item in self.selectedItems():
-            self.saveManager.setIgnored(item.text(), False)
+            Save.setIgnored(item.text(), False)
 
             index: int = itemsInList.index(item)
             self.takeItem(index)
             itemsInList.pop(index)
         
-        self.saveManager.saveJSON()
+        Save.saveJSON()
 
         self.itemsRemoved.emit()
         self.itemsChanged.emit()

@@ -3,13 +3,13 @@ import logging
 
 from PySide6.QtCore import QCoreApplication as qapp, Slot
 
+from src.getPath import Pathing
+from src.save import Save, OptionsManager
 from src.threaded.workerQObject import Worker
 
-from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG
-
 class MoveToDisabledDir(Worker):
-    def __init__(self, *mods: str, optionsPath: str = OPTIONS_CONFIG, savePath: str = MOD_CONFIG) -> None:
-        super().__init__(optionsPath=optionsPath, savePath=savePath)
+    def __init__(self, *mods: str) -> None:
+        super().__init__()
 
         self.mods: tuple[str, ...] = mods
         self.mods_moved: list[tuple[str, str]] = []
@@ -20,7 +20,7 @@ class MoveToDisabledDir(Worker):
 
         self.setTotalProgress.emit(len(self.mods))
 
-        disabledModsPath: str = self.optionsManager.getDispath()
+        disabledModsPath: str = OptionsManager.getDispath()
 
         for mod in self.mods:
 
@@ -31,7 +31,7 @@ class MoveToDisabledDir(Worker):
             # Checking if the mod is already in the disabled mods folder
             if not os.path.isdir(modDest):
 
-                modPath: list[str] | str = self.p.mod(self.saveManager.getType(mod), mod)
+                modPath: list[str] | str = Pathing.mod(Save.getType(mod), mod)
 
                 self.move(modPath, modDest)
                 self.mods_moved.append((modPath, modDest))

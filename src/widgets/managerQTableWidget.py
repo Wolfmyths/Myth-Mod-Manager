@@ -22,21 +22,16 @@ from src.threaded.unZipMod import UnZipMod
 from src.getPath import Pathing
 import src.errorChecking as errorChecking
 from src.save import Save, OptionsManager
-from src.constant_vars import MODSIGNORE, ModType, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, LIGHT, MOD_CONFIG, OPTIONS_CONFIG, ModRole
+from src.constant_vars import MODSIGNORE, ModType, UI_GRAPHICS_PATH, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, LIGHT, ModRole
 from src.api.api import findModworkshopAssetID, findModVersion
 from src.api.checkModUpdate import checkModUpdate
 
 class ModListWidget(qtw.QTableWidget):
     modHidden = Signal()
 
-    def __init__(self, savePath: str = MOD_CONFIG, optionsPath: str = OPTIONS_CONFIG) -> None:
+    def __init__(self) -> None:
         super().__init__()
         logging.getLogger(__name__)
-
-        self.saveManager = Save(savePath)
-        self.optionsManager = OptionsManager(optionsPath)
-
-        self.p = Pathing(optionsPath)
 
         self.setSelectionMode(qtw.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.setSelectionBehavior(qtw.QAbstractItemView.SelectionBehavior.SelectRows)
@@ -87,7 +82,7 @@ class ModListWidget(qtw.QTableWidget):
         disabled_text: str = qapp.translate("ModListWidget", 'Disabled')
 
         for i, item in enumerate(self.getEnabledItems()):
-            if self.saveManager.getEnabled(self.getNameItem(i).text()):
+            if Save.getEnabled(self.getNameItem(i).text()):
                 item.setText(enabled_text)
             else:
                 item.setText(disabled_text)
@@ -176,9 +171,9 @@ class ModListWidget(qtw.QTableWidget):
                         tags = []
                     item.setData(ModRole.tags, tuple(tags))
 
-                    if self.saveManager.getModworkshopAssetID(value):
+                    if Save.getModworkshopAssetID(value):
 
-                        color = MODWORKSHOP_LOGO_B if self.optionsManager.getTheme() == LIGHT else MODWORKSHOP_LOGO_W
+                        color = MODWORKSHOP_LOGO_B if OptionsManager.getTheme() == LIGHT else MODWORKSHOP_LOGO_W
 
                         item.setIcon(qtg.QIcon(os.path.join(UI_GRAPHICS_PATH, color)))
 
@@ -213,7 +208,7 @@ class ModListWidget(qtw.QTableWidget):
 
         items: List[qtw.QTableWidgetItem] = self.getSelectedNameItems()
 
-        disabledModDir: str = self.optionsManager.getDispath()
+        disabledModDir: str = OptionsManager.getDispath()
 
         startFileMover = ProgressWidget(MoveToDisabledDir(*[x.text() for x in items]))
         startFileMover.exec()
@@ -226,14 +221,14 @@ class ModListWidget(qtw.QTableWidget):
 
             if os.path.isdir(os.path.join(disabledModDir, modName)):
 
-                self.saveManager.setEnabled(modName, False)
+                Save.setEnabled(modName, False)
 
                 self.getEnabledItem(row).setText(qapp.translate("ModListWidget", 'Disabled'))
 
             else:
                 logging.info('%s is already disabled in the save file', modName)
         
-        self.saveManager.saveJSON()
+        Save.saveJSON()
 
     def deleteItem(self) -> None:
         '''
@@ -262,7 +257,7 @@ class ModListWidget(qtw.QTableWidget):
             
             self.itemChanged.emit(*items)
 
-            self.saveManager.saveJSON()
+            Save.saveJSON()
     
     def setItemEnabled(self) -> None:
         '''Sets one or more mods to be enabled in MOD_CONFIG and in the GUI'''
@@ -279,14 +274,14 @@ class ModListWidget(qtw.QTableWidget):
             modName: str = item.text()
             modType = ModType(self.getTypeItem(row).text())
 
-            self.p.mod(modType, modName)
+            Pathing.mod(modType, modName)
 
-            if os.path.isdir(self.p.mod(modType, modName)):
-                self.saveManager.setEnabled(modName, True)
+            if os.path.isdir(Pathing.mod(modType, modName)):
+                Save.setEnabled(modName, True)
 
                 self.getEnabledItem(row).setText(qapp.translate("ModListWidget", 'Enabled'))
         
-        self.saveManager.saveJSON()
+        Save.saveJSON()
 
     # This isn't used anywhere, might be removed later
     def isMultipleSelected(self) -> bool:
@@ -304,38 +299,38 @@ class ModListWidget(qtw.QTableWidget):
         mods_override, mods, maps = self.getMods()
 
         # Save mods into .ini
-        self.saveManager.addMods((mods_override, ModType.mods_override), (mods, ModType.mods), (maps, ModType.maps))
+        Save.addMods((mods_override, ModType.mods_override), (mods, ModType.mods), (maps, ModType.maps))
 
-        disModFolder: str = self.optionsManager.getDispath()
+        disModFolder: str = OptionsManager.getDispath()
 
         # Add mods to the table widget
         for mod in (x for x in mods_override + mods + maps):
             
             # Checking if the mod is ignored
-            if self.saveManager.getIgnored(mod):
+            if Save.getIgnored(mod):
                 continue
 
-            type: ModType | None = self.saveManager.getType(mod)
+            type: ModType | None = Save.getType(mod)
             isEnabled: bool = not os.path.isdir(os.path.join(disModFolder, mod))
-            modPath: List[str] | str = self.p.mod(type, mod) if isEnabled else os.path.join(disModFolder, mod)
+            modPath: List[str] | str = Pathing.mod(type, mod) if isEnabled else os.path.join(disModFolder, mod)
             version = str(findModVersion(modPath))
-            tags: List[str] = self.saveManager.getTags(mod)
+            tags: List[str] = Save.getTags(mod)
 
-            assetID: str = self.saveManager.getModworkshopAssetID(mod)
+            assetID: str = Save.getModworkshopAssetID(mod)
 
             # Empty string
             if not assetID:
                 assetID = findModworkshopAssetID(modPath)
 
-            self.saveManager.setEnabled(mod, isEnabled)
+            Save.setEnabled(mod, isEnabled)
             
-            self.saveManager.setModWorkshopAssetID(mod, assetID)
+            Save.setModWorkshopAssetID(mod, assetID)
             
             logging.debug('Adding mod to table, %s|%s|%s|%s|%s|%s', mod, type, isEnabled, version, assetID, tags)
 
             self.addMod(name=mod, type=type, enabled=isEnabled, version=version, tags=tags)
         
-        self.saveManager.saveJSON()
+        Save.saveJSON()
 
         # Clear selections from the disabled mod check
         self.clearSelection()
@@ -360,10 +355,10 @@ class ModListWidget(qtw.QTableWidget):
         maps: list[str] = []
 
         # Mod Folder Paths
-        modsPath: str = self.p.mods()
-        mod_overridePath: str = self.p.mod_overrides()
-        maps_path: str = self.p.maps()
-        disabledModsPath: str = self.optionsManager.getDispath()
+        modsPath: str = Pathing.mods()
+        mod_overridePath: str = Pathing.mod_overrides()
+        maps_path: str = Pathing.maps()
+        disabledModsPath: str = OptionsManager.getDispath()
 
         # Mod Folder Contents
         modsFolder: List[str] = os.listdir(modsPath)
@@ -415,9 +410,9 @@ class ModListWidget(qtw.QTableWidget):
             
             for mod in disabledModsFolder:
 
-                if self.saveManager.hasMod(mod):
+                if Save.hasMod(mod):
 
-                    modType: ModType | None = self.saveManager.getType(mod)
+                    modType: ModType | None = Save.getType(mod)
                     
                     if modType == ModType.mods:
 
@@ -440,7 +435,7 @@ class ModListWidget(qtw.QTableWidget):
         if not len(self.getSelectedNameItems()) <= 0:
             selectedItem: qtw.QTableWidgetItem = self.getSelectedNameItems()[0]
 
-            assetID: str = self.saveManager.getModworkshopAssetID(selectedItem.text())
+            assetID: str = Save.getModworkshopAssetID(selectedItem.text())
 
             errorChecking.openWebPage(f'https://modworkshop.net/mod/{assetID}')
     
@@ -459,7 +454,7 @@ class ModListWidget(qtw.QTableWidget):
         item: qtw.QTableWidgetItem = self.getSelectedNameItems()[0]
         modName: str = self.getNameItem(self.row(item)).text()
         modVersion: str = self.getVersionItem(self.row(item)).text()
-        assetID: str = self.saveManager.getModworkshopAssetID(modName)
+        assetID: str = Save.getModworkshopAssetID(modName)
 
         if not assetID:
             logging.warning('ModListWidget.checkModUpdate(), %s is missing an assetID', modName)
@@ -477,10 +472,10 @@ class ModListWidget(qtw.QTableWidget):
             modType: str = self.getTypeItem(self.row(selectedItem)).text()
 
             path: str | list[str]
-            if not self.saveManager.getEnabled(modName):
-                path = os.path.join(self.optionsManager.getDispath(), modName)
+            if not Save.getEnabled(modName):
+                path = os.path.join(OptionsManager.getDispath(), modName)
             else:
-                path = self.p.mod(ModType(modType), modName)
+                path = Pathing.mod(ModType(modType), modName)
 
             if os.path.isdir(path):
                 errorChecking.startFile(path)
@@ -489,10 +484,10 @@ class ModListWidget(qtw.QTableWidget):
         items: List[qtw.QTableWidgetItem] = self.getSelectedNameItems()
         for item in items:
             modName: str = item.text()
-            self.saveManager.setIgnored(modName, True)
+            Save.setIgnored(modName, True)
             self.removeRow(item.row())
         
-        self.saveManager.saveJSON()
+        Save.saveJSON()
 
         self.modHidden.emit()
         self.itemChanged.emit(items[0])

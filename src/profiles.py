@@ -16,19 +16,15 @@ from src.threaded.moveToDisabledDir import MoveToDisabledDir
 from src.threaded.moveToEnabledDir import MoveToEnabledModDir
 from src.save import Save
 
-from src.constant_vars import MOD_CONFIG, PROFILES_JSON
-
 class modProfile(qtw.QWidget):
-    def __init__(self, savePath = MOD_CONFIG, profilePath: str = PROFILES_JSON) -> None:
+    def __init__(self) -> None:
         super().__init__()
-
-        self.saveManager = Save(savePath)
 
         layout = qtw.QVBoxLayout()
 
         self.addProfileButton = qtw.QPushButton(self)
 
-        self.profileDisplay = ProfileList(self, profilePath)
+        self.profileDisplay = ProfileList(self)
 
         self.addProfileButton.clicked.connect(self.profileDisplay.menuAddProfile)
         self.profileDisplay.applyProfile.connect(self.applyMods)
@@ -48,7 +44,7 @@ class modProfile(qtw.QWidget):
     @Slot(tuple)
     def applyMods(self, mods: tuple[str, ...]) -> None:
         disabledMods: list[str] = [x for x in mods if errorChecking.isInstalled(x)]
-        enabledMods: list[str] = [x for x in self.saveManager.mods() if errorChecking.isInstalled(x) and x not in mods]
+        enabledMods: list[str] = [x for x in Save.mods() if errorChecking.isInstalled(x) and x not in mods]
         enableProgressWidget = ProgressWidget(MoveToEnabledModDir(*disabledMods))
         disableProgressWidget = ProgressWidget(MoveToDisabledDir(*enabledMods))
 

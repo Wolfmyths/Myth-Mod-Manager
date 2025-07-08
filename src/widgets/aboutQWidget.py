@@ -8,16 +8,14 @@ import PySide6.QtWidgets as qtw
 from src.save import OptionsManager
 from src.errorChecking import openWebPage
 
-from src.constant_vars import VERSION, PROGRAM_NAME, UI_GRAPHICS_PATH, GITHUB_LOGO_W, GITHUB_LOGO_B, LIGHT, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, KOFI_LOGO_B, OPTIONS_CONFIG
+from src.constant_vars import VERSION, PROGRAM_NAME, UI_GRAPHICS_PATH, GITHUB_LOGO_W, GITHUB_LOGO_B, LIGHT, MODWORKSHOP_LOGO_B, MODWORKSHOP_LOGO_W, KOFI_LOGO_B
 
 
 class About(qtw.QWidget):
-    def __init__(self, optionsPath: str = OPTIONS_CONFIG) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
         logging.getLogger(__file__)
-
-        self.options = OptionsManager(optionsPath)
 
         layout = qtw.QVBoxLayout()
         layout.setAlignment(qt.AlignmentFlag.AlignTop)
@@ -41,7 +39,7 @@ class About(qtw.QWidget):
         
         self.buttonFrame.setLayout(buttonFrameLayout)
 
-        self.updateIcons(self.options.getTheme())
+        self.updateIcons(OptionsManager.getTheme())
 
         self.aboutLabel = qtw.QLabel(self)
         self.aboutLabel.setWordWrap(True)

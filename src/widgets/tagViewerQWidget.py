@@ -6,6 +6,7 @@ import PySide6.QtGui as qtg
 from PySide6.QtCore import Signal, QCoreApplication as qapp
 
 from src.constant_vars import ModRole, PROGRAM_NAME, ICON
+from src.save import Save
 from src.widgets.QMenu.tagViewerQMenu import TagViewerMenu
 from src.widgets.QDialog.tagHandlerQDialog import TagHandler
 from src.widgets.tagDisplayQTable import TagDisplay
@@ -49,30 +50,30 @@ class TagViewer(qtw.QWidget):
         )
         confirmation.exec()
         if confirmation.result():
-            self.managerTable.saveManager.clearTags()
-            self.managerTable.saveManager.saveJSON()
+            Save.clearTags()
+            Save.saveJSON()
     
     def addTags(self) -> None:
         items = self.tagQTable.selectedItems()[::self.tagQTable.columnCount()]
-        allTags = self.managerTable.saveManager.getAllTags()
+        allTags = Save.getAllTags()
 
         tagQDialog = TagHandler(1, allTags)
         tagQDialog.exec()
         if tagQDialog.result():
             modsToBeChanged = [x.text() for x in items]
             tagsToBeAdded = tagQDialog.input.text().split(',')
-            self.managerTable.saveManager.setTags(tagsToBeAdded, *modsToBeChanged)
-            self.managerTable.saveManager.saveJSON()
+            Save.setTags(tagsToBeAdded, *modsToBeChanged)
+            Save.saveJSON()
 
             # Apply changes to GUI
             for mod in modsToBeChanged:
-                self.tagChanged.emit(mod, tuple(self.managerTable.saveManager.getTags(mod)))
+                self.tagChanged.emit(mod, tuple(Save.getTags(mod)))
 
             self.refreshTable()
     
     def removeTags(self) -> None:
         items = self.tagQTable.selectedItems()[::self.tagQTable.columnCount()]
-        allTags = self.managerTable.saveManager.getAllTags()
+        allTags = Save.getAllTags()
 
         tagQDialog = TagHandler(0, allTags)
         tagQDialog.exec()
@@ -81,12 +82,12 @@ class TagViewer(qtw.QWidget):
             modsToBeChanged = [x.text() for x in items]
             tagsToBeRemoved = tagQDialog.input.text().split(',')
 
-            self.managerTable.saveManager.removeTags(tagsToBeRemoved, *modsToBeChanged)
-            self.managerTable.saveManager.saveJSON()
+            Save.removeTags(tagsToBeRemoved, *modsToBeChanged)
+            Save.saveJSON()
 
             # Apply changes to GUI
             for mod in modsToBeChanged:
-                self.tagChanged.emit(mod, tuple(self.managerTable.saveManager.getTags(mod)))
+                self.tagChanged.emit(mod, tuple(Save.getTags(mod)))
 
             self.refreshTable()
 

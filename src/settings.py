@@ -12,7 +12,7 @@ from src.save import OptionsManager
 from src.getPath import Pathing
 from src.style import StyleManager
 from src.widgets.ignoredModsQListWidget import IgnoredMods
-from src.constant_vars import DARK, LIGHT, OPTIONS_CONFIG, ROOT_PATH, OptionKeys, LANG_FOLDER_PATH
+from src.constant_vars import DARK, LIGHT, ROOT_PATH, OptionKeys, LANG_FOLDER_PATH
 from src.widgets.QDialog.newUpdateQDialog import updateDetected
 from src.widgets.QDialog.announcementQDialog import Notice
 
@@ -39,12 +39,10 @@ language_code_to_string: dict = {x:y for y,x in language_string_to_code.items()}
 
 class Options(qtw.QWidget):
     themeSwitched = Signal(str)
-    def __init__(self, optionsPath = OPTIONS_CONFIG) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
         logging.getLogger(__file__)
-
-        self.optionsManager = OptionsManager(optionsPath)
 
         layout = qtw.QVBoxLayout()
 
@@ -163,10 +161,10 @@ class Options(qtw.QWidget):
     @Slot()
     def applySettings(self) -> None:
         if self.optionChanged.get(OptionKeys.game_path):
-            self.optionsManager.setGamepath(self.optionsGeneral.gameDir.text())
+            OptionsManager.setGamepath(self.optionsGeneral.gameDir.text())
 
         if self.optionChanged.get(OptionKeys.dispath):
-            old_path: str = self.optionsManager.getDispath()
+            old_path: str = OptionsManager.getDispath()
             new_path: str = self.optionsGeneral.disabledModDir.text()
 
             is_dir: bool = os.path.isdir(new_path)
@@ -190,7 +188,7 @@ class Options(qtw.QWidget):
                 ).exec()
 
             if not progressWidget.mode.cancel:
-                self.optionsManager.setDispath(new_path)
+                OptionsManager.setDispath(new_path)
             else:
                 # Revert text
                 self.optionsGeneral.disabledModDir.setText(old_path)
@@ -205,7 +203,7 @@ class Options(qtw.QWidget):
 
         if self.optionChanged.get(OptionKeys.color_theme):
             theme = LIGHT if self.optionsGeneral.colorThemeLight.isChecked() else DARK
-            self.optionsManager.setTheme(theme)
+            OptionsManager.setTheme(theme)
 
             app: qtw.QApplication = qtw.QApplication.instance()
             app.setStyleSheet(StyleManager().getStyleSheet(theme))
@@ -213,18 +211,18 @@ class Options(qtw.QWidget):
             self.themeSwitched.emit(theme)
 
         if self.optionChanged.get(OptionKeys.mmm_update_alert):
-            self.optionsManager.setMMMUpdateAlert(self.optionsGeneral.updateAlertCheckbox.isChecked())
+            OptionsManager.setMMMUpdateAlert(self.optionsGeneral.updateAlertCheckbox.isChecked())
         
         if self.optionChanged.get(OptionKeys.lang):
             app: qtw.QApplication = qtw.QApplication.instance()
 
-            old_lang: str = self.optionsManager.getLang()
+            old_lang: str = OptionsManager.getLang()
             new_lang: str | None = language_string_to_code.get(self.optionsGeneral.language.currentText())
 
             translator: QTranslator = app.findChild(QTranslator)
 
             if translator.load(os.path.join(LANG_FOLDER_PATH, new_lang + '.qm')):
-                self.optionsManager.setLang(new_lang)
+                OptionsManager.setLang(new_lang)
 
                 logging.info('Changed lang from %s to %s', old_lang, new_lang)
             else:
@@ -235,7 +233,7 @@ class Options(qtw.QWidget):
         self.applyButton.setEnabled(False)
         self.cancelButton.setEnabled(False)
 
-        self.optionsManager.writeData()
+        OptionsManager.writeData()
 
     @Slot()
     @Slot(bool)
@@ -247,22 +245,22 @@ class Options(qtw.QWidget):
         has a pending change.
         '''
         if self.optionChanged.get(OptionKeys.game_path) or reset:
-            self.optionsGeneral.gameDir.setText(self.optionsManager.getGamepath())
+            self.optionsGeneral.gameDir.setText(OptionsManager.getGamepath())
 
         if self.optionChanged.get(OptionKeys.dispath) or reset:
-            self.optionsGeneral.disabledModDir.setText(self.optionsManager.getDispath())
+            self.optionsGeneral.disabledModDir.setText(OptionsManager.getDispath())
 
         if self.optionChanged.get(OptionKeys.color_theme) or reset:
-            if self.optionsManager.getTheme() == LIGHT:
+            if OptionsManager.getTheme() == LIGHT:
                 self.optionsGeneral.colorThemeLight.setChecked(True)
             else:
                 self.optionsGeneral.colorThemeDark.setChecked(True)
 
         if self.optionChanged.get(OptionKeys.mmm_update_alert) or reset:
-            self.optionsGeneral.updateAlertCheckbox.setChecked(self.optionsManager.getMMMUpdateAlert())
+            self.optionsGeneral.updateAlertCheckbox.setChecked(OptionsManager.getMMMUpdateAlert())
 
         if self.optionChanged.get(OptionKeys.lang) or reset:
-            self.optionsGeneral.language.setCurrentText(language_code_to_string.get(self.optionsManager.getLang()))
+            self.optionsGeneral.language.setCurrentText(language_code_to_string.get(OptionsManager.getLang()))
 
         self.resetPendingOptions()
 
@@ -281,9 +279,6 @@ class OptionsSectionBase(qtw.QWidget):
 class OptionsGeneral(OptionsSectionBase):
     def __init__(self, parent: Options = None) -> None:
         super().__init__(parent=parent)
-
-        parent = self.parentWidget()
-        self.optionsManager: OptionsManager = parent.optionsManager
 
         layout = qtw.QVBoxLayout()
 
@@ -336,7 +331,7 @@ class OptionsGeneral(OptionsSectionBase):
         gbUpdatesLayout = qtw.QVBoxLayout()
 
         self.updateAlertCheckbox = qtw.QCheckBox(self)
-        self.updateAlertCheckbox.setChecked(self.optionsManager.getMMMUpdateAlert())
+        self.updateAlertCheckbox.setChecked(OptionsManager.getMMMUpdateAlert())
         self.updateAlertCheckbox.clicked.connect(self.setUpdateAlert)
 
         self.checkUpdateButton = qtw.QPushButton(self)
@@ -386,29 +381,29 @@ class OptionsGeneral(OptionsSectionBase):
 
     @Slot(str)
     def gamePathChanged(self, path: str) -> None:
-        changed: bool = True if path != self.optionsManager.getGamepath() else False
+        changed: bool = True if path != OptionsManager.getGamepath() else False
         self.pendingChanges.emit(OptionKeys.game_path, changed)
     
     @Slot(str)
     def disPathChanged(self, path: str) -> None:
         path = repr(path)
-        changed: bool = True if path != self.optionsManager.getDispath() else False
+        changed: bool = True if path != OptionsManager.getDispath() else False
         self.pendingChanges.emit(OptionKeys.dispath, changed)
     
     @Slot(str)
     def langChanged(self, lang: str) -> None:
         lang = language_string_to_code.get(lang)
-        changed: bool = True if lang != self.optionsManager.getLang() else False
+        changed: bool = True if lang != OptionsManager.getLang() else False
         self.pendingChanges.emit(OptionKeys.lang, changed)
     
     @Slot(str)
     def themeChanged(self, theme: str) -> None:
-        changed: bool = True if theme != self.optionsManager.getTheme() else False
+        changed: bool = True if theme != OptionsManager.getTheme() else False
         self.pendingChanges.emit(OptionKeys.color_theme, changed)
     
     @Slot()
     def setUpdateAlert(self) -> None:
-        changed: bool = True if self.updateAlertCheckbox.isChecked() != self.optionsManager.getMMMUpdateAlert() else False
+        changed: bool = True if self.updateAlertCheckbox.isChecked() != OptionsManager.getMMMUpdateAlert() else False
         self.pendingChanges.emit(OptionKeys.mmm_update_alert, changed)
     
     def checkUpdate(self) -> None:
@@ -529,7 +524,7 @@ class OptionsMisc(OptionsSectionBase):
     
     @Slot()
     def openCrashLogBLT(self) -> None:
-        modPath = Pathing().mods()
+        modPath: str = Pathing.mods()
 
         errorChecking.startFile(os.path.join(modPath, 'logs'))
     

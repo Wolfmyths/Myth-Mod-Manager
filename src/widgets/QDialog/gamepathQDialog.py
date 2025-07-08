@@ -5,10 +5,9 @@ import PySide6.QtWidgets as qtw
 
 from src.widgets.QDialog.QDialog import Dialog
 from src.save import OptionsManager
-from src.constant_vars import OPTIONS_CONFIG
 
 class GamePathNotFound(Dialog):
-    def __init__(self, QParent: qtw.QWidget | qtw.QApplication, optionsPath: str = OPTIONS_CONFIG) -> None:
+    def __init__(self, QParent: qtw.QWidget | qtw.QApplication) -> None:
         super().__init__()
 
         self.QParent: qtw.QWidget | qtw.QApplication = QParent
@@ -16,8 +15,6 @@ class GamePathNotFound(Dialog):
         style: qtw.QStyle = self.style()
 
         self.setWindowTitle(qapp.translate('GamePathNotFound', 'Set game path'))
-
-        self.optionsManager = OptionsManager(optionsPath)
 
         layout = qtw.QVBoxLayout()
 
@@ -76,8 +73,8 @@ class GamePathNotFound(Dialog):
     
     @Slot()
     def accept(self) -> None:
-        self.optionsManager.setGamepath(self.gameDir.text())
-        self.optionsManager.writeData()
+        OptionsManager.setGamepath(self.gameDir.text())
+        OptionsManager.writeData()
         return super().accept()
 
     @Slot()

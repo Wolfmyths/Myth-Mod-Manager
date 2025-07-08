@@ -10,7 +10,7 @@ from src.widgets.modProfileQTreeWidget import ProfileList
 
 @pytest.fixture(scope='module')
 def create_ProfileList(createTemp_Profiles_ini: str) -> Generator:
-    yield ProfileList(profilePath = createTemp_Profiles_ini)
+    yield ProfileList()
 
 def test_modProfile(qtbot: QtBot, create_ProfileList: ProfileList) -> None:
     qtbot.addWidget(create_ProfileList)

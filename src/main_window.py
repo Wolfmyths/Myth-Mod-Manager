@@ -10,29 +10,26 @@ from src.settings import Options
 from src.profiles import modProfile
 from src.widgets.aboutQWidget import About
 from src.widgets.QDialog.newUpdateQDialog import updateDetected
-from src.save import OptionsManager, Save
+from src.save import OptionsManager
 from src.api.checkUpdate import checkUpdate
 
-from src.constant_vars import ICON, PROGRAM_NAME, VERSION, MOD_CONFIG, OPTIONS_CONFIG, ROOT_PATH
+from src.constant_vars import ICON, PROGRAM_NAME, VERSION, ROOT_PATH
 from src import errorChecking
 
 class MainWindow(qtw.QMainWindow):
-    def __init__(self, app: qapp | None = None, savePath = MOD_CONFIG, optionsPath = OPTIONS_CONFIG) -> None:
+    def __init__(self, app: qapp | None = None) -> None:
         super().__init__()
-
-        self.optionsManager = OptionsManager(optionsPath)
-        self.save = Save(savePath)
 
         self.setWindowIcon(qtg.QIcon(ICON))
         self.setWindowTitle(f'{PROGRAM_NAME} {VERSION}')
         self.setMinimumSize(800, 800)
-        self.resize(self.optionsManager.getWindowSize())
+        self.resize(OptionsManager.getWindowSize())
 
         self.app: qapp | None = app
 
         self.tab = qtw.QTabWidget(self)
 
-        self.manager = ModManager(savePath, optionsPath)
+        self.manager = ModManager()
         self.profile = modProfile()
         self.tools = ToolManager()
         self.options = Options()
@@ -56,7 +53,7 @@ class MainWindow(qtw.QMainWindow):
 
         self.applyStaticText()
 
-        if self.optionsManager.getMMMUpdateAlert():
+        if OptionsManager.getMMMUpdateAlert():
             self.run_checkUpdate = checkUpdate()
             self.run_checkUpdate.updateDetected.connect(self.updateDetected)
 
@@ -108,8 +105,8 @@ class MainWindow(qtw.QMainWindow):
         self.options.optionsMisc.applyStaticText()
 
     def closeEvent(self, event: qtg.QCloseEvent) -> None:
-        self.optionsManager.setWindowSize(self.size())
-        self.optionsManager.writeData()
+        OptionsManager.setWindowSize(self.size())
+        OptionsManager.writeData()
 
         if isinstance(self.app, qtw.QApplication):
             self.app.closeAllWindows()

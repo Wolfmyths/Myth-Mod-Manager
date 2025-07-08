@@ -3,6 +3,7 @@ import os
 
 from PySide6.QtCore import QCoreApplication as qapp, Slot
 
+from src.getPath import Pathing
 import src.errorChecking as errorChecking
 from src.threaded.workerQObject import Worker
 from src.constant_vars import ModType
@@ -37,7 +38,7 @@ class ChangeModType(Worker):
             # Setting the Destination path
             if errorChecking.isTypeMod(ChosenDir):
 
-                modDestPath: list[str] | str = self.p.mod(ChosenDir, mod)
+                modDestPath: list[str] | str = Pathing.mod(ChosenDir, mod)
 
                 self.move(modsDirPath, modDestPath)
                 self.mods_moved.append((modsDirPath, modDestPath))

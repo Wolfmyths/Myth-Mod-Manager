@@ -3,11 +3,12 @@ from pytestqt.qtbot import QtBot
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QSize
 
+from src.save import OptionsManager
 from src.main_window import MainWindow
 from src.constant_vars import PROGRAM_NAME, VERSION
 
-def test_main_window(qtbot: QtBot, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> None:
-    widget = MainWindow(optionsPath=createTemp_Config_ini, savePath=createTemp_Mod_ini)
+def test_main_window(qtbot: QtBot, createTemp_Config_ini: str, createTemp_Mod_ini: str, createTemp_Profiles_ini: str, createTemp_externalShortcuts_ini) -> None:
+    widget = MainWindow()
     qtbot.addWidget(widget)
 
     assert not widget.windowIcon().isNull()                          # Has icon
@@ -17,4 +18,4 @@ def test_main_window(qtbot: QtBot, createTemp_Config_ini: str, createTemp_Mod_in
 
     widget.resize(1000, 900)
     widget.close()
-    assert widget.optionsManager.getWindowSize() == QSize(1000, 900) # Saving window size
+    assert OptionsManager.getWindowSize() == QSize(1000, 900) # Saving window size

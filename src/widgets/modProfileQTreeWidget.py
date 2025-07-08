@@ -14,7 +14,7 @@ from src.widgets.QDialog.profileSelectionQDialog import SelectProfile
 
 import src.errorChecking as errorChecking
 from src.profileManager import ProfileManager
-from src.constant_vars import DATA_PROFILE, DATA_MOD, ProfileRole, PROFILES_JSON
+from src.constant_vars import DATA_PROFILE, DATA_MOD, ProfileRole
 
 if TYPE_CHECKING:
     from src.profiles import modProfile
@@ -29,7 +29,7 @@ class ProfileList(qtw.QTreeWidget):
 
     noneRightclicked = Signal()
 
-    def __init__(self, parent: modProfile = None, profilePath: str = PROFILES_JSON) -> None:
+    def __init__(self, parent: modProfile = None) -> None:
         super().__init__(parent)
 
         logging.getLogger(__name__)
@@ -40,8 +40,6 @@ class ProfileList(qtw.QTreeWidget):
 
         self.header().setSectionResizeMode(0, qtw.QHeaderView.ResizeMode.Stretch)
         self.header().setSectionResizeMode(1, qtw.QHeaderView.ResizeMode.Interactive)
-
-        self.profileManager = ProfileManager(profilePath)
 
         self.menu = ProfileMenu(self)
 
@@ -106,7 +104,7 @@ class ProfileList(qtw.QTreeWidget):
 
                 logging.info('Applying mods from %s', selectedItem.text(0))
 
-                self.applyProfile.emit(tuple(self.profileManager.getMods(selectedItem.text(0))))
+                self.applyProfile.emit(tuple(ProfileManager.getMods(selectedItem.text(0))))
             
             else:
 
@@ -114,7 +112,7 @@ class ProfileList(qtw.QTreeWidget):
 
                 logging.info('Applying mods from %s', profile)
 
-                self.applyProfile.emit(tuple(self.profileManager.getMods(profile)))
+                self.applyProfile.emit(tuple(ProfileManager.getMods(profile)))
     
     def checkInstalled(self) -> None:
         '''
@@ -122,7 +120,7 @@ class ProfileList(qtw.QTreeWidget):
         depending if it's installed or not.
         '''
 
-        for profile in list(self.profileManager.file.keys()):
+        for profile in ProfileManager.get_profile_names():
 
             profileWidget: qtw.QTreeWidgetItem = self.__findProfile(profile)
 
@@ -144,9 +142,9 @@ class ProfileList(qtw.QTreeWidget):
         self.clear()
 
         profile: str
-        for profile in list(self.profileManager.file.keys()):
+        for profile in ProfileManager.get_profile_names():
 
-            modList: list[str] = self.profileManager.file.get(profile)
+            modList: list[str] = ProfileManager.getMods(profile)
 
             self.addProfile(profile, initalize=True)
 
@@ -208,7 +206,7 @@ class ProfileList(qtw.QTreeWidget):
             profile.setText(1, str(int(profile.text(1)) + 1))
         
         if save:
-            self.profileManager.addMod(profile.text(0), *mods)
+            ProfileManager.addMod(profile.text(0), *mods)
 
             if not profile.isExpanded():
                 profile.setExpanded(True)
@@ -221,7 +219,7 @@ class ProfileList(qtw.QTreeWidget):
 
         logging.info('Removing mod %s from profile %s', mod.text(0), profile.text(0))
 
-        self.profileManager.removeMod(profile.text(0), mod.text(0))
+        ProfileManager.removeMod(profile.text(0), mod.text(0))
 
         profile.takeChild(profile.indexOfChild(mod))
 
@@ -301,7 +299,7 @@ class ProfileList(qtw.QTreeWidget):
             self.addTopLevelItem(profile)
         
         if not initalize:
-            self.profileManager.addProfile(*items)
+            ProfileManager.addProfile(*items)
     
     def isProfile(self, itemInQuestion: qtw.QTreeWidgetItem) -> bool:
         return itemInQuestion.data(0, ProfileRole.type) == DATA_PROFILE[2]
@@ -315,7 +313,7 @@ class ProfileList(qtw.QTreeWidget):
 
         self.takeTopLevelItem(self.indexOfTopLevelItem(toBeDeleted))
 
-        self.profileManager.removeProfile(toBeDeleted.text(0))
+        ProfileManager.removeProfile(toBeDeleted.text(0))
     
     def editProfileMenu(self) -> None:
 
@@ -353,7 +351,7 @@ class ProfileList(qtw.QTreeWidget):
 
         logging.info('Editing %s to %s', profile.text(0), name)
 
-        self.profileManager.changeProfile(profile.text(0), name)
+        ProfileManager.changeProfile(profile.text(0), name)
 
         profile.setText(0, name)
 

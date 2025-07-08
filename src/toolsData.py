@@ -4,33 +4,42 @@ import logging
 from src.JSONParser import JSONParser
 from src.constant_vars import TOOLS_JSON
 
-class ToolJSON(JSONParser):
-    file: dict[str:list[str]] = None
+class ToolJSON():
+    _file: dict[str:list[str]] = None
+    _path: str = ''
+
     def __init__(self, path: str = TOOLS_JSON) -> None:
         logging.getLogger(__name__)
-        super().__init__(path, default={'shortcuts' : []})
-        self.path = path
+
+        ToolJSON._file = JSONParser.loadJSON(path, {'shortcuts' : []})
+        ToolJSON._path = path
 
     def __str__(self) -> str:
 
-        if self.file is not None:
-            output = str(self.file.get('shortcuts'))
+        if ToolJSON._file is not None:
+            output = str(ToolJSON._file.get('shortcuts'))
         else:
             output = 'None'
         
         return output
     
-    def getShortcuts(self) -> list[str]:
-        return self.file.get('shortcuts')
+    @staticmethod
+    def save() -> None:
+        JSONParser.saveJSON(ToolJSON._path, ToolJSON._file)
+
+    @staticmethod
+    def getShortcuts() -> list[str]:
+        return ToolJSON._file.get('shortcuts')
     
-    def newTool(self, *urls: str) -> list[str]:
+    @staticmethod
+    def newTool(*urls: str) -> list[str]:
         '''
         Adds new urls to the shortcuts list, returns a list of duplicates
         '''
 
         dupes: list[str] = []
 
-        shortcuts: list[str] = self.getShortcuts()
+        shortcuts: list[str] = ToolJSON.getShortcuts()
 
         for url in urls:
             if url not in shortcuts:
@@ -38,27 +47,29 @@ class ToolJSON(JSONParser):
             else:
                 dupes.append(url)
         
-        self.file['shortcuts'] = shortcuts
+        ToolJSON._file['shortcuts'] = shortcuts
 
         if dupes:
             logging.info('Duplicate URL shortcuts tried to be added: %s', ', '.join(dupes))
 
         return dupes
     
-    def removeTool(self, *urls: str) -> None:
-        shortcuts: list[str] = self.getShortcuts()
+    @staticmethod
+    def removeTool(*urls: str) -> None:
+        shortcuts: list[str] = ToolJSON.getShortcuts()
         for url in urls:
             if url in shortcuts:
                 logging.info('External tool at %s has been deleted', url)
                 shortcuts.remove(url)
         
-        self.file['shortcuts'] = shortcuts
+        ToolJSON._file['shortcuts'] = shortcuts
     
-    def changeTool(self, old: str, new: str) -> None:
-        shortcuts: list[str] = self.getShortcuts()
+    @staticmethod
+    def changeTool(old: str, new: str) -> None:
+        shortcuts: list[str] = ToolJSON.getShortcuts()
         if old in shortcuts:
             logging.info('External tool url has changed from %s to %s', old, new)
             index: int = shortcuts.index(os.path.abspath(old))
             shortcuts[index] = os.path.abspath(new)
         
-        self.file['shortcuts'] = shortcuts
+        ToolJSON._file['shortcuts'] = shortcuts

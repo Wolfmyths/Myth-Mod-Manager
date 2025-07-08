@@ -6,13 +6,13 @@ from src.widgets.QDialog.QDialog import Dialog
 
 import src.errorChecking as errorChecking
 from src.save import Save
-from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG, ModRole
+from src.constant_vars import ModRole
 
 class SelectMod(Dialog):
 
     mods: list[str] = None
 
-    def __init__(self, savePath: str = MOD_CONFIG, optionsPath: str = OPTIONS_CONFIG) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
         self.setWindowTitle(qapp.translate('SelectMod', 'Mods to be added:'))
@@ -28,8 +28,6 @@ class SelectMod(Dialog):
         self.searchBar.setPlaceholderText(qapp.translate('SelectMod', 'Search... use "tag:" with no spaces to search for tags, use a comma "," to seperate tags'))
         self.searchBar.textChanged.connect(self.search)
 
-        self.saveManager = Save(savePath)
-
         buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
         self.buttonBox = qtw.QDialogButtonBox(buttons)
@@ -37,12 +35,12 @@ class SelectMod(Dialog):
         self.buttonBox.rejected.connect(self.reject)
 
         # Add mods
-        self.modList.addItems(sorted([x for x in self.saveManager.mods() if errorChecking.isInstalled(x, optionsPath)]))
+        self.modList.addItems(sorted([x for x in Save.mods() if errorChecking.isInstalled(x)]))
 
         # Add tags
         for i in range(self.modList.count()):
             item: qtw.QListWidgetItem = self.modList.item(i)
-            modTags: list[str] = self.saveManager.getTags(item.text())
+            modTags: list[str] = Save.getTags(item.text())
             if modTags is not None:
                 item.setData(ModRole.tags, modTags)
 

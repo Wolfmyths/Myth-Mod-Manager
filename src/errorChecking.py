@@ -13,8 +13,7 @@ from src.widgets.QDialog.announcementQDialog import Notice
 
 from src.getPath import Pathing
 from src.save import OptionsManager
-from src.constant_vars import ModType, OPTIONS_CONFIG
-
+from src.constant_vars import ModType
 logging.getLogger(__name__)
 
 @Slot(str)
@@ -32,22 +31,24 @@ def openWebPage(link: str) -> bool:
     
     return outcome
 
-def createModDirs(optionsPath: str = OPTIONS_CONFIG) -> None:
-    path = Pathing(optionsPath)
-    disPath: str = OptionsManager(optionsPath).getDispath()
+def createModDirs() -> None:
+    disPath: str = OptionsManager.getDispath()
 
-    for modDir in (path.maps(), path.mod_overrides(), path.mods(), disPath):
+    for modDir in (Pathing.maps(), Pathing.mod_overrides(), Pathing.mods(), disPath):
         if not os.path.isdir(modDir):
             os.mkdir(modDir)
 
-def isInstalled(mod: str, optionsPath: str = OPTIONS_CONFIG) -> bool:
+def isInstalled(mod: str) -> bool:
     '''Checks if the mod is installed on the system'''
 
     installed = False
 
-    path = Pathing(optionsPath)
-
-    possiblePaths: tuple[str, str, str, str] = (path.maps(), path.mod_overrides(), path.mods(), OptionsManager(optionsPath).getDispath())
+    possiblePaths: tuple[str, str, str, str] = (
+        Pathing.maps(),
+        Pathing.mod_overrides(),
+        Pathing.mods(),
+        OptionsManager.getDispath()
+    )
 
     for path in possiblePaths:
 

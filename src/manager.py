@@ -10,19 +10,16 @@ import PySide6.QtGui as qtg
 
 from src.widgets.managerQTableWidget import ModListWidget
 from src.widgets.QDialog.announcementQDialog import Notice
-from src.save import Save, OptionsManager
+from src.save import OptionsManager
 import src.errorChecking as errorChecking
-from src.constant_vars import ModType, MOD_CONFIG, OPTIONS_CONFIG
+from src.constant_vars import ModType
 
 class ModManager(qtw.QWidget):
 
-    def __init__(self, saveManagerPath = MOD_CONFIG, optionsManagerPath = OPTIONS_CONFIG) -> None:
+    def __init__(self) -> None:
         super().__init__()
 
         self.setObjectName('manager')
-
-        self.saveManager = Save(saveManagerPath)
-        self.optionsManager = OptionsManager(optionsManagerPath)
 
         layout = qtw.QVBoxLayout()
 
@@ -55,7 +52,7 @@ class ModManager(qtw.QWidget):
 
         self.search = qtw.QLineEdit()
 
-        self.modsTable = ModListWidget(saveManagerPath, optionsManagerPath)
+        self.modsTable = ModListWidget()
 
         self.modsTable.refreshMods()
 
@@ -86,7 +83,7 @@ class ModManager(qtw.QWidget):
     
     @Slot()
     def onOpenGameDirClicked(self) -> None:
-        errorChecking.startFile(self.optionsManager.getGamepath())
+        errorChecking.startFile(OptionsManager.getGamepath())
 
     def applyStaticText(self) -> None:
         self.refresh.setText(qapp.translate("ModManager", "Refresh Mods"))
@@ -108,7 +105,7 @@ class ModManager(qtw.QWidget):
     @Slot()
     def startPayday(self) -> None:
 
-        gamePath: str = self.optionsManager.getGamepath()
+        gamePath: str = OptionsManager.getGamepath()
 
         try:
             if not os.path.isabs(gamePath):

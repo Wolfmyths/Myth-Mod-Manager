@@ -7,14 +7,11 @@ from src.toolsData import ToolJSON
 from src.widgets.toolDisplayQWidget import ExternalTool
 from src.widgets.QDialog.announcementQDialog import Notice
 
-from src.constant_vars import TOOLS_JSON
-
 class ExternalToolDisplay(qtw.QListWidget):
     external_tools: list[ExternalTool] = []
-    def __init__(self, json = TOOLS_JSON) -> None:
+    def __init__(self) -> None:
         super().__init__()
         logging.getLogger(__name__)
-        self.json = ToolJSON(json)
 
         self.setWrapping(True)
         self.setResizeMode(self.ResizeMode.Adjust)
@@ -22,15 +19,15 @@ class ExternalToolDisplay(qtw.QListWidget):
         self.setFlow(self.Flow.LeftToRight)
         self.setSpacing(4)
 
-        self.addTool(*self.json.getShortcuts(), save=False)
+        self.addTool(*ToolJSON.getShortcuts(), save=False)
 
     def addTool(self, *url: str, save: bool = True) -> None:
 
         dupes: list[str] = []
 
         if save:
-            dupes = self.json.newTool(*url)
-            self.json.saveJSON()
+            dupes = ToolJSON.newTool(*url)
+            ToolJSON.save()
 
         for s in url:
 
@@ -72,8 +69,8 @@ class ExternalToolDisplay(qtw.QListWidget):
         self.external_tools.pop(index)
         self.takeItem(index)
 
-        self.json.removeTool(url)
-        self.json.saveJSON()
+        ToolJSON.removeTool(url)
+        ToolJSON.save()
 
     @Slot(str, str)
     def changeName(self, newUrl: str, oldUrl: str) -> None:
@@ -89,5 +86,5 @@ class ExternalToolDisplay(qtw.QListWidget):
 
         item.setText(newUrl)
 
-        self.json.changeTool(oldUrl, newUrl)
-        self.json.saveJSON()
+        ToolJSON.changeTool(oldUrl, newUrl)
+        ToolJSON.save()

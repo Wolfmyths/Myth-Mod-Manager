@@ -16,7 +16,7 @@ MOCK_LANG: str = 'zh_CN'
 
 @pytest.fixture(scope='module')
 def create_Settings(createTemp_Config_ini: str) -> Generator:
-    yield Options(createTemp_Config_ini)
+    yield Options()
 
 def test_Settings(create_Settings: Options) -> None:
     assert create_Settings.sectionsList.count() == 4

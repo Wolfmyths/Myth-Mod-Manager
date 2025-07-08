@@ -5,6 +5,7 @@ import patoolib
 
 from PySide6.QtCore import QCoreApplication as qapp, Slot
 
+from src.getPath import Pathing
 from src.threaded.workerQObject import Worker
 from src.constant_vars import ModType
 
@@ -20,7 +21,11 @@ class UnZipMod(Worker):
 
         self.setTotalProgress.emit(len(self.mods))
 
-        modDestDict: dict[ModType, str] = {ModType.mods : self.p.mods(), ModType.mods_override : self.p.mod_overrides(), ModType.maps : self.p.maps()}
+        modDestDict: dict[ModType, str] = {
+            ModType.mods          : Pathing.mods(),
+            ModType.mods_override : Pathing.mod_overrides(),
+            ModType.maps          : Pathing.maps()
+        }
 
         try:
 

@@ -1,39 +1,37 @@
 import os
 
 from src.save import OptionsManager
-from src.constant_vars import ModType, OPTIONS_CONFIG
+from src.constant_vars import ModType
 
 class Pathing():
     '''Getter functions that shorten the process of obtaining mod paths'''
 
-    def __init__(self, optionFile: str = OPTIONS_CONFIG) -> None:
-        self.option: str = optionFile
-    
-    def __getGamepath(self) -> str:
-        return OptionsManager(self.option).getGamepath()
-
-    def mod_overrides(self) -> str:
+    @staticmethod
+    def mod_overrides() -> str:
         '''Returns mod_overrides path'''
-        return os.path.join(self.__getGamepath(), 'assets', 'mod_overrides')
+        return os.path.join(OptionsManager.getGamepath(), 'assets', 'mod_overrides')
 
-    def mods(self) -> str:
+    @staticmethod
+    def mods() -> str:
         '''Returns mods directory path'''
-        return os.path.join(self.__getGamepath(), 'mods')
+        return os.path.join(OptionsManager.getGamepath(), 'mods')
 
-    def maps(self) -> str:
+    @staticmethod
+    def maps() -> str:
         '''Returns maps directory path'''
-        return os.path.join(self.__getGamepath(), 'Maps')
+        return os.path.join(OptionsManager.getGamepath(), 'Maps')
 
-    def mod(self, type: ModType, modName: str) -> list[str] | str:
+    @staticmethod
+    def mod(type: ModType, modName: str) -> list[str] | str:
         '''
         Returns mod path given the type and name,
         does not check if the return value exists
         '''
 
         pathsDict: dict[ModType, str] = {
-            ModType.mods : os.path.join(self.mods(), modName),
-            ModType.mods_override : os.path.join(self.mod_overrides(), modName),
-            ModType.maps : os.path.join(self.maps(), modName)
+            ModType.mods : os.path.join(Pathing.mods(), modName),
+            ModType.mods_override : os.path.join(Pathing.mod_overrides(), modName),
+            ModType.maps : os.path.join(Pathing.maps(), modName)
         }
 
         if type == ModType.all_types():

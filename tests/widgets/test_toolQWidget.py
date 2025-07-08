@@ -16,7 +16,7 @@ URL_TO_BE_DELETED = 'D:\\path\\payday.exe'
 # ExternalToolDisplay starts with 3 items
 @pytest.fixture(scope='function')
 def create_ExternalToolDisplay(createTemp_externalShortcuts_ini: str) -> Generator:
-    yield ExternalToolDisplay(createTemp_externalShortcuts_ini)
+    yield ExternalToolDisplay()
 
 def test_deleteItem(create_ExternalToolDisplay: ExternalToolDisplay) -> None:
 

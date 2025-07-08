@@ -5,6 +5,7 @@ import stat
 import pytest
 from semantic_version import Version
 
+from src.save import OptionsManager
 import src.errorChecking
 from src.constant_vars import ModType
 
@@ -62,7 +63,8 @@ def test_isTypeMod(modType: ModType, expected_outcome: bool) -> None:
 
 @pytest.fixture(scope="module")
 def begin_testing_createModDirs(createTemp_Config_ini: str) -> None:
-    src.errorChecking.createModDirs(createTemp_Config_ini)
+    OptionsManager(createTemp_Config_ini)
+    src.errorChecking.createModDirs()
 
 @pytest.mark.parametrize(
         'path',

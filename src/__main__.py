@@ -7,6 +7,8 @@ from PySide6.QtCore import QTranslator, QLocale
 
 from src.main_window import MainWindow
 from src.save import Save, OptionsManager
+from src.profileManager import ProfileManager
+from src.toolsData import ToolJSON
 from src.widgets.QDialog.gamepathQDialog import GamePathNotFound
 from src.constant_vars import VERSION, PROGRAM_NAME, LOGS_PATH, IS_SCRIPT, OLD_EXE, ROOT_PATH, MAX_LOGS, OptionKeys, LANG_FOLDER_PATH
 import src.errorChecking as errorChecking
@@ -51,21 +53,24 @@ if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
     QLocale.setDefault(QLocale.Language.English)
 
-    save = Save()
-    optionsManager = OptionsManager()
+    # Initialize Static Classes
+    OptionsManager()
+    Save()
+    ToolJSON()
+    ProfileManager()
 
     translator = QTranslator(app)
-    path: str = os.path.join(LANG_FOLDER_PATH, optionsManager.getLang() + '.qm')
+    path: str = os.path.join(LANG_FOLDER_PATH, OptionsManager.getLang() + '.qm')
     if not translator.load(path):
        logging.error('Translator failed to load: %s', os.path.basename(path))
     else:
         app.installTranslator(translator)
         logging.info('Loaded language: %s', translator.language())
 
-    app.setStyleSheet(StyleManager().getStyleSheet(optionsManager.getTheme()))
+    app.setStyleSheet(StyleManager().getStyleSheet(OptionsManager.getTheme()))
 
     # Checking game path
-    if not optionsManager.hasOption(OptionKeys.game_path):
+    if not OptionsManager.hasOption(OptionKeys.game_path):
         warning = GamePathNotFound(app)
         warning.exec()
 

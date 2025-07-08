@@ -5,6 +5,8 @@ import logging
 from PySide6.QtCore import QCoreApplication as qapp, Slot
 
 from src.threaded.workerQObject import Worker
+from src.save import OptionsManager, Save
+from src.getPath import Pathing
 from src.constant_vars import ModType, BACKUP_MODS, MODSIGNORE, MOD_CONFIG
 
 class BackupMods(Worker):
@@ -17,15 +19,15 @@ class BackupMods(Worker):
 
             # Step 1: Gather Options
 
-            disPath: str = self.optionsManager.getDispath()
+            disPath: str = OptionsManager.getDispath()
 
             # Step 2: Set Paths
 
-            modPath: str = self.p.mods()
+            modPath: str = Pathing.mods()
 
-            mod_overridePath: str = self.p.mod_overrides()
+            mod_overridePath: str = Pathing.mod_overrides()
 
-            maps_path: str = self.p.maps()
+            maps_path: str = Pathing.maps()
 
             bundledModsPath: str = os.path.join(self.bundledFilePath, 'mods')
 
@@ -70,7 +72,7 @@ class BackupMods(Worker):
                         f' {BACKUP_MODS}'
                     )
 
-                    modType: ModType | None = self.saveManager.getType(mod)
+                    modType: ModType | None = Save.getType(mod)
 
                     # In the case this file is not a mod
                     if modType is None:
@@ -78,7 +80,7 @@ class BackupMods(Worker):
                         continue
 
                     # If the mod is disabled then the src will go to the disabled mods directory
-                    src: str = os.path.join(srcPathDict[modType], mod) if self.saveManager.getEnabled(mod) else os.path.join(disPath, mod)
+                    src: str = os.path.join(srcPathDict[modType], mod) if Save.getEnabled(mod) else os.path.join(disPath, mod)
 
                     output: str = os.path.join(outputPathDict[modType], mod)
 

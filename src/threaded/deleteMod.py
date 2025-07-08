@@ -5,13 +5,15 @@ from PySide6.QtCore import QCoreApplication as qapp, Slot
 
 import send2trash
 
+from src.getPath import Pathing
+from src.save import OptionsManager, Save
 from src.threaded.workerQObject import Worker
 
-from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG, ModType
+from src.constant_vars import ModType
 
 class DeleteMod(Worker):
-    def __init__(self, *mods: str, optionsPath: str = OPTIONS_CONFIG, savePath: str = MOD_CONFIG) -> None:
-        super().__init__(optionsPath=optionsPath, savePath=savePath)
+    def __init__(self, *mods: str) -> None:
+        super().__init__()
 
         self.mods: tuple[str, ...] = mods
 
@@ -23,20 +25,20 @@ class DeleteMod(Worker):
 
         self.setTotalProgress.emit(len(self.mods))
 
-        disPath: str = self.optionsManager.getDispath()
+        disPath: str = OptionsManager.getDispath()
 
         try: 
             for modName in self.mods:
 
                 self.setCurrentProgress.emit(1, qapp.translate('DeleteMod', 'Deleting') + f'{modName}')
 
-                enabled: bool = self.saveManager.getEnabled(modName)
+                enabled: bool = Save.getEnabled(modName)
 
-                type: ModType | str | None = self.saveManager.getType(modName) if enabled else 'disabled'
+                type: ModType | str | None = Save.getType(modName) if enabled else 'disabled'
 
-                self.saveManager.removeMods(modName)
+                Save.removeMods(modName)
 
-                path: list[str] | str = self.p.mod(type, modName) if type != 'disabled' else disPath
+                path: list[str] | str = Pathing.mod(type, modName) if type != 'disabled' else disPath
 
                 if os.path.isdir(path):
                     send2trash.send2trash(path)

@@ -8,9 +8,6 @@ from PySide6.QtCore import QCoreApplication as qapp
 from PySide6.QtCore import QObject, Signal, QMutex, QMutexLocker
 
 import src.errorChecking as errorChecking
-from src.constant_vars import MOD_CONFIG, OPTIONS_CONFIG
-from src.getPath import Pathing
-from src.save import OptionsManager, Save
 
 
 class Worker(QObject):
@@ -30,14 +27,9 @@ class Worker(QObject):
 
     mutex: QMutex = None # Should be set externally by the ProgressWidget class
 
-    def __init__(self, optionsPath: str = OPTIONS_CONFIG, savePath: str = MOD_CONFIG) -> None:
+    def __init__(self) -> None:
         super().__init__()
         logging.getLogger(__name__)
-
-        self.saveManager = Save(savePath)
-        self.optionsManager = OptionsManager(optionsPath)
-
-        self.p = Pathing(optionsPath)
 
     def start() -> None:
         ...

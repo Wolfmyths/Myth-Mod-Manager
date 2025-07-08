@@ -7,20 +7,12 @@ from PySide6.QtCore import QMutex
 from pytestqt.qtbot import QtBot
 
 from src.threaded.moveToDisabledDir import MoveToDisabledDir
-from src.getPath import Pathing
 from src.save import OptionsManager
 
 @pytest.fixture(scope='module')
 def create_worker(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator:
-    dispath: str = os.path.join(create_mod_dirs, 'disabledMods')
-    parser = OptionsManager(createTemp_Config_ini)
-    parser.setGamepath(create_mod_dirs)
-    parser.setDispath(dispath)
-    parser.writeData()
-
     mutex = QMutex()
-    worker = MoveToDisabledDir('make game easy mod', optionsPath=createTemp_Config_ini, savePath=createTemp_Mod_ini)
-    worker.p = Pathing(createTemp_Config_ini)
+    worker = MoveToDisabledDir('make game easy mod')
     worker.mutex = mutex
 
     yield worker

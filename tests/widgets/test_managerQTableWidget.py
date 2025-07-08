@@ -8,18 +8,20 @@ from pytestqt.qtbot import QtBot
 
 from PySide6.QtCore import Qt as qt
 
+from src.save import Save
 from src.widgets.managerQTableWidget import ModListWidget
 from src.constant_vars import ModType, ModRole
 
-MODS = (('mod1', ModType.mods, True, '2.3.0', ['cool']),
-        ('mod2', ModType.mods_override, True, 'None', ['calm', 'cool']),
-        ('mod3', ModType.maps, None, '2.4.0', None),
-        )
+MODS = (
+    ('mod1', ModType.mods, True, '2.3.0', ['cool']),
+    ('mod2', ModType.mods_override, True, 'None', ['calm', 'cool']),
+    ('mod3', ModType.maps, None, '2.4.0', None),
+)
 
 @pytest.fixture(scope='module')
 def create_QTable(createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator:
 
-    widget = ModListWidget(createTemp_Mod_ini, createTemp_Config_ini)
+    widget = ModListWidget()
 
     widget.addMod(name=MODS[0][0], type=MODS[0][1], enabled=MODS[0][2], version=MODS[0][3], tags=MODS[0][4])
     widget.addMod(name=MODS[1][0], type=MODS[1][1], enabled=MODS[1][2], version=MODS[1][3], tags=MODS[1][4])
@@ -69,8 +71,8 @@ def test_Icon(create_QTable: ModListWidget, create_mod_dirs: str) -> None:
 
         tmp_mod_name: list[str] = [os.path.basename(tmp_mod)]
 
-        create_QTable.saveManager.addMods((tmp_mod_name, ModType.mods))
-        create_QTable.saveManager.setModWorkshopAssetID(tmp_mod_name[0], '1234')
+        Save.addMods((tmp_mod_name, ModType.mods))
+        Save.setModWorkshopAssetID(tmp_mod_name[0], '1234')
 
         create_QTable.refreshMods()
         tmp_mod_item: QTableWidgetItem = create_QTable.findItems(tmp_mod_name[0], qt.MatchFlag.MatchExactly)[0]

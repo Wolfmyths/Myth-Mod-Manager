@@ -6,9 +6,10 @@ from configparser import ConfigParser
 
 import pytest
 
-from src.profileManager import ProfileManager
-from src.toolsData import ToolJSON
-from src.save import Save, OptionsManager
+from src.helpers.profile_manager import ProfileManager
+from src.helpers.tools_manager import ToolJSON
+from src.helpers.save_manager import Save
+from src.helpers.options_manager import OptionsManager
 from src.constant_vars import OptionKeys, ModKeys, ModType, LIGHT
 
 MOCK_MOD_NAME_1 = 'make game easy mod'

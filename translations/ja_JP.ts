@@ -4,32 +4,32 @@
 <context>
     <name>About</name>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="59"/>
+        <location filename="../src/widgets/qwidget/about.py" line="57"/>
         <source>Visit Github Repository</source>
         <translation>Githubリポジトリへ</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="60"/>
+        <location filename="../src/widgets/qwidget/about.py" line="58"/>
         <source>Support Wolfmyths on Ko-Fi</source>
         <translation>Ko-FiでWolfmythsをサポートする</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="61"/>
+        <location filename="../src/widgets/qwidget/about.py" line="59"/>
         <source>Visit Modworkshop Page</source>
         <translation>Modworkshopのページを見る</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="65"/>
+        <location filename="../src/widgets/qwidget/about.py" line="65"/>
         <source>is an open-source mod manager for PAYDAY 2 created by Wolfmyths.</source>
         <translation>はWolfmythsによって作成されたPAYDAY 2のオープンソースMODマネージャーです。</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="66"/>
+        <location filename="../src/widgets/qwidget/about.py" line="66"/>
         <source>The goal of this program is to streamline the proccess of PAYDAY 2 mod managment without hassle of juggling multiple file explorers.</source>
         <translation>このプログラムの目的は、複数のファイルエクスプローラーを操作する手間を省き、PAYDAY 2のMOD管理を効率化することです。</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="68"/>
+        <location filename="../src/widgets/qwidget/about.py" line="68"/>
         <source>Suggestions are greatly appreciated on modworkshop.net and github.</source>
         <translation>modworkshop.netとgithubでの提案を大いに歓迎します。</translation>
     </message>
@@ -37,37 +37,37 @@
 <context>
     <name>BackupMods</name>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="48"/>
+        <location filename="../src/objects/backupMods.py" line="48"/>
         <source>Validating backup folder paths</source>
         <translation>バックアップフォルダパスの検証</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="69"/>
+        <location filename="../src/objects/backupMods.py" line="69"/>
         <source>Copying</source>
         <translation>コピー</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="71"/>
+        <location filename="../src/objects/backupMods.py" line="71"/>
         <source>to</source>
         <translation>へのコピー</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="100"/>
+        <location filename="../src/objects/backupMods.py" line="100"/>
         <source>Zipping to</source>
         <translation>Zip圧縮</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="102"/>
+        <location filename="../src/objects/backupMods.py" line="102"/>
         <source>This might take some time...</source>
         <translation>これは時間がかかるかもしれません...</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="109"/>
+        <location filename="../src/objects/backupMods.py" line="109"/>
         <source>Cleanup</source>
         <translation>クリーンアップ</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="125"/>
+        <location filename="../src/objects/backupMods.py" line="125"/>
         <source>An error was raised while backing up mods</source>
         <translation>MODのバックアップ中にエラーが発生しました</translation>
     </message>
@@ -75,12 +75,12 @@
 <context>
     <name>ChangeModType</name>
     <message>
-        <location filename="../src/threaded/changeModType.py" line="36"/>
+        <location filename="../src/objects/changeModType.py" line="36"/>
         <source>Installing</source>
         <translation>インストール</translation>
     </message>
     <message>
-        <location filename="../src/threaded/changeModType.py" line="48"/>
+        <location filename="../src/objects/changeModType.py" line="48"/>
         <source>An error was raised while changing mod type:</source>
         <translation>MODタイプの変更中にエラーが発生しました：</translation>
     </message>
@@ -88,12 +88,12 @@
 <context>
     <name>DeleteMod</name>
     <message>
-        <location filename="../src/threaded/deleteMod.py" line="31"/>
+        <location filename="../src/objects/deleteMod.py" line="31"/>
         <source>Deleting</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../src/threaded/deleteMod.py" line="49"/>
+        <location filename="../src/objects/deleteMod.py" line="49"/>
         <source>An error was raised while deleting a mod:</source>
         <translation>MODの削除中にエラーが発生しました：</translation>
     </message>
@@ -377,12 +377,12 @@
 <context>
     <name>MoveToDisabledDir</name>
     <message>
-        <location filename="../src/threaded/moveToDisabledDir.py" line="29"/>
+        <location filename="../src/objects/moveToDisabledDir.py" line="29"/>
         <source>Disabling</source>
         <translation>無効化</translation>
     </message>
     <message>
-        <location filename="../src/threaded/moveToDisabledDir.py" line="45"/>
+        <location filename="../src/objects/moveToDisabledDir.py" line="45"/>
         <source>An error occured while disabling a mod:</source>
         <translation>MODの無効化中にエラーが発生しました：</translation>
     </message>
@@ -390,12 +390,12 @@
 <context>
     <name>MoveToEnabledModDir</name>
     <message>
-        <location filename="../src/threaded/moveToEnabledDir.py" line="30"/>
+        <location filename="../src/objects/moveToEnabledDir.py" line="30"/>
         <source>Enabling</source>
         <translation>有効化</translation>
     </message>
     <message>
-        <location filename="../src/threaded/moveToEnabledDir.py" line="45"/>
+        <location filename="../src/objects/moveToEnabledDir.py" line="45"/>
         <source>An error occured while enabling a mod:</source>
         <translation>MODを有効化する際にエラーが発生しました：</translation>
     </message>
@@ -807,18 +807,18 @@
 <context>
     <name>UnZipMod</name>
     <message>
-        <location filename="../src/threaded/unZipMod.py" line="36"/>
+        <location filename="../src/objects/unZipMod.py" line="36"/>
         <source>Unpacking</source>
         <translation>解凍</translation>
     </message>
     <message>
-        <location filename="../src/threaded/unZipMod.py" line="51"/>
-        <location filename="../src/threaded/unZipMod.py" line="57"/>
+        <location filename="../src/objects/unZipMod.py" line="51"/>
+        <location filename="../src/objects/unZipMod.py" line="57"/>
         <source>An error was raised in unZipMod:</source>
         <translation>unZipModでエラーが発生しました：</translation>
     </message>
     <message>
-        <location filename="../src/threaded/unZipMod.py" line="53"/>
+        <location filename="../src/objects/unZipMod.py" line="53"/>
         <source>Try extracting the mod manually first</source>
         <translation>まず手動で解凍してみてください</translation>
     </message>
@@ -826,18 +826,18 @@
 <context>
     <name>Worker</name>
     <message>
-        <location filename="../src/threaded/workerQObject.py" line="69"/>
+        <location filename="../src/objects/workerQObject.py" line="69"/>
         <source>Checking file permissions of</source>
         <translation>のファイルパーミッションのチェック</translation>
     </message>
     <message>
-        <location filename="../src/threaded/workerQObject.py" line="75"/>
-        <location filename="../src/threaded/workerQObject.py" line="80"/>
+        <location filename="../src/objects/workerQObject.py" line="75"/>
+        <location filename="../src/objects/workerQObject.py" line="80"/>
         <source>Checking folder permissions of</source>
         <translation>フォルダパーミッションのチェック</translation>
     </message>
     <message>
-        <location filename="../src/threaded/workerQObject.py" line="83"/>
+        <location filename="../src/objects/workerQObject.py" line="83"/>
         <source>Fixing install for</source>
         <translation>インストールの修正</translation>
     </message>

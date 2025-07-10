@@ -1,6 +1,8 @@
-if not exist "%cd%\venv" (
-	python3 -m venv /venv
+set "ROOT=."
+
+if not exist "%ROOT%\venv" (
+	py -m venv "%ROOT%\venv"
 )
 	
-cd venv\Scripts
+cd "%ROOT%\venv\Scripts"
 activate

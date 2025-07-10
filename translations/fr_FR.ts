@@ -4,32 +4,32 @@
 <context>
     <name>About</name>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="59"/>
+        <location filename="../src/widgets/qwidget/about.py" line="57"/>
         <source>Visit Github Repository</source>
         <translation>Visiter le dépôt Github</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="60"/>
+        <location filename="../src/widgets/qwidget/about.py" line="58"/>
         <source>Support Wolfmyths on Ko-Fi</source>
         <translation>Soutenir Wolfmyths sur Ko-Fi</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="61"/>
+        <location filename="../src/widgets/qwidget/about.py" line="59"/>
         <source>Visit Modworkshop Page</source>
         <translation>Visiter la page Modworkshop</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="65"/>
+        <location filename="../src/widgets/qwidget/about.py" line="65"/>
         <source>is an open-source mod manager for PAYDAY 2 created by Wolfmyths.</source>
         <translation>est un gestionnaire de mods open-source pour PAYDAY 2 créé par Wolfmyths.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="66"/>
+        <location filename="../src/widgets/qwidget/about.py" line="66"/>
         <source>The goal of this program is to streamline the proccess of PAYDAY 2 mod managment without hassle of juggling multiple file explorers.</source>
         <translation>Le but de ce programme est de simplifier le processus de gestion des mods de PAYDAY 2 sans avoir à jongler avec de multiples explorateurs de fichiers.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="68"/>
+        <location filename="../src/widgets/qwidget/about.py" line="68"/>
         <source>Suggestions are greatly appreciated on modworkshop.net and github.</source>
         <translation>Les suggestions sont très appréciées sur modworkshop.net et github.</translation>
     </message>
@@ -37,37 +37,37 @@
 <context>
     <name>BackupMods</name>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="48"/>
+        <location filename="../src/objects/backupMods.py" line="48"/>
         <source>Validating backup folder paths</source>
         <translation>Validation des chemins d&apos;accès aux dossiers de sauvegarde</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="69"/>
+        <location filename="../src/objects/backupMods.py" line="69"/>
         <source>Copying</source>
         <translation>Copier</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="71"/>
+        <location filename="../src/objects/backupMods.py" line="71"/>
         <source>to</source>
         <translation>vers</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="100"/>
+        <location filename="../src/objects/backupMods.py" line="100"/>
         <source>Zipping to</source>
         <translation>Zippage vers</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="102"/>
+        <location filename="../src/objects/backupMods.py" line="102"/>
         <source>This might take some time...</source>
         <translation>Cela peut prendre un certain temps...</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="109"/>
+        <location filename="../src/objects/backupMods.py" line="109"/>
         <source>Cleanup</source>
         <translation>Nettoyage</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="125"/>
+        <location filename="../src/objects/backupMods.py" line="125"/>
         <source>An error was raised while backing up mods</source>
         <translation>Une erreur s&apos;est produite lors de la sauvegarde des mods</translation>
     </message>
@@ -75,12 +75,12 @@
 <context>
     <name>ChangeModType</name>
     <message>
-        <location filename="../src/threaded/changeModType.py" line="36"/>
+        <location filename="../src/objects/changeModType.py" line="36"/>
         <source>Installing</source>
         <translation>Installation</translation>
     </message>
     <message>
-        <location filename="../src/threaded/changeModType.py" line="48"/>
+        <location filename="../src/objects/changeModType.py" line="48"/>
         <source>An error was raised while changing mod type:</source>
         <translation>Une erreur s&apos;est produite lors du changement de type de mod :</translation>
     </message>
@@ -88,12 +88,12 @@
 <context>
     <name>DeleteMod</name>
     <message>
-        <location filename="../src/threaded/deleteMod.py" line="31"/>
+        <location filename="../src/objects/deleteMod.py" line="31"/>
         <source>Deleting</source>
         <translation>Suppression</translation>
     </message>
     <message>
-        <location filename="../src/threaded/deleteMod.py" line="49"/>
+        <location filename="../src/objects/deleteMod.py" line="49"/>
         <source>An error was raised while deleting a mod:</source>
         <translation>Une erreur s&apos;est produite lors de la suppression d&apos;un mod :</translation>
     </message>
@@ -377,12 +377,12 @@
 <context>
     <name>MoveToDisabledDir</name>
     <message>
-        <location filename="../src/threaded/moveToDisabledDir.py" line="29"/>
+        <location filename="../src/objects/moveToDisabledDir.py" line="29"/>
         <source>Disabling</source>
         <translation>Désactivation</translation>
     </message>
     <message>
-        <location filename="../src/threaded/moveToDisabledDir.py" line="45"/>
+        <location filename="../src/objects/moveToDisabledDir.py" line="45"/>
         <source>An error occured while disabling a mod:</source>
         <translation>Une erreur s&apos;est produite lors de la désactivation d&apos;un mod :</translation>
     </message>
@@ -390,12 +390,12 @@
 <context>
     <name>MoveToEnabledModDir</name>
     <message>
-        <location filename="../src/threaded/moveToEnabledDir.py" line="30"/>
+        <location filename="../src/objects/moveToEnabledDir.py" line="30"/>
         <source>Enabling</source>
         <translation>Activation</translation>
     </message>
     <message>
-        <location filename="../src/threaded/moveToEnabledDir.py" line="45"/>
+        <location filename="../src/objects/moveToEnabledDir.py" line="45"/>
         <source>An error occured while enabling a mod:</source>
         <translation>Une erreur s&apos;est produite lors de l&apos;activation d&apos;un mod :</translation>
     </message>
@@ -807,18 +807,18 @@
 <context>
     <name>UnZipMod</name>
     <message>
-        <location filename="../src/threaded/unZipMod.py" line="36"/>
+        <location filename="../src/objects/unZipMod.py" line="36"/>
         <source>Unpacking</source>
         <translation>Déballage</translation>
     </message>
     <message>
-        <location filename="../src/threaded/unZipMod.py" line="51"/>
-        <location filename="../src/threaded/unZipMod.py" line="57"/>
+        <location filename="../src/objects/unZipMod.py" line="51"/>
+        <location filename="../src/objects/unZipMod.py" line="57"/>
         <source>An error was raised in unZipMod:</source>
         <translation>Une erreur a été soulevée dans unZipMod :</translation>
     </message>
     <message>
-        <location filename="../src/threaded/unZipMod.py" line="53"/>
+        <location filename="../src/objects/unZipMod.py" line="53"/>
         <source>Try extracting the mod manually first</source>
         <translation>Essayez d&apos;abord d&apos;extraire le mod manuellement</translation>
     </message>
@@ -826,18 +826,18 @@
 <context>
     <name>Worker</name>
     <message>
-        <location filename="../src/threaded/workerQObject.py" line="69"/>
+        <location filename="../src/objects/workerQObject.py" line="69"/>
         <source>Checking file permissions of</source>
         <translation>Vérification des permissions des fichiers</translation>
     </message>
     <message>
-        <location filename="../src/threaded/workerQObject.py" line="75"/>
-        <location filename="../src/threaded/workerQObject.py" line="80"/>
+        <location filename="../src/objects/workerQObject.py" line="75"/>
+        <location filename="../src/objects/workerQObject.py" line="80"/>
         <source>Checking folder permissions of</source>
         <translation>Vérification des permissions du dossier</translation>
     </message>
     <message>
-        <location filename="../src/threaded/workerQObject.py" line="83"/>
+        <location filename="../src/objects/workerQObject.py" line="83"/>
         <source>Fixing install for</source>
         <translation>Correction de l&apos;installation pour</translation>
     </message>

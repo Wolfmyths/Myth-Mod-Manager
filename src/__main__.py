@@ -5,14 +5,15 @@ from datetime import datetime
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QTranslator, QLocale
 
-from src.main_window import MainWindow
-from src.save import Save, OptionsManager
-from src.profileManager import ProfileManager
-from src.toolsData import ToolJSON
-from src.widgets.QDialog.gamepathQDialog import GamePathNotFound
+from src.widgets.qwidget.main_window import MainWindow
+from src.helpers.options_manager import OptionsManager
+from src.helpers.profile_manager import ProfileManager
+from src.helpers.save_manager import Save
+from src.helpers.tools_manager import ToolJSON
+from src.widgets.qdialog.gamepath_not_found import GamePathNotFound
 from src.constant_vars import VERSION, PROGRAM_NAME, LOGS_PATH, IS_SCRIPT, OLD_EXE, ROOT_PATH, MAX_LOGS, OptionKeys, LANG_FOLDER_PATH
-import src.errorChecking as errorChecking
-from src.style import StyleManager
+import src.helpers.helper as helper
+from src.helpers.style import StyleManager
 
 def setup_logging() -> None:
     time: str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -75,7 +76,7 @@ if __name__ == '__main__':
         warning.exec()
 
     # Checking neccessary directories
-    errorChecking.createModDirs()
+    helper.createModDirs()
 
     window = MainWindow(app)
     window.show()

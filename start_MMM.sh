@@ -1,1 +1,1 @@
-python -m src
+python -m "src"

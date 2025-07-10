@@ -2,7 +2,7 @@ from pytestqt.qtbot import QtBot
 
 from PySide6.QtCore import Qt as qt
 
-from src.widgets.QMenu.QMenu import ModContextMenu
+from src.widgets.qmenu.QMenu import ModContextMenu
 
 def test_menu(qtbot: QtBot) -> None:
     widget = ModContextMenu()

@@ -4,6 +4,10 @@ from enum import StrEnum, auto
 
 import semantic_version
 
+##
+## THIS FILE IS PLACED NEXT TO __main__ FOR FILE PATH REASONS
+##
+
 class ModType(StrEnum):
     '''
     Types of PAYDAY 2 mods 
@@ -30,13 +34,14 @@ class OptionKeys(StrEnum):
 
     section          = 'OPTIONS' # Main section
 
-    game_path        = auto()
+    game_path         = auto()
     dispath          = 'disabled-mods'
-    color_theme      = auto()
-    windowsize_w     = auto()
-    windowsize_h     = auto()
-    mmm_update_alert = auto()
-    lang             = auto()
+    color_theme       = auto()
+    windowsize_w      = auto()
+    windowsize_h      = auto()
+    mmm_update_alert  = auto()
+    lang              = auto()
+    launch_parameters = auto()
 
     def all_keys() -> list[str]:
         # Splice removes section key
@@ -50,6 +55,25 @@ class ProfileRole():
 
 class ModRole():
     tags = 33 # Role ID for a mod's tags
+
+# Lang map string to code
+LANG_STR_TO_CODE: dict[str:str] = {
+    'Deutsch'            : 'de_DE',
+    'English'            : 'en_US',
+    'Español (españa)'   : 'es_ES',
+    'Français'           : 'fr_FR',
+    'Italiano'           : 'it_IT',
+    '日本語'              : 'ja_JP',
+    '한국인'              : 'ko_KR',
+    'Nederlands'         : 'nl_NL',
+    'Polski'             : 'pl_PL',
+    'Português (Brasil)' : 'pt_BR',
+    'Русский'            : 'ru_RU',
+    '中文（简体）'        : 'zh_CN'
+}
+
+# Lang code map code to string
+LANG_CODE_TO_STR: dict[str:str] = {x:y for y,x in LANG_STR_TO_CODE.items()}
 
 # Detection if the program is being run through an exe or the script
 IS_SCRIPT = not getattr(sys, 'frozen', False)
@@ -92,10 +116,10 @@ DATA_PROFILE = (0, ProfileRole.type, 'profile') # Used to label an item as a pro
 DATA_MOD = (0, ProfileRole.type, 'mod') # Used to label an item as a mod
 
 # Default Disabled Folder
-MODS_DISABLED_PATH_DEFAULT = os.path.join(os.path.abspath(ROOT_PATH), DISABLED_MODS)
+MODS_DISABLED_PATH_DEFAULT: str = os.path.join(ROOT_PATH, DISABLED_MODS)
 
 # Graphics folder path
-UI_GRAPHICS_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'graphics')
+UI_GRAPHICS_PATH: str = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'graphics')
 
 # Color Themes
 DARK = 'dark'

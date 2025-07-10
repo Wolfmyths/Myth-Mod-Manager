@@ -7,7 +7,7 @@ There are plans to maybe even add a wiki.
 + `start_MMM.bat` and `start_MMM.sh` are the scripts that starts the program
 + The program auto-adjusts paths if running via script or EXE
 + If you want to compile an exe on your system, run `createEXE.bat` or `createEXE.sh`
-+ Variables that are used throughout the project are stored in `constant_vars.py`
++ Variables that are used throughout the project are stored in `./src/constant_vars.py`
 + Please keep your code formatting consistent with the rest of the project
 + **Use the `future-update` branch when submitting commits and PRs**
 
@@ -19,12 +19,11 @@ PyTest doesn't cover every function yet but it covers most of it.
 
 ### How to run PyTest
 
-1. Open your terminal and make sure your current directory is the repository
-2. Execute command `python3 -m venv /venv`
-   + Steps 1-2 do not have to be repeated once done
-3. Start the venv via:
-   + Windows: `venv/scripts/activate.bat`
-   + Linux (bash/zsh): `venv/bin/activate`
+1. Open your terminal and make sure your current directory is in the repository
+2. Execute command `venv.bat` or `venv.sh` depending on your platform
+   + These scripts will create a virtal environment in the repository if it does not exist
+   + Your current directory will change to `./venv/Scripts` or `./venv/bin` depending on your platform after running
+3. Execute command `cd ../..` to return to the repository root folder
 4. Install/Update dependencies in the venv `pip install -r requirements.txt`
 5. Execute command `pytest tests` and it should work
 
@@ -74,7 +73,7 @@ The first argument is context for .ts files, the second is the actual text itsel
 
 After you have fixed the typo, update the .ts files by opening your terminal and inputting this command:
 ```shell
-util/scrape_translations_needed.py -u
+lang_utils/scrape_translations_needed.py -u
 ```
 
 Make sure you changed directory to the repo otherwise it probably won't work!
@@ -90,14 +89,14 @@ Open the file and go to line 3, you will see a attribute to the `<TS>` container
 The rest of the process requires a little bit of manual work.
 However, there are external python scripts that have been created to help with the process.
 
-In the utils folder of this repo, there is a file called `scrape_translations_needed.py`.
-The script looks through a .ts file, checks for missing translations, and then outputs the English text of the missing translations line-by-line in a .txt.
+In `./lang_utils`, there is a file called `scrape_translations_needed.py`.
+The script looks through a `.ts` file, checks for missing translations, and then outputs the English text of the missing translations line-by-line in a `.txt`.
 It also updates all .ts files' `<source>` container tags.
 
 To use the script, make sure you have python and the packages in `requirements.txt` installed.
 Open up your command prompt, change your directory to the repo and use this command:
 ```shell
-util/scrape_translations_needed.py -e -u
+lang_utils/scrape_translations_needed.py -e -u
 ```
 
 The -e flag is if you want to export the missing translations.
@@ -116,7 +115,7 @@ There are a couple things to consider before translating:
 
 After you have translated your script you can now go back to your terminal and type the following command:
 ```shell
-util/update_ts_files path_to_ts_file path_to_translation_file
+lang_utils/update_ts_files path_to_ts_file path_to_translation_file
 ```
 
 The script will update the specified ts file and replace the missing translations with the ones in the translation file and you have your translation!
@@ -128,8 +127,8 @@ Enter this command:
 pyside6-lrelease path_to_ts_file -qm ./src/lang/ts_file_name.qm
 ```
 
-All that's left is to add it into the source code, which is located in `src/settings.py`.
-On the top of the script you should see a variable named `language_string_to_code`.
+All that's left is to add it into the source code, which is located in `./src/constant_vars.py`.
+On the top of the script you should see a variable named `LANG_STR_TO_CODE`.
 
 Add a new entry to the variable and follow the example of the other entries.
 Make sure the key value (the one of the left) is translated.

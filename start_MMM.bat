@@ -1,1 +1,1 @@
-call python -m src
+call py -m src

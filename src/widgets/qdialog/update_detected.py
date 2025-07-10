@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
 
 from semantic_version import Version
 
-from src.widgets.qdialog.QDialog import Dialog
+from src.widgets.qdialog.dialog import Dialog
 from src.constant_vars import VERSION
 from src.widgets.qdialog.notice import Notice
 from src.helpers.options_manager import OptionsManager

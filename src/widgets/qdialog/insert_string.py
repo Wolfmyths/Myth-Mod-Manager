@@ -1,7 +1,7 @@
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, Slot
 
-from src.widgets.qdialog.QDialog import Dialog
+from src.widgets.qdialog.dialog import Dialog
 
 class InsertString(Dialog):
     '''QDialog class that requests a string input from the user'''

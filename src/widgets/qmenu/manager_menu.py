@@ -6,7 +6,7 @@ from PySide6.QtCore import QCoreApplication as qapp, Slot
 from PySide6.QtWidgets import QTableWidgetItem
 
 from src.helpers.save_manager import Save
-from src.widgets.qmenu.QMenu import ModContextMenu
+from src.widgets.qmenu.mod_context_menu import ModContextMenu
 
 if TYPE_CHECKING:
     from src.widgets.qtable.mod_list_widget import ModListWidget

@@ -1,7 +1,7 @@
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Slot
 
-from src.widgets.qdialog.QDialog import Dialog
+from src.widgets.qdialog.dialog import Dialog
 
 class Confirmation(Dialog):
     def __init__(self, title: str, body: str) -> None:

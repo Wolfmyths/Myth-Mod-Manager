@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import PySide6.QtGui as qtg
 from PySide6.QtCore import QCoreApplication as qapp, Slot
 
-from src.widgets.qmenu.QMenu import ModContextMenu
+from src.widgets.qmenu.mod_context_menu import ModContextMenu
 
 if TYPE_CHECKING:
     from src.widgets.qtreewidget.profile_list import ProfileList

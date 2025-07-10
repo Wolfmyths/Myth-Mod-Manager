@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     import PySide6.QtGui as qtg
 
 class ModContextMenu(qtw.QMenu):
-    '''Base class for QMenu Objects'''
+    '''Base class for QMenu Objects that are used as context menus'''
 
     lastClicked: qt.MouseButton = None
     lastReleased: qt.MouseButton = None

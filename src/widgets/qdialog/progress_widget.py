@@ -9,7 +9,7 @@ from PySide6.QtCore import (
     QThread, QCoreApplication as qapp, Slot, QMutex, QMutexLocker, QSignalBlocker
 )
 
-from src.widgets.qdialog.QDialog import Dialog
+from src.widgets.qdialog.dialog import Dialog
 
 if TYPE_CHECKING:
     from src.objects.worker import Worker

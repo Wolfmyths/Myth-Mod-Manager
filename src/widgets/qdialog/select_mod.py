@@ -2,7 +2,7 @@ from typing import List
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
 
-from src.widgets.qdialog.QDialog import Dialog
+from src.widgets.qdialog.dialog import Dialog
 
 import src.helpers.helper as helper
 from src.helpers.save_manager import Save

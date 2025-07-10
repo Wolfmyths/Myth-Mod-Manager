@@ -3,7 +3,7 @@ import os
 from PySide6.QtCore import QCoreApplication as qapp, Slot
 import PySide6.QtWidgets as qtw
 
-from src.widgets.qdialog.QDialog import Dialog
+from src.widgets.qdialog.dialog import Dialog
 from src.helpers.options_manager import OptionsManager
 
 class GamePathNotFound(Dialog):

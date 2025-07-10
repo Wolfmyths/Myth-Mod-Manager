@@ -121,7 +121,8 @@ class ModManager(qtw.QWidget):
             if not os.path.isabs(gamePath):
                 raise Exception(qapp.translate("ModManager", 'Path is not absolute'))
 
-            gameExe = 'payday2_win32_release.exe' if sys.platform.startswith('win') else 'payday2_release'
+            #gameExe = 'payday2_win32_release.exe' if sys.platform.startswith('win') else 'payday2_release'
+            gameExe = 'payday2_win32_release.exe' # FOR DEBUGGING, GET RID OF THIS LINE AS SOON AS POSSIBLE
 
             success, exit_code = QProcess.startDetached(os.path.join(gamePath, gameExe), args, gamePath)
 

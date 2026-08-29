@@ -1,16 +1,11 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
-
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, Qt
+from typing_extensions import override
 
 from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
 
-if TYPE_CHECKING:
-    from src.widgets.qwidget.options import Options
-
 class OptionsShortcuts(OptionsSectionBase):
-    def __init__(self, parent: Options = None) -> None:
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
         super().__init__(parent= parent)
 
         layout = qtw.QVBoxLayout()
@@ -31,6 +26,7 @@ class OptionsShortcuts(OptionsSectionBase):
 
         self.setLayout(layout)
     
+    @override
     def applyStaticText(self) -> None:
         self.gbShortcuts.setTitle(qapp.translate("OptionsShortcuts", "Shortcuts"))
 

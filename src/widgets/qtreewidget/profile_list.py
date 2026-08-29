@@ -1,10 +1,9 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
 import logging
 
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
-from PySide6.QtCore import Qt as qt, Signal, QCoreApplication as qapp
+from PySide6.QtCore import Qt as qt, Signal, QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.widgets.qmenu.profile_menu import ProfileMenu
 from src.widgets.qdialog.insert_string import InsertString
@@ -16,9 +15,6 @@ import src.helpers.helper as helper
 from src.helpers.profile_manager import ProfileManager
 from src.constant_vars import DATA_PROFILE, DATA_MOD, ProfileRole
 
-if TYPE_CHECKING:
-    from src.widgets.qwidget.mod_profile import ModProfile
-
 class ProfileList(qtw.QTreeWidget):
 
     applyProfile = Signal(tuple)
@@ -29,7 +25,7 @@ class ProfileList(qtw.QTreeWidget):
 
     noneRightclicked = Signal()
 
-    def __init__(self, parent: ModProfile = None) -> None:
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
         super().__init__(parent)
 
         logging.getLogger(__name__)
@@ -42,6 +38,18 @@ class ProfileList(qtw.QTreeWidget):
         self.header().setSectionResizeMode(1, qtw.QHeaderView.ResizeMode.Interactive)
 
         self.menu = ProfileMenu(self)
+        self.menu.profileApply.triggered.connect(self.applyProfileEvent)
+        self.menu.profileAdd.triggered.connect(self.menuAddProfile)
+        self.menu.profileRemove.triggered.connect(self.deleteProfile)
+        self.menu.profileEdit.triggered.connect(self.editProfileMenu)
+        self.menu.profileCopy.triggered.connect(self.copyProfile)
+        self.menu.modAdd.triggered.connect(self.modAddMenu)
+        self.menu.modRemove.triggered.connect(self.removeMods)
+        self.menu.copyModsTo.triggered.connect(self.copyModsToProfileMenu)
+
+        self.profileRightclicked.connect(self.menu.profileRightClicked)
+        self.modRightclicked.connect(self.menu.modRightClicked)
+        self.noneRightclicked.connect(self.menu.noneRightClicked)
 
         self.updateView()
         self.applyStaticText()
@@ -63,21 +71,16 @@ class ProfileList(qtw.QTreeWidget):
     def __getParentOfChild(self, child: qtw.QTreeWidgetItem) -> qtw.QTreeWidgetItem:
         return self.__findProfile(child.data(0, ProfileRole.parent))
 
-    def __getMods(self, profile: qtw.QTreeWidgetItem) -> list[qtw.QTreeWidgetItem] | None:
+    def __getMods(self, profile: qtw.QTreeWidgetItem) -> list[qtw.QTreeWidgetItem]:
         '''Returns a list of mod names given the profile'''
-        mods: list[str] = []
+        mods: list[qtw.QTreeWidgetItem] = []
 
         for i in range(0, profile.childCount() + 1):
 
             child: qtw.QTreeWidgetItem = profile.child(i)
 
-            if child is None:
-                continue
-
-            mods.append(child)
-
-        if not mods:
-            return None
+            if child:
+                mods.append(child)
 
         return mods
 
@@ -94,6 +97,7 @@ class ProfileList(qtw.QTreeWidget):
 
             return None
     
+    @Slot()
     def applyProfileEvent(self) -> None:
 
         selectedItem: qtw.QTreeWidgetItem | None = self.__selectedItem()
@@ -161,6 +165,7 @@ class ProfileList(qtw.QTreeWidget):
         
         self.checkInstalled()
     
+    @Slot()
     def modAddMenu(self) -> None:
         qDialog = SelectMod()
 
@@ -175,6 +180,9 @@ class ProfileList(qtw.QTreeWidget):
 
         selectedItem: qtw.QTreeWidgetItem | None = self.__selectedItem()
 
+        if selectedItem is None:
+            return
+
         # If this function was triggered by selecting a mod, find the profile
         profile: qtw.QTreeWidgetItem | None
         if not self.isProfile(selectedItem):
@@ -184,10 +192,11 @@ class ProfileList(qtw.QTreeWidget):
         
         logging.info('Adding mods: %s into profile: %s', ' ,'.join(mods), profile.text(0))
 
-        profileMods: list[qtw.QTreeWidgetItem] | None = self.__getMods(profile)
+        profileModsItems: list[qtw.QTreeWidgetItem] | None = self.__getMods(profile)
+        profileMods: list[str] = []
 
-        if profileMods:
-            profileMods = [x.text(0) for x in profileMods]
+        if profileModsItems:
+            profileMods = [x.text(0) for x in profileModsItems]
 
         for mod in mods:
             
@@ -211,9 +220,13 @@ class ProfileList(qtw.QTreeWidget):
             if not profile.isExpanded():
                 profile.setExpanded(True)
     
+    @Slot()
     def removeMods(self) -> None:
 
         mod: qtw.QTreeWidgetItem | None = self.__selectedItem()
+
+        if mod is None:
+            return
 
         profile: qtw.QTreeWidgetItem = self.__getParentOfChild(mod)
 
@@ -225,6 +238,7 @@ class ProfileList(qtw.QTreeWidget):
 
         profile.setText(1, str(int(profile.text(1)) - 1))
     
+    @Slot()
     def copyModsToProfileMenu(self) -> None:
         qDialog = SelectProfile()
         qDialog.exec()
@@ -235,6 +249,9 @@ class ProfileList(qtw.QTreeWidget):
     def copyModsToProfile(self, modsDestination: str) -> None:
 
         selectedItem: qtw.QTreeWidgetItem | None = self.__selectedItem()
+
+        if selectedItem is None:
+            return
 
         copyingTo: qtw.QTreeWidgetItem = self.__findProfile(modsDestination)
 
@@ -249,6 +266,7 @@ class ProfileList(qtw.QTreeWidget):
         else:
             self.addMods(selectedItem.text(0))
     
+    @Slot()
     def menuAddProfile(self) -> None:
         '''
         Prompts the user to ask what the profile
@@ -304,10 +322,14 @@ class ProfileList(qtw.QTreeWidget):
     def isProfile(self, itemInQuestion: qtw.QTreeWidgetItem) -> bool:
         return itemInQuestion.data(0, ProfileRole.type) == DATA_PROFILE[2]
 
+    @Slot()
     def deleteProfile(self) -> None:
         '''Deletes an existing profile'''
 
         toBeDeleted: qtw.QTreeWidgetItem | None = self.__selectedItem()
+
+        if toBeDeleted is None:
+            return
 
         logging.info('Deleting profile %s', toBeDeleted.text(0))
 
@@ -315,6 +337,7 @@ class ProfileList(qtw.QTreeWidget):
 
         ProfileManager.removeProfile(toBeDeleted.text(0))
     
+    @Slot()
     def editProfileMenu(self) -> None:
 
         qDialog = InsertString(qapp.translate('ProfileList', 'New profile name:'))
@@ -355,14 +378,15 @@ class ProfileList(qtw.QTreeWidget):
 
         profile.setText(0, name)
 
+    @Slot()
     def copyProfile(self) -> None:
 
         profileToCopy: qtw.QTreeWidgetItem | None = self.__selectedItem()
 
-        mods: list[qtw.QTreeWidgetItem] | None = self.__getMods(profileToCopy)
-
-        if mods is None:
+        if profileToCopy is None:
             return
+
+        mods: list[qtw.QTreeWidgetItem] = self.__getMods(profileToCopy)
 
         logging.info('Copying %s', profileToCopy.text(0))
 
@@ -412,13 +436,14 @@ class ProfileList(qtw.QTreeWidget):
 
 # EVENT OVERRIDES
 
+    @override
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
 
         if event.button() == qt.MouseButton.RightButton:
 
             self.clearSelection()
 
-            selectedItem: qtw.QTreeWidgetItem = self.itemAt(event.pos())
+            selectedItem: qtw.QTreeWidgetItem | None = self.itemAt(event.pos())
 
             if selectedItem:
 
@@ -429,9 +454,6 @@ class ProfileList(qtw.QTreeWidget):
                 else:
                     self.modRightclicked.emit()
 
-            else:
-                self.noneRightclicked.emit()
-
             self.menu.exec(qtg.QCursor.pos())
 
         elif event.button() == qt.MouseButton.LeftButton:
@@ -441,6 +463,7 @@ class ProfileList(qtw.QTreeWidget):
 
         return super().mousePressEvent(event)
 
+    @override
     def keyPressEvent(self, event: qtg.QKeyEvent) -> None:
 
         selectedItem: qtw.QTreeWidgetItem | None = self.__selectedItem()

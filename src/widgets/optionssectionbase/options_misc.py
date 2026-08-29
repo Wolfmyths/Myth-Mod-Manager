@@ -1,10 +1,9 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
-import sys
+import platform
 import os
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 import src.helpers.helper as helper
 from src.helpers.helper_pathing import Pathing
@@ -13,11 +12,8 @@ from src.widgets.qdialog.progress_widget import ProgressWidget
 from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
 from src.objects.backup_mods import BackupMods
 
-if TYPE_CHECKING:
-    from src.widgets.qwidget.options import Options
-
 class OptionsMisc(OptionsSectionBase):
-    def __init__(self, parent: Options = None) -> None:
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
         super().__init__(parent= parent)
 
         layout = qtw.QVBoxLayout()
@@ -47,6 +43,7 @@ class OptionsMisc(OptionsSectionBase):
 
         self.setLayout(layout)
     
+    @override
     def applyStaticText(self) -> None:
         self.miscGroup.setTitle(qapp.translate("OptionsMisc", "Misc"))
 
@@ -68,7 +65,7 @@ class OptionsMisc(OptionsSectionBase):
     @Slot()
     def openCrashLogs(self) -> None:
 
-        if sys.platform.startswith('win'):
+        if platform.system().startswith('Win'):
             os.startfile(os.path.join('C:', 'Users', os.environ['USERNAME'], 'AppData', 'Local', 'PAYDAY 2'))
         else:
             notice = Notice(

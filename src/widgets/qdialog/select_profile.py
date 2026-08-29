@@ -1,6 +1,6 @@
-from typing import List
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.widgets.qdialog.dialog import Dialog
 
@@ -8,7 +8,7 @@ from src.helpers.profile_manager import ProfileManager
 
 class SelectProfile(Dialog):
 
-    profile: str = None
+    profile: str = ''
 
     def __init__(self) -> None:
         super().__init__()
@@ -42,7 +42,7 @@ class SelectProfile(Dialog):
     @Slot(str)
     def search(self, input: str) -> None:
 
-        results: List[qtw.QListWidgetItem] = self.profileList.findItems(
+        results: list[qtw.QListWidgetItem] = self.profileList.findItems(
             f'{input}*',
             qt.MatchFlag.MatchWildcard | qt.MatchFlag.MatchExactly
         )
@@ -56,6 +56,7 @@ class SelectProfile(Dialog):
             else:
                 self.profileList.setRowHidden(i, False)
     
+    @override
     @Slot()
     def accept(self) -> None:
 
@@ -68,6 +69,7 @@ class SelectProfile(Dialog):
 
         return super().accept()
     
+    @override
     @Slot()
     def reject(self) -> None:
         self.setResult(0)

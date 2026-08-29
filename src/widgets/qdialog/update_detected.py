@@ -4,7 +4,7 @@ import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
 from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
 
-from semantic_version import Version
+from typing_extensions import override
 
 from src.widgets.qdialog.dialog import Dialog
 from src.constant_vars import VERSION
@@ -20,7 +20,7 @@ class UpdateDetected(Dialog):
     downloadState = False
     lastIterBytes = 0
 
-    def __init__(self, newVersion: Version, releaseNotes: str) -> None:
+    def __init__(self, newVersion: str, releaseNotes: str) -> None:
         super().__init__()
 
         self.setWindowTitle(qapp.translate('updateDetected', 'Update Notice'))
@@ -47,7 +47,7 @@ class UpdateDetected(Dialog):
             text=qapp.translate('updateDetected', 'New update found:') +
                 f' {newVersion}\n' +
                 qapp.translate('updateDetected', 'Current Version:') +
-                f' {VERSION}\n' +
+                f' {VERSION.toString()}\n' +
                 qapp.translate('updateDetected', 'Do you want to Update?')
         )
 
@@ -55,7 +55,7 @@ class UpdateDetected(Dialog):
         self.changelog.setMarkdown(releaseNotes)
         self.changelog.setOpenExternalLinks(True)
 
-        self.viewWeb = qtw.QPushButton(text=qapp.translate('updateDetected', 'View Release Notes on github.com'), parent=self)
+        self.viewWeb = qtw.QPushButton(qapp.translate('updateDetected', 'View Release Notes on github.com'), parent=self)
         self.viewWeb.clicked.connect(lambda: openWebPage('https://github.com/Wolfmyths/Myth-Mod-Manager/releases/latest'))
 
         self.buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
@@ -168,7 +168,8 @@ class UpdateDetected(Dialog):
         newValue: int = value + self.progressBar.value()
         self.progressBar.setValue(newValue)
 
-# EVENT OVERRIDES 
+# EVENT OVERRIDES
+    @override
     def closeEvent(self, arg__1: qtg.QCloseEvent) -> None:
 
         if not self.succeededState:
@@ -176,12 +177,14 @@ class UpdateDetected(Dialog):
             return super().closeEvent(arg__1)
         else:
             self.accept()
-    
+
+    @override
     def exec(self) -> int:
         # Hide progress widget until it get activated
         self.progressBar.hide()
         return super().exec()
     
+    @override
     def accept(self) -> None:
 
         self.setResult(qtw.QDialog.DialogCode.Accepted)

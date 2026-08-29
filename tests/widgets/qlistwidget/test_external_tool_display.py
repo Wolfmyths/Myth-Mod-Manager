@@ -1,5 +1,5 @@
 import pytest
-from typing import Generator
+from collections.abc import Generator
 
 from pytestqt.qtbot import QtBot
 
@@ -15,7 +15,7 @@ URL_TO_BE_DELETED = 'D:\\path\\payday.exe'
 
 # ExternalToolDisplay starts with 3 items
 @pytest.fixture(scope='function')
-def create_ExternalToolDisplay(createTemp_externalShortcuts_ini: str) -> Generator:
+def create_ExternalToolDisplay(createTemp_externalShortcuts_ini: str) -> Generator[ExternalToolDisplay]:  # pyright: ignore[reportUnusedParameter]
     yield ExternalToolDisplay()
 
 def test_deleteItem(create_ExternalToolDisplay: ExternalToolDisplay) -> None:

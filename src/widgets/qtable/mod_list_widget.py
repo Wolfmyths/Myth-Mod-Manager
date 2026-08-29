@@ -1,11 +1,13 @@
 import os
 import logging
-from typing import List
+from typing import cast
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, Signal
+from typing_extensions import override
 
+from src.api.check_update import CheckUpdate
 from src.widgets.qmenu.manager_menu import ManagerMenu
 from src.widgets.qdialog.progress_widget import ProgressWidget
 from src.widgets.qdialog.confirmation import Confirmation
@@ -34,6 +36,8 @@ class ModListWidget(qtw.QTableWidget):
         super().__init__()
         logging.getLogger(__name__)
 
+        self.api = CheckUpdate()
+
         self.setSelectionMode(qtw.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.setSelectionBehavior(qtw.QAbstractItemView.SelectionBehavior.SelectRows)
         self.setEditTriggers(qtw.QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -56,7 +60,7 @@ class ModListWidget(qtw.QTableWidget):
         horizontalHeader.setSectionResizeMode(2, qtw.QHeaderView.ResizeMode.ResizeToContents)
         horizontalHeader.setSectionResizeMode(3, qtw.QHeaderView.ResizeMode.Interactive)
 
-        self.sortState: dict[str:int | qt.SortOrder] = {
+        self.sortState: dict[str, int | qt.SortOrder] = {
             'col' : 0,
             'ascending': qt.SortOrder.AscendingOrder
         }
@@ -69,6 +73,15 @@ class ModListWidget(qtw.QTableWidget):
         self.tagViewer = None
 
         self.applyStaticText()
+
+        self.contextMenu.enable.triggered.connect(self.setItemEnabled)
+        self.contextMenu.disable.triggered.connect(self.setItemDisabled)
+        self.contextMenu.hideMod.triggered.connect(self.hideMod)
+        self.contextMenu.delete.triggered.connect(self.deleteItem)
+        self.contextMenu.checkUpdate.triggered.connect(self.CheckModUpdate)
+        self.contextMenu.visitModPage.triggered.connect(self.visitModPage)
+        self.contextMenu.openModDir.triggered.connect(self.openModDir)
+        self.contextMenu.viewTags.triggered.connect(self.viewTags)
 
     def applyStaticText(self) -> None:
         self.setHorizontalHeaderLabels((
@@ -88,38 +101,40 @@ class ModListWidget(qtw.QTableWidget):
             else:
                 item.setText(disabled_text)
 
-    def getEnabledItem(self, row: int) -> qtw.QTableWidgetItem:
+    def getEnabledItem(self, row: int) -> qtw.QTableWidgetItem | None:
         return self.item(row, 2)
     
-    def getEnabledItems(self) -> list[qtw.QTableWidgetItem]:
+    def getEnabledItems(self) -> list[qtw.QTableWidgetItem | None]:
         return [
             self.getEnabledItem(x) for x in range(self.rowCount())
         ]
     
-    def getNameItem(self, row: int) -> qtw.QTableWidgetItem:
+    def getNameItem(self, row: int) -> qtw.QTableWidgetItem | None:
         return self.item(row, 0)
     
-    def getTypeItem(self, row: int) -> qtw.QTableWidgetItem:
+    def getTypeItem(self, row: int) -> qtw.QTableWidgetItem | None:
         return self.item(row, 1)
     
-    def getVersionItem(self, row: int) -> qtw.QTableWidgetItem:
+    def getVersionItem(self, row: int) -> qtw.QTableWidgetItem | None:
         return self.item(row, 3)
     
     def getSelectedNameItems(self) -> list[qtw.QTableWidgetItem]:
         return self.selectedItems()[::self.columnCount()]
     
-    def getModTypeCount(self, modType: ModType) -> int | None:
+    def getModTypeCount(self, modType: ModType) -> int:
         '''
         Returns the specified modtype count in the table,
-        if an invalid parameter is passed then return None
+        if an invalid parameter is passed then return -1
         '''
 
         if helper.isTypeMod(modType):
             return len(self.findItems(modType.value, qt.MatchFlag.MatchExactly))
+        
+        return -1
     
     @Slot(int)
     @Slot(int, bool)
-    def sort(self, header: int, changeAscending = True) -> None:
+    def sort(self, header: int, changeAscending: bool = True) -> None:
         '''
         Sorts the table widget based on the header selected.
 
@@ -134,7 +149,7 @@ class ModListWidget(qtw.QTableWidget):
                 qt.SortOrder.DescendingOrder : qt.SortOrder.AscendingOrder
             }
 
-            currentSort: qt.SortOrder = self.sortState['ascending']
+            currentSort: qt.SortOrder = cast(qt.SortOrder, self.sortState['ascending'])
 
             self.sortState['ascending'] = inverseDict[currentSort]
 
@@ -142,7 +157,7 @@ class ModListWidget(qtw.QTableWidget):
         
         logging.debug('Sorting items by col: %s, ascending: %s', self.sortState.get('col'), self.sortState.get('ascending'))
 
-        self.sortItems(self.sortState['col'], self.sortState['ascending'])
+        self.sortItems(self.sortState['col'], cast(qt.SortOrder, self.sortState['ascending']))
     
     def addMod(self, **kwargs: str | ModType | bool | list[str]) -> None:
         '''
@@ -161,16 +176,14 @@ class ModListWidget(qtw.QTableWidget):
 
         self.insertRow(self.rowCount())
 
-        for key, value in kwargs.items():
+        for key, value in kwargs.items():  # pyright: ignore[reportAssignmentType]
 
             match key:
 
                 case 'name':
                     item = qtw.QTableWidgetItem(value)
-                    tags: str | ModType | bool | List[str] | None = kwargs.get('tags')
-                    if tags is None:
-                        tags = []
-                    item.setData(ModRole.tags, tuple(tags))
+                    tags = kwargs.get('tags', [])
+                    item.setData(ModRole.tags, tags)
 
                     if Save.getModworkshopAssetID(value):
 
@@ -182,6 +195,7 @@ class ModListWidget(qtw.QTableWidget):
 
 
                 case 'type':
+                    value = cast(ModType, value)
                     self.setItem(self.rowCount() - 1, 1, qtw.QTableWidgetItem(value.value))
 
                 case 'enabled': # The key to this value should be a boolean
@@ -207,7 +221,7 @@ class ModListWidget(qtw.QTableWidget):
         iteration
         '''
 
-        items: List[qtw.QTableWidgetItem] = self.getSelectedNameItems()
+        items: list[qtw.QTableWidgetItem] = self.getSelectedNameItems()
 
         disabledModDir: str = OptionsManager.getDispath()
 
@@ -245,7 +259,7 @@ class ModListWidget(qtw.QTableWidget):
 
         if warning.result():
 
-            items: List[qtw.QTableWidgetItem] = self.getSelectedNameItems()
+            items: list[qtw.QTableWidgetItem] = self.getSelectedNameItems()
 
             startFileMover = ProgressWidget(DeleteMod(*[x.text() for x in items]))
             startFileMover.exec()
@@ -263,7 +277,7 @@ class ModListWidget(qtw.QTableWidget):
     def setItemEnabled(self) -> None:
         '''Sets one or more mods to be enabled in MOD_CONFIG and in the GUI'''
 
-        items: List[qtw.QTableWidgetItem] = self.getSelectedNameItems()
+        items: list[qtw.QTableWidgetItem] = self.getSelectedNameItems()
 
         startFileMover = ProgressWidget(MoveToEnabledModDir(*[x.text() for x in items]))
         startFileMover.exec()
@@ -312,10 +326,15 @@ class ModListWidget(qtw.QTableWidget):
                 continue
 
             type: ModType | None = Save.getType(mod)
+
+            if type is None:
+                logging.error("refreshMods(): Mod %s did not have a type", mod)
+                continue
+
             isEnabled: bool = not os.path.isdir(os.path.join(disModFolder, mod))
-            modPath: List[str] | str = Pathing.mod(type, mod) if isEnabled else os.path.join(disModFolder, mod)
+            modPath: list[str] | str = Pathing.mod(type, mod) if isEnabled else os.path.join(disModFolder, mod)
             version = str(findModVersion(modPath))
-            tags: List[str] = Save.getTags(mod)
+            tags: list[str] = Save.getTags(mod)
 
             assetID: str = Save.getModworkshopAssetID(mod)
 
@@ -337,7 +356,7 @@ class ModListWidget(qtw.QTableWidget):
         self.clearSelection()
 
         if sorting:
-            self.sort(self.sortState['col'], False)
+            self.sort(cast(int, self.sortState['col']), False)
 
     def getMods(self) -> list[list[str]]:
         '''
@@ -362,10 +381,10 @@ class ModListWidget(qtw.QTableWidget):
         disabledModsPath: str = OptionsManager.getDispath()
 
         # Mod Folder Contents
-        modsFolder: List[str] = os.listdir(modsPath)
-        mod_overrideFolder: List[str] = os.listdir(mod_overridePath)
-        mapsFolder: List[str] = os.listdir(maps_path)
-        disabledModsFolder: List[str] = os.listdir(disabledModsPath)
+        modsFolder: list[str] = os.listdir(modsPath)
+        mod_overrideFolder: list[str] = os.listdir(mod_overridePath)
+        mapsFolder: list[str] = os.listdir(maps_path)
+        disabledModsFolder: list[str] = os.listdir(disabledModsPath)
 
         # Mods Folder
         if os.path.exists(modsPath):
@@ -429,7 +448,7 @@ class ModListWidget(qtw.QTableWidget):
                 else:
                     logging.error('%s needs to be installed first before becoming disabled', mod)
 
-        return mod_override, mods, maps
+        return [list(mod_override), list(mods), list(maps)]
     
     def visitModPage(self) -> None:
 
@@ -482,7 +501,7 @@ class ModListWidget(qtw.QTableWidget):
                 helper.startFile(path)
 
     def hideMod(self) -> None:
-        items: List[qtw.QTableWidgetItem] = self.getSelectedNameItems()
+        items: list[qtw.QTableWidgetItem] = self.getSelectedNameItems()
         for item in items:
             modName: str = item.text()
             Save.setIgnored(modName, True)
@@ -495,26 +514,26 @@ class ModListWidget(qtw.QTableWidget):
 
     def viewTags(self) -> None:
         self.tagViewer = TagViewer(self)
-        self.tagViewer.tagChanged.connect(lambda x, y: self.updateTags(x, y))
+        self.tagViewer.tagChanged.connect(self.updateTags)
         self.tagViewer.show()
     
     @Slot(str, tuple)
-    def updateTags(self, mod: str, tags: tuple[str]) -> None:
-        items: List[qtw.QTableWidgetItem] = self.findItems(mod, qt.MatchFlag.MatchFixedString)
+    def updateTags(self, mod: str, tags: list[str]) -> None:
+        items: list[qtw.QTableWidgetItem] = self.findItems(mod, qt.MatchFlag.MatchFixedString)
         if items:
             item: qtw.QTableWidgetItem = items[0]
             item.setData(ModRole.tags, sorted(tags))
 
     @Slot(str)
     def search(self, input: str) -> None:
-        searchedTags = None
+        searchedTags = []
 
         if input.startswith('tag:') and len(input) > 4:
-            splitStr: List[str] = input.split(' ')
+            splitStr: list[str] = input.split(' ')
             input = ' '.join(splitStr[1:])
-            searchedTags: List[str] = splitStr[0][4:].split(',')
+            searchedTags: list[str] = splitStr[0][4:].split(',')
 
-        results: List[qtw.QTableWidgetItem] = self.findItems(
+        results: list[qtw.QTableWidgetItem] = self.findItems(
             f'{input}*',
             qt.MatchFlag.MatchWildcard | qt.MatchFlag.MatchExactly
         )
@@ -522,17 +541,19 @@ class ModListWidget(qtw.QTableWidget):
         for i in range(0, self.rowCount() + 1):
 
             item: qtw.QTableWidgetItem | None = self.item(i, 0)
-            if item is not None:
-                modTags: tuple[str] | None = item.data(ModRole.tags)
+            if item is None:
+                continue
 
-            if searchedTags is not None and modTags is not None:
+            modTags: list[str] | None = item.data(ModRole.tags)
+
+            if searchedTags and modTags is not None:
                 for tag in searchedTags:
                     if tag in modTags and item in results:
                         self.setRowHidden(i, False)
                     else:
                         self.setRowHidden(i, True)
             else:
-                if item in results and searchedTags is None:
+                if item in results and searchedTags:
                     self.setRowHidden(i, False)
                 else:
                     self.setRowHidden(i, True)
@@ -548,7 +569,7 @@ class ModListWidget(qtw.QTableWidget):
         }
 
         for i in range(0, self.rowCount() - 1):
-            item: qtw.QTableWidgetItem = self.getNameItem(i)
+            item: qtw.QTableWidgetItem | None = self.getNameItem(i)
 
             if not item.icon().isNull():
                 item.setIcon(qtg.QIcon(os.path.join(UI_GRAPHICS_PATH, reverseDict[newIcon])))
@@ -566,7 +587,7 @@ class ModListWidget(qtw.QTableWidget):
             return
 
         # Dictionary holding the destination for each mod
-        dict_: dict = notice.typeDict
+        dict_ = notice.typeDict
 
         # Combine the mod location and URL into a Tuple
         if dirs:
@@ -593,6 +614,7 @@ class ModListWidget(qtw.QTableWidget):
         self.refreshMods()
 
 # EVENT OVERRIDES
+    @override
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
 
         if event.button() == qt.MouseButton.RightButton:
@@ -600,14 +622,29 @@ class ModListWidget(qtw.QTableWidget):
             # Will return None if there are no mods causing a traceback
             tableWidgetItem: qtw.QTableWidgetItem | None = self.itemAt(event.pos())
 
-            if tableWidgetItem is not None:
+            if tableWidgetItem is None:
+                return event.ignore()
 
-                if len(self.getSelectedNameItems()) <= 1:
-                    self.selectRow(tableWidgetItem.row())
-                self.contextMenu.exec(qtg.QCursor.pos())
+            if len(self.getSelectedNameItems()) <= 1:
+                self.selectRow(tableWidgetItem.row())
+            
+            selectedItems: list[qtw.QTableWidgetItem] = self.getSelectedNameItems()
+            if len(selectedItems) <= 0:
+                event.accept()
+                return
+
+            if Save.getModworkshopAssetID(selectedItems[0].text()):
+                self.contextMenu.visitModPage.setEnabled(True)
+                self.contextMenu.checkUpdate.setEnabled(True)
+            else:
+                self.contextMenu.visitModPage.setEnabled(False)
+                self.contextMenu.checkUpdate.setEnabled(False)
+
+            self.contextMenu.exec(qtg.QCursor.pos())
 
         return super().mousePressEvent(event)
     
+    @override
     def dragEnterEvent(self, event: qtg.QDragEnterEvent) -> None:
 
         if event.mimeData().hasUrls():
@@ -617,6 +654,7 @@ class ModListWidget(qtw.QTableWidget):
         else:
             event.ignore()
     
+    @override
     def dragMoveEvent(self, event: qtg.QDragMoveEvent) -> None:
         
         if event.mimeData().hasUrls():
@@ -626,6 +664,7 @@ class ModListWidget(qtw.QTableWidget):
         else:
             event.ignore()
     
+    @override
     def dropEvent(self, event: qtg.QDropEvent) -> None:
         if event.mimeData().hasUrls():
 

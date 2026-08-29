@@ -1,6 +1,6 @@
 import tempfile
 import os
-from typing import Generator
+from collections.abc import Generator
 
 from PySide6.QtWidgets import QTableWidgetItem
 import pytest
@@ -15,17 +15,17 @@ from src.constant_vars import ModType, ModRole
 MODS = (
     ('mod1', ModType.mods, True, '2.3.0', ['cool']),
     ('mod2', ModType.mods_override, True, 'None', ['calm', 'cool']),
-    ('mod3', ModType.maps, None, '2.4.0', None),
+    ('mod3', ModType.maps, None, '2.4.0', list[str]()),
 )
 
 @pytest.fixture(scope='module')
-def create_QTable(createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator:
+def create_QTable(createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator[ModListWidget]:  # pyright: ignore[reportUnusedParameter]
 
     widget = ModListWidget()
 
     widget.addMod(name=MODS[0][0], type=MODS[0][1], enabled=MODS[0][2], version=MODS[0][3], tags=MODS[0][4])
     widget.addMod(name=MODS[1][0], type=MODS[1][1], enabled=MODS[1][2], version=MODS[1][3], tags=MODS[1][4])
-    widget.addMod(name=MODS[2][0], type=MODS[2][1], enabled=MODS[2][2], version=MODS[2][3], tags=MODS[2][4])
+    widget.addMod(name=MODS[2][0], type=MODS[2][1], enabled=MODS[2][2], version=MODS[2][3], tags=MODS[2][4])  # pyright: ignore[reportArgumentType] None being used as an arg is intentional
 
     yield widget
 
@@ -36,8 +36,8 @@ def test_addMods(create_QTable: ModListWidget) -> None:
     assert create_QTable.getNameItem(0).text() == 'mod1'
     assert create_QTable.getTypeItem(0).text() == 'mods'
     assert create_QTable.getVersionItem(1).text() == '1.0.0'
-    assert create_QTable.getNameItem(0).data(ModRole.tags) == ('cool',)
-    assert create_QTable.getNameItem(2).data(ModRole.tags) == ()
+    assert create_QTable.getNameItem(0).data(ModRole.tags) == ['cool',]
+    assert create_QTable.getNameItem(2).data(ModRole.tags) == []
 
 def test_sort(create_QTable: ModListWidget) -> None:
 

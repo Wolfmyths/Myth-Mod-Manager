@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Callable
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, Slot
+from typing_extensions import override
 
 if TYPE_CHECKING:
     import PySide6.QtGui as qtg
@@ -10,8 +11,8 @@ if TYPE_CHECKING:
 class ModContextMenu(qtw.QMenu):
     '''Base class for QMenu Objects that are used as context menus'''
 
-    lastClicked: qt.MouseButton = None
-    lastReleased: qt.MouseButton = None
+    lastClicked: qt.MouseButton = qt.MouseButton.NoButton
+    lastReleased: qt.MouseButton = qt.MouseButton.NoButton
     def __init__(self, parent: qtw.QWidget | None = None) -> None:
         super().__init__(parent)
     
@@ -33,10 +34,12 @@ class ModContextMenu(qtw.QMenu):
         return
 
 # EVENT OVERRIDES
+    @override
     def mousePressEvent(self, arg__1: qtg.QMouseEvent) -> None:
         self.lastClicked = arg__1.button()
         return super().mousePressEvent(arg__1)
     
+    @override
     def mouseReleaseEvent(self, arg__1: qtg.QMouseEvent) -> None:
         self.lastReleased = arg__1.button()
         return super().mouseReleaseEvent(arg__1)

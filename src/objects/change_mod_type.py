@@ -2,6 +2,7 @@ import logging
 import os
 
 from PySide6.QtCore import QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.helpers.helper_pathing import Pathing
 import src.helpers.helper as helper
@@ -16,6 +17,7 @@ class ChangeModType(Worker):
         self.mods: tuple[tuple[str, ModType], ...] = mods
         self.mods_moved: list[tuple[str, str]] = []
     
+    @override
     @Slot()
     def start(self) -> None:
         '''
@@ -23,13 +25,11 @@ class ChangeModType(Worker):
         '''
 
         self.setTotalProgress.emit(len(self.mods))
-
-        ChosenDir = None
         
-        for mod in self.mods:
+        for mod_tuple in self.mods:
 
-            modsDirPath: str = mod[0]
-            ChosenDir: ModType = mod[1]
+            modsDirPath: str = mod_tuple[0]
+            ChosenDir: ModType = mod_tuple[1]
 
             mod: str = os.path.basename(modsDirPath)
 
@@ -38,7 +38,7 @@ class ChangeModType(Worker):
             # Setting the Destination path
             if helper.isTypeMod(ChosenDir):
 
-                modDestPath: list[str] | str = Pathing.mod(ChosenDir, mod)
+                modDestPath: str = Pathing.mod(ChosenDir, mod)
 
                 self.move(modsDirPath, modDestPath)
                 self.mods_moved.append((modsDirPath, modDestPath))
@@ -49,6 +49,7 @@ class ChangeModType(Worker):
         
         self.succeeded.emit()
     
+    @override
     def onCancel(self) -> None:
         self.setTotalProgress.emit(len(self.mods_moved))
         for modPaths in self.mods_moved:

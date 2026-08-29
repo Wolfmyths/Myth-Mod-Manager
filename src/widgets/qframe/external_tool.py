@@ -33,13 +33,13 @@ class ExternalTool(qtw.QFrame):
 
         editIcon: QIcon = style.standardIcon(style.StandardPixmap.SP_DirLinkIcon)
 
-        self.editToolButton = qtw.QPushButton(icon=editIcon, parent=self.optionsFrame)
+        self.editToolButton = qtw.QPushButton(editIcon, '', parent=self.optionsFrame)
         self.editToolButton.setSizePolicy(qtw.QSizePolicy.Policy.Fixed, qtw.QSizePolicy.Policy.Fixed)
         self.editToolButton.pressed.connect(self.editToolURL)
 
         deleteIcon: QIcon = style.standardIcon(style.StandardPixmap.SP_DialogDiscardButton)
 
-        self.deleteToolButton = qtw.QPushButton(icon=deleteIcon, parent=self.optionsFrame)
+        self.deleteToolButton = qtw.QPushButton(deleteIcon, '', parent=self.optionsFrame)
         self.deleteToolButton.setSizePolicy(qtw.QSizePolicy.Policy.Fixed, qtw.QSizePolicy.Policy.Fixed)
         self.deleteToolButton.pressed.connect(self.deleteExternalTool)
 
@@ -48,7 +48,7 @@ class ExternalTool(qtw.QFrame):
 
         self.optionsFrame.setLayout(optionsFrameLayout)
 
-        self.startToolButton = qtw.QPushButton(text=self.__trimBasename(self.toolURL), parent=self)
+        self.startToolButton = qtw.QPushButton(self.__trimBasename(self.toolURL), parent=self)
         self.startToolButton.setSizePolicy(qtw.QSizePolicy.Policy.Expanding, qtw.QSizePolicy.Policy.Expanding)
         self.startToolButton.pressed.connect(self.startExternalTool)
 

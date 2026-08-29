@@ -1,18 +1,14 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import LiteralString, cast
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, Slot
 
-import src.helpers.helper as helper
 from src.constant_vars import OptionKeys
+from src.helpers.options_manager import OptionsManager
 from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
 
-if TYPE_CHECKING:
-    from src.widgets.qwidget.options import Options
-
 class OptionsLaunchParams(OptionsSectionBase):
-    def __init__(self, parent: Options = None) -> None:
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
         super().__init__(parent)
         layout = qtw.QVBoxLayout()
         childLayout = qtw.QFormLayout()
@@ -23,40 +19,54 @@ class OptionsLaunchParams(OptionsSectionBase):
         childLayout2.setSpacing(10)
         childLayout2.setRowWrapPolicy(qtw.QFormLayout.RowWrapPolicy.WrapAllRows)
 
-        self.warningLabel         = qtw.QLabel(qapp.translate("OptionsLaunchParams", "USE THESE IF YOU KNOW WHAT YOU'RE DOING"), self)
+        PARAM: LiteralString = "param"
+
+        self.warningLabel            = qtw.QLabel(qapp.translate("OptionsLaunchParams", "USE THESE IF YOU KNOW WHAT YOU'RE DOING"), self)
         
         self.dLineEdit            = qtw.QLineEdit(self)
+        self.dLineEdit.setProperty(PARAM, "-d")
         self.dLineEdit.setPlaceholderText("<dir>")
         self.oLineEdit            = qtw.QLineEdit(self)
+        self.oLineEdit.setProperty(PARAM, "-o")
         self.oLineEdit.setPlaceholderText("<file>")
         
         self.sCheckBox            = qtw.QCheckBox(self)
+        self.sCheckBox.setProperty(PARAM, "-s")
         self.uCheckBox            = qtw.QCheckBox(self)
+        self.uCheckBox.setProperty(PARAM, "-u")
         self.qCheckBox            = qtw.QCheckBox(self)
+        self.qCheckBox.setProperty(PARAM, "-q")
         self.skipintroCheckBox    = qtw.QCheckBox(self)
+        self.skipintroCheckBox.setProperty(PARAM, "-skip_intro")
         self.steamMMCheckBox      = qtw.QCheckBox(self)
+        self.steamMMCheckBox.setProperty(PARAM, "-steamMM")
         self.epicMMCheckBox       = qtw.QCheckBox(self)
+        self.epicMMCheckBox.setProperty(PARAM, "-epicMM")
         self.newCPUCheckBox       = qtw.QCheckBox(self)
+        self.newCPUCheckBox.setProperty(PARAM, "-NewCPU")
         self.qaCheckBox           = qtw.QCheckBox(self)
+        self.qaCheckBox.setProperty(PARAM, "-qa")
         self.crashCheckBox        = qtw.QCheckBox(self)
+        self.crashCheckBox.setProperty(PARAM, "-crash")
         self.delayedstartCheckBox = qtw.QCheckBox(self)
+        self.delayedstartCheckBox.setProperty(PARAM, "-delayedstart")
         self.removevtuneCheckBox  = qtw.QCheckBox(self)
+        self.removevtuneCheckBox.setProperty(PARAM, "-removevtune")
 
         self.customLineEdit       = qtw.QLineEdit(self)
         self.previewLineEdit      = qtw.QLineEdit(self)
         self.previewLineEdit.setReadOnly(True)
 
         
-        launchParamPairs: tuple[tuple[str, qtw.QWidget], ...] = self._get_param_widget_pairs()
+        launchParamPairs = self._get_param_widget_pairs()
 
         # Assigning for child layout 1
         for title, widget in launchParamPairs:
             childLayout.addRow(title, widget)
-            widget.setProperty("param", title)
 
             if isinstance(widget, qtw.QCheckBox):
                 widget.clicked.connect(self.update_preview)
-            elif isinstance(widget, qtw.QLineEdit):
+            else:
                 widget.textEdited.connect(self.update_preview)
         
         self.setup()
@@ -78,31 +88,37 @@ class OptionsLaunchParams(OptionsSectionBase):
         self.setLayout(layout)
     
     def setup(self) -> None:
-        launchParamPairs: tuple[tuple[str, qtw.QWidget], ...] = self._get_param_widget_pairs()
-        launch_parameters: list[str] = helper.launchParamsToList()
+        launchParamPairs = self._get_param_widget_pairs()
+        lineEditPairs = [x for x in launchParamPairs if isinstance(x[1], qtw.QLineEdit)]
+        checkboxPairs = [x for x in launchParamPairs if isinstance(x[1], qtw.QCheckBox)]
+        launch_parameters = OptionsManager.getLaunchParameters().split("-")
 
-        for title, lineEdit in launchParamPairs[:2]:
-            lineEdit: qtw.QLineEdit
-            for param in launch_parameters:
-                if param.startswith(title):
-                    lineEdit.setText(param)
-                    launch_parameters.remove(param)
-                else:
-                    lineEdit.setText('')
-        
-        for title, checkBox in launchParamPairs[3:]:
-            checkBox: qtw.QCheckBox
-            if title in launch_parameters:
-                checkBox.setChecked(True)
-                launch_parameters.remove(title)
+        def _find_arg(arg: str) -> int:
+            for idx in range(len(launch_parameters)):
+                if not launch_parameters[idx].startswith(arg):
+                    continue
+                
+                return idx
+
+            return -1
+
+        for title, lineEdit in lineEditPairs:
+            lineEdit = cast(qtw.QLineEdit, lineEdit)
+            idx = _find_arg(title)
+            if not idx == -1:
+                lineEdit.setText(f"-{launch_parameters[idx]}")
             else:
-                checkBox.setChecked(False)
+                lineEdit.clear()
+        
+        for title, checkBox in checkboxPairs:
+            checkBox = cast(qtw.QCheckBox, checkBox)
+            checkBox.setChecked(not _find_arg(title) == -1)
         
         self.customLineEdit.setText(' '.join(launch_parameters))
         self.update_preview()
 
 
-    def _get_param_widget_pairs(self) -> tuple[tuple[str, qtw.QWidget], ...]:
+    def _get_param_widget_pairs(self) -> tuple[tuple[str, qtw.QCheckBox | qtw.QLineEdit], ...]:
         return (
             ('-d', self.dLineEdit),
             ('-o', self.oLineEdit),
@@ -121,25 +137,19 @@ class OptionsLaunchParams(OptionsSectionBase):
 
     @Slot(str)
     def on_preview_text_changed(self, newText: str) -> None:
-        newText: str = newText.strip()
+        newText = newText.strip()
+        currentText = OptionsManager.getLaunchParameters()
 
-        newTextSet: set[str]
-        if newText:
-            newTextSet = set(helper.launchParamsToList(newText))
-        else:
-            newTextSet = set()
+        is_changed: bool = not newText == currentText
         
-        currentTextSet: set[str] = set(helper.launchParamsToList())
-
-        is_changed: bool = not newTextSet == currentTextSet
+        print(
+            "On preview text changed triggered",
+            "New Text: ", newText, '\n',
+            "Current Text: ", currentText, '\n',
+            "Is same: ", newText == currentText
+        )
         
-        #print(
-        #    "New Text: ", newTextSet, '\n',
-        #    "Current Text: ", currentTextSet, '\n',
-        #    "Is same: ", newTextSet == currentTextSet
-        #)
-        
-        self.pendingChanges.emit(OptionKeys.launch_parameters.value, is_changed)
+        self.pendingChanges.emit(OptionKeys.launch_parameters, is_changed)
 
     @Slot()
     def update_preview(self) -> None:

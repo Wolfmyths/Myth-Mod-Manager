@@ -1,39 +1,36 @@
+from __future__ import annotations
+
 import os
 import json
 import xml.etree.ElementTree as et
 import logging
-from typing import Any
 
-from semantic_version import Version
+from PySide6.QtCore import QVersionNumber
 
 logging.getLogger(__file__)
 
-def __loadXML(modPath: str) -> et.ElementTree | None:
+def __loadXML(modPath: str) -> et.ElementTree[et.Element[str]] | None:
 
     xmlName = 'main.xml'
 
     xmlPath: str = os.path.join(modPath, xmlName)
 
-    xml = None
-
     logging.debug('Checking xml file of %s', os.path.basename(modPath))
     
     try:
         if os.path.exists(xmlPath):
-            xml: et.ElementTree = et.parse(xmlPath)
+            xml = et.parse(xmlPath)
+            return xml
+        
     except Exception as e:
         logging.error('Something went wrong parsing an xml file in %s:\n%s', os.path.basename(modPath), str(e))
-    
-    return xml
 
-def __parseVersion(version: Any) -> Version | None:
+def __parseVersion(version: str | None) -> QVersionNumber | None:
 
     logging.debug('Parsing %s', version)
 
     if version is None:
         return
-    
-    version: str = str(version)
     
     removeChars = ('v', 'V')
     try:
@@ -42,20 +39,20 @@ def __parseVersion(version: Any) -> Version | None:
         if version.endswith(removeChars):
             version = version[:-1]
         
-        version = Version.coerce(version)
+        version_qver = QVersionNumber.fromString(version)
 
     except Exception as e:
         logging.error('Something went wrong in __parseVersion() parsing version %s: %s', version, str(e))
-        version = None
+        version_qver = None
     
-    return version
+    return version_qver
 
 def findModworkshopAssetID(modPath: str) -> str:
     '''Finds the AssetID of a modworkshop mod if it can'''
 
     assetID = ''
 
-    xml: et.ElementTree | None = __loadXML(modPath)
+    xml: et.ElementTree[et.Element[str]] | None = __loadXML(modPath)
 
     if xml is None:
         return assetID
@@ -72,13 +69,13 @@ def findModworkshopAssetID(modPath: str) -> str:
     
     return assetID
 
-def findModVersion(modPath: str) -> Version | None:
+def findModVersion(modPath: str) -> QVersionNumber | None:
     '''Finds the mod version if it can by parsing `main.xml` and `mod.txt`'''
     try:
 
         version: str | None = None
 
-        xml: et.ElementTree | None = __loadXML(modPath)
+        xml: et.ElementTree[et.Element[str]] | None = __loadXML(modPath)
 
         txtName = 'mod.txt'
         txtPath: str = os.path.join(modPath, txtName)
@@ -107,7 +104,7 @@ def findModVersion(modPath: str) -> Version | None:
                             if line.endswith(','):
                                 line = line.removesuffix(',')
 
-                            data: dict = json.loads('{{{line}}}'.format(line=line))
+                            data: dict[str, str] = json.loads('{{{line}}}'.format(line=line))
 
                             version = data.get('version')
 

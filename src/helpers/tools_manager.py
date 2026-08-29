@@ -1,11 +1,13 @@
 import os
 import logging
 
+from typing_extensions import override
+
 from src.helpers.json_parser import JSONParser
 from src.constant_vars import TOOLS_JSON
 
 class ToolJSON():
-    _file: dict[str:list[str]] = None
+    _file: dict[str, list[str]] = {}
     _path: str = ''
 
     def __init__(self, path: str = TOOLS_JSON) -> None:
@@ -14,9 +16,10 @@ class ToolJSON():
         ToolJSON._file = JSONParser.loadJSON(path, {'shortcuts' : []})
         ToolJSON._path = path
 
+    @override
     def __str__(self) -> str:
 
-        if ToolJSON._file is not None:
+        if not ToolJSON._file:
             output = str(ToolJSON._file.get('shortcuts'))
         else:
             output = 'None'

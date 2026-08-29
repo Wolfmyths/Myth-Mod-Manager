@@ -12,7 +12,7 @@ from src.constant_vars import ModType
 
 #TODO: Everything seems to work but the assert statement
 @pytest.mark.skip
-def test_thread(qtbot: QtBot, create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> None:
+def test_thread(qtbot: QtBot, create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> None:  # pyright: ignore[reportUnusedParameter]
     zip_path: str = os.path.join(create_mod_dirs, 'zip')
     os.mkdir(zip_path)
     shutil.make_archive(zip_path, 'zip')

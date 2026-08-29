@@ -1,12 +1,10 @@
 import json
 import logging
+from typing import cast
 
-from PySide6.QtCore import QObject, QUrl, Signal, Slot
+from PySide6.QtCore import QObject, QUrl, Signal, Slot, QVersionNumber
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
-from semantic_version import Version
-
-from src.helpers.helper import isPrerelease
 from src.constant_vars import VERSION
 
 class CheckUpdate(QObject):
@@ -25,10 +23,7 @@ class CheckUpdate(QObject):
         super().__init__()
         logging.getLogger(__file__)
 
-        link = 'https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases'
-
-        if not isPrerelease(VERSION):
-            link += '/latest'
+        link = 'https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest'
         
         network = QNetworkAccessManager(self)
         request = QNetworkRequest(QUrl(link))
@@ -39,7 +34,7 @@ class CheckUpdate(QObject):
     
     @Slot()
     def __reply_handler(self) -> None:
-        reply: QNetworkReply = self.sender()
+        reply: QNetworkReply = cast(QNetworkReply, self.sender())
 
         if reply.error() == QNetworkReply.NetworkError.NoError:
             self.__checkVersion()
@@ -49,20 +44,17 @@ class CheckUpdate(QObject):
             self.deleteLater()
     
     def __checkVersion(self) -> None:
-        reply: QNetworkReply = self.sender()
+        reply: QNetworkReply = cast(QNetworkReply, self.sender())
 
         try:
-            data: dict = json.loads(reply.readAll().data().decode())
+            data: dict = json.loads(cast(bytearray, reply.readAll().data()).decode())  # pyright: ignore[reportMissingTypeArgument]
         except Exception as e:
             logging.error('An error occured trying to access a Github API reply in checkUpdate().__checkversion():\n%s', str(e))
             self.error.emit()
             self.deleteLater()
+            return
 
-        latestVersion: Version
-        if isPrerelease(VERSION):
-            latestVersion = Version.coerce(data[0]['tag_name'])
-        else:
-            latestVersion = Version.coerce(data['tag_name'])
+        latestVersion = QVersionNumber.fromString(data['tag_name'])  # pyright: ignore[reportUnknownArgumentType]
         
         logging.info('Latest Version: %s', latestVersion)
 

@@ -1,8 +1,8 @@
 import os
-import sys
+import platform
 from enum import StrEnum, auto
 
-import semantic_version
+from PySide6.QtCore import QVersionNumber
 
 ##
 ## THIS FILE IS PLACED NEXT TO __main__ FOR FILE PATH REASONS
@@ -18,6 +18,7 @@ class ModType(StrEnum):
     mods_override = auto()
     maps          = auto()
 
+    @staticmethod
     def all_types() -> list[str]:
         return [enum.value for enum in ModType]
 
@@ -35,14 +36,17 @@ class OptionKeys(StrEnum):
     section          = 'OPTIONS' # Main section
 
     game_path         = auto()
-    dispath          = 'disabled-mods'
+    dispath           = 'disabled-mods'
     color_theme       = auto()
     windowsize_w      = auto()
     windowsize_h      = auto()
     mmm_update_alert  = auto()
     lang              = auto()
     launch_parameters = auto()
+    proton_path       = auto()
+    proton_version    = auto()
 
+    @staticmethod
     def all_keys() -> list[str]:
         # Splice removes section key
         return [enum.value for enum in OptionKeys][1:]
@@ -57,7 +61,7 @@ class ModRole():
     tags = 33 # Role ID for a mod's tags
 
 # Lang map string to code
-LANG_STR_TO_CODE: dict[str:str] = {
+LANG_STR_TO_CODE = {
     'Deutsch'            : 'de_DE',
     'English'            : 'en_US',
     'Español (españa)'   : 'es_ES',
@@ -73,10 +77,10 @@ LANG_STR_TO_CODE: dict[str:str] = {
 }
 
 # Lang code map code to string
-LANG_CODE_TO_STR: dict[str:str] = {x:y for y,x in LANG_STR_TO_CODE.items()}
+LANG_CODE_TO_STR = {x:y for y,x in LANG_STR_TO_CODE.items()}
 
-# Detection if the program is being run through an exe or the script
-IS_SCRIPT = not getattr(sys, 'frozen', False)
+# Detection if the program is in debug mode or not (Assign manually)
+IS_DEBUG = True
 
 # Root Path
 ROOT_PATH = os.path.abspath(os.getcwd())
@@ -97,7 +101,7 @@ OPTIONS_CONFIG = 'config.ini'
 PROFILES_JSON = 'profiles.json'
 TOOLS_JSON = 'externalshortcuts.json'
 START_PAYDAY = 'runGame.bat'
-OLD_EXE = 'Myth Mod Manager.exe (Old)' if sys.platform.startswith('win') else 'Myth Mod Manager (old)'
+OLD_EXE = 'Myth Mod Manager.exe (Old)' if platform.system().startswith('Win') else 'Myth Mod Manager (old)'
 DISABLED_MODS = 'disabled-mods'
 BACKUP_MODS = 'backup mods'
 
@@ -128,4 +132,4 @@ LIGHT = 'light'
 # Program Info
 PROGRAM_NAME = 'Myth Mod Manager'
 
-VERSION = semantic_version.Version(major=1, minor=7, patch=1)
+VERSION = QVersionNumber(1, 7, 1)

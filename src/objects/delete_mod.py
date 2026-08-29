@@ -1,9 +1,8 @@
 import logging
 import os
 
-from PySide6.QtCore import QCoreApplication as qapp, Slot
-
-import send2trash
+from PySide6.QtCore import QCoreApplication as qapp, Slot, QFile
+from typing_extensions import override
 
 from src.helpers.helper_pathing import Pathing
 from src.helpers.options_manager import OptionsManager
@@ -18,6 +17,7 @@ class DeleteMod(Worker):
 
         self.mods: tuple[str, ...] = mods
 
+    @override
     @Slot()
     def start(self) -> None:
         '''Removes the mod(s) from the user's computer'''
@@ -33,16 +33,20 @@ class DeleteMod(Worker):
 
                 self.setCurrentProgress.emit(1, qapp.translate('DeleteMod', 'Deleting') + f'{modName}')
 
-                enabled: bool = Save.getEnabled(modName)
+                is_enabled: bool = Save.getEnabled(modName)
 
-                type: ModType | str | None = Save.getType(modName) if enabled else 'disabled'
+                type: ModType | None = Save.getType(modName)
+
+                if type is None:
+                    logging.warning("mod %s type is none in DeleteMod.start, skipping...", modName)
+                    continue
 
                 Save.removeMods(modName)
 
-                path: list[str] | str = Pathing.mod(type, modName) if type != 'disabled' else disPath
+                path: str = Pathing.mod(type, modName) if is_enabled else os.path.join(disPath, modName)
 
                 if os.path.isdir(path):
-                    send2trash.send2trash(path)
+                    QFile.moveToTrash(path)
                 else:
                     logging.error('An error was raised in FileMover.deleteMod(), %s path does not exist:\n%s', os.path.basename(path), path)
 

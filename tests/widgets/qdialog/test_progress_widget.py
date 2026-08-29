@@ -1,11 +1,11 @@
 import pytest
-from typing import Generator
+from collections.abc import Generator
 
 from src.widgets.qdialog.progress_widget import ProgressWidget
 from src.objects.worker import Worker
 
 @pytest.fixture(scope='function')
-def create_progressWidget(createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator:
+def create_progressWidget(createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator[ProgressWidget]:  # pyright: ignore[reportUnusedParameter]
     worker = Worker()
     widget = ProgressWidget(worker)
 

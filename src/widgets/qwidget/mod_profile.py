@@ -61,7 +61,6 @@ class ModProfile(qtw.QWidget):
 
         # Refresh table so it is updated after all of this is done
         # TODO: Refactor to make this not loop through all widgets
-        widget: ModListWidget
         for widget in qtw.QApplication.allWidgets():
             if isinstance(widget, ModListWidget):
                 widget.refreshMods()

@@ -3,6 +3,7 @@ import shutil
 import logging
 
 from PySide6.QtCore import QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.objects.worker import Worker
 from src.helpers.options_manager import OptionsManager
@@ -14,6 +15,7 @@ class BackupMods(Worker):
 
     bundledFilePath = os.path.join(os.path.abspath(os.curdir), BACKUP_MODS)
 
+    @override
     @Slot()
     def start(self) -> None:
             '''Takes all of the mods and compresses them into a zip file, the output is in the exe directory'''
@@ -125,6 +127,7 @@ class BackupMods(Worker):
                     f':\n{e}'
                 )
 
+    @override
     def onCancel(self) -> None:
         if os.path.exists(self.bundledFilePath):
             shutil.rmtree(self.bundledFilePath)

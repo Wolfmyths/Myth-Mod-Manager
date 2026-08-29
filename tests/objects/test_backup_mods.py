@@ -10,7 +10,7 @@ from src.constant_vars import BACKUP_MODS
 
 #TODO: os.mkdir() isn't working
 @pytest.mark.skip
-def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> None:
+def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> None:  # pyright: ignore[reportUnusedParameter]
     mutex = QMutex()
     worker = BackupMods()
     

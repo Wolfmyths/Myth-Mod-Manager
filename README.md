@@ -8,7 +8,7 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 ![GitHub contributors](https://img.shields.io/github/contributors/Wolfmyths/Myth-Mod-Manager)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
-![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Framework](https://img.shields.io/badge/Framework-PySide6-green)
 ![Platform](https://img.shields.io/badge/OS-Windows_|_Linux-blue)
 
@@ -23,9 +23,7 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 
 * Search bar to find the installed mod you're looking for in seconds.
 
-* Create profiles to organize your mods.
-
-* Assign tags to mods
+* Create profiles and use tags to organize your mods.
 
 * Delete mods from your computer.
 
@@ -36,11 +34,15 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 
 * Easy to access buttons for your game directory, crash logs, and starting the game.
 
-* Backup all of your mods and package it into a compressed file.
+* Backup all of your mods into a compressed file.
   
-* Auto detects and installs Myth Mod Manager's updates.
+* Checks for Myth Mod Manager updates and can install them.
+  
+* Configure PAYDAY 2 launch parameters
 
-**Like all PAYDAY 2 Mods, [Super BLT](https://superblt.znix.xyz/) is required to run mods**
+**Myth Mod Manger runs under the assumption you have [Super BLT](https://superblt.znix.xyz/) installed**
+
+**Myth Mod Manager is an external program and does not directly mod PAYDAY 2**
 
 # Showcase
 
@@ -50,7 +52,7 @@ A simple mod manager for PAYDAY 2 to make managing all of those files a little b
 
 # Anti-Virus False Positives (And building the exe yourself)
 
-Rest assured, this program does not contain malicious code.
+Rest assured, this program does not contain malicious code. The program is compressed with [upx](https://upx.github.io/) which commonly raises flase positives.
 
 **When a release is published, github builds the executable as seen [here](https://github.com/Wolfmyths/Myth-Mod-Manager/blob/main/.github/workflows), not me.**
 
@@ -58,9 +60,10 @@ If you still are suspicious, you can build the executable yourself with these st
 
 1. [Install Python 3.11](https://www.python.org/downloads/)
 2. Clone this repository
-3. Run `createEXE.bat` or `createEXE.sh` depending on your OS
-4. There will be a folder created called `Myth Mod Manager` which contains the newly compiled executable. This is created within the repository.
-5. Move `Myth Mod Manager` to your preferred directory and start it.
+3. (Optional but recommended) Create and run a virtual environment with `venv.bat` or `venv.sh` depending on your OS
+4. Run `createEXE.bat` or `createEXE.sh` depending on your OS (Make sure cwd is the project folder, not the venv)
+5. There will be a folder created called `Myth Mod Manager` which contains the newly compiled executable. This is created within the repository.
+6. Move `Myth Mod Manager` to your preferred directory and start it.
 
 # Supported Platforms
 

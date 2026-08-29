@@ -2,6 +2,7 @@ import os
 
 from PySide6.QtCore import QCoreApplication as qapp, Slot
 import PySide6.QtWidgets as qtw
+from typing_extensions import override
 
 from src.widgets.qdialog.dialog import Dialog
 from src.helpers.options_manager import OptionsManager
@@ -23,7 +24,7 @@ class GamePathNotFound(Dialog):
         self.inputFrame = qtw.QFrame(self)
         inputFrameLayout = qtw.QHBoxLayout()
 
-        self.openExplorerButton = qtw.QPushButton(icon=style.standardIcon(style.StandardPixmap.SP_DirLinkIcon), parent=self.inputFrame)
+        self.openExplorerButton = qtw.QPushButton(style.standardIcon(style.StandardPixmap.SP_DirLinkIcon), '', parent=self.inputFrame)
         self.openExplorerButton.setSizePolicy(qtw.QSizePolicy.Policy.Fixed, qtw.QSizePolicy.Policy.Fixed)
         self.openExplorerButton.clicked.connect(self.openFileDialog)
 
@@ -71,12 +72,14 @@ class GamePathNotFound(Dialog):
         else:
             okButton.setEnabled(False)
     
+    @override
     @Slot()
     def accept(self) -> None:
         OptionsManager.setGamepath(self.gameDir.text())
         OptionsManager.writeData()
         return super().accept()
 
+    @override
     @Slot()
     def reject(self) -> None:
 

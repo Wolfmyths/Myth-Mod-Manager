@@ -1,4 +1,4 @@
-from typing import Generator
+from collections.abc import Generator
 import tempfile
 import os
 import json
@@ -17,7 +17,7 @@ MOCK_MOD_NAME_2 = 'best mod ever'
 MOCK_MOD_NAME_3 = 'super fun mod'
 
 @pytest.fixture(scope='module')
-def create_mod_dirs() -> Generator:
+def create_mod_dirs() -> Generator[str]:
     with tempfile.TemporaryDirectory() as tmp_dir:
         os.makedirs(os.path.join(tmp_dir, 'mods', MOCK_MOD_NAME_1))
         os.makedirs(os.path.join(tmp_dir, 'assets', 'mod_overrides', MOCK_MOD_NAME_2))
@@ -28,8 +28,8 @@ def create_mod_dirs() -> Generator:
         yield tmp_dir
 
 @pytest.fixture(scope='module')
-def createTemp_Mod_ini() -> Generator:
-    data: dict[str, ModType | str | bool] = {
+def createTemp_Mod_ini() -> Generator[str]:
+    data: dict[str, ModType | str | bool] = {  # pyright: ignore[reportAssignmentType]
         MOCK_MOD_NAME_3 : {
             ModKeys.type.value : ModType.maps.value,
             ModKeys.modworkshopid.value : '3453',
@@ -61,13 +61,13 @@ def createTemp_Mod_ini() -> Generator:
 
     yield tmp_name
 
-    Save._file = {}
-    Save._path = ''
+    Save._file = {}  # pyright: ignore[reportPrivateUsage]
+    Save._path = ''  # pyright: ignore[reportPrivateUsage]
 
     os.remove(tmp_name)
 
 @pytest.fixture(scope='module')
-def createTemp_Config_ini(create_mod_dirs: str) -> Generator:
+def createTemp_Config_ini(create_mod_dirs: str) -> Generator[str]:
     with tempfile.NamedTemporaryFile('w', suffix='.ini', delete=False) as tmp:
         tmp_filename: str = tmp.name
 
@@ -95,7 +95,7 @@ def createTemp_Config_ini(create_mod_dirs: str) -> Generator:
     os.remove(tmp_filename)
 
 @pytest.fixture(scope='module')
-def createTemp_Profiles_ini() -> Generator:
+def createTemp_Profiles_ini() -> Generator[str]:
 
     data: dict[str, list[str]] = {'Awesome mods' : ['cool_beans', 'among us guards', 'make game easy']}
 
@@ -108,13 +108,13 @@ def createTemp_Profiles_ini() -> Generator:
 
     yield tmp_name
 
-    ProfileManager._file = {}
-    ProfileManager._path = ''
+    ProfileManager._file = {}  # pyright: ignore[reportPrivateUsage]
+    ProfileManager._path = ''  # pyright: ignore[reportPrivateUsage]
 
     os.remove(tmp_name)
 
 @pytest.fixture(scope='module')
-def createTemp_externalShortcuts_ini() -> Generator:
+def createTemp_externalShortcuts_ini() -> Generator[str]:
 
     data: dict[str, list[str]] = {'shortcuts' : ['C:\\path\\program.exe', 'D:\\path\\payday.exe', 'C:\\path\\map_builder.exe']}
 
@@ -127,7 +127,7 @@ def createTemp_externalShortcuts_ini() -> Generator:
 
     yield tmp_name
 
-    ToolJSON._file = {}
-    ToolJSON._path = ''
+    ToolJSON._file = {}  # pyright: ignore[reportPrivateUsage]
+    ToolJSON._path = ''  # pyright: ignore[reportPrivateUsage]
 
     os.remove(tmp_name)

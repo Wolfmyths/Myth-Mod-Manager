@@ -19,15 +19,15 @@ def test_dialog(qtbot: QtBot, create_mod_dirs: str) -> None:
 
     assert len(widget.findChildren(qtw.QGroupBox)) == 3
 
-    radioButton0: qtw.QRadioButton = widget.findChild(qtw.QRadioButton, f'super fun mod {ModType.mods}')
+    radioButton0= widget.findChild(qtw.QRadioButton, f'super fun mod {ModType.mods}')
     radioButton0.click()
 
     assert widget.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok).isEnabled() is False
 
-    radioButton1: qtw.QRadioButton = widget.findChild(qtw.QRadioButton, f'best mod ever {ModType.mods_override}')
+    radioButton1 = widget.findChild(qtw.QRadioButton, f'best mod ever {ModType.mods_override}')
     radioButton1.click()
 
-    radioButton2: qtw.QRadioButton = widget.findChild(qtw.QRadioButton, f'make game easy mod {ModType.maps}')
+    radioButton2 = widget.findChild(qtw.QRadioButton, f'make game easy mod {ModType.maps}')
     radioButton2.click()
 
     assert widget.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok).isEnabled()

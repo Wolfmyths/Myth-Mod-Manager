@@ -1,5 +1,6 @@
 import logging
-from typing import Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from src.helpers.json_parser import JSONParser
 from src.constant_vars import MOD_CONFIG, ModType, ModKeys
@@ -7,10 +8,10 @@ from src.constant_vars import MOD_CONFIG, ModType, ModKeys
 class Save():
     '''Manages the data of each mod'''
 
-    _file: dict = {}
+    _file: dict[str, dict[str, Any]] = {}
     _path: str = ''
 
-    def __init__(self, file=MOD_CONFIG) -> None:
+    def __init__(self, file: str = MOD_CONFIG) -> None:
         Save._path = file
         Save._file = JSONParser.loadJSON(file)
 
@@ -31,11 +32,11 @@ class Save():
 
     @staticmethod
     def hasMod(mod: str) -> bool:
-        return Save.getMod(mod) is not None
+        return bool(Save.getMod(mod))
 
     @staticmethod
-    def getMod(mod: str) -> dict:
-        return Save._file.get(mod, None)
+    def getMod(mod: str) -> dict[Any, Any]:
+        return Save._file.get(mod, dict())
 
     @staticmethod
     def addMods(*mods: tuple[list[str], ModType]) -> None:
@@ -50,12 +51,15 @@ class Save():
         for arg in mods:
             for mod in arg[0]:
 
-                if not Save.hasMod(mod):
-                    logging.info('Adding new mod to %s: %s', MOD_CONFIG, mod)
-                    Save._file[mod] = {}
+                if Save.hasMod(mod):
+                    logging.info('Mod %s, %s already exists.', MOD_CONFIG, mod)
+                    continue
 
-                Save.setEnabled(mod)
-                Save.setType(mod, arg[1])
+                logging.info('Adding new mod to %s: %s', MOD_CONFIG, mod)
+                Save._file[mod] = {
+                    ModKeys.enabled.value : True,
+                    ModKeys.type.value : arg[1]
+                }
 
     @staticmethod
     def getEnabled(mod: str) -> bool:
@@ -120,16 +124,16 @@ class Save():
     
     @staticmethod
     def getTags(mod: str) -> list[str]:
-        fallback = []
+        fallback: list[str] = []
+
         if Save.hasMod(mod):
-            tags = Save.getMod(mod).get(ModKeys.tags.value, fallback)
-            return tags if tags is not None else fallback
-        else:
-            return fallback
+            return Save.getMod(mod).get(ModKeys.tags.value, fallback)
+        
+        return fallback
     
     @staticmethod
     def getAllTags() -> list[str]:
-        allTags = set()
+        allTags: set[str] = set()
         for mod in Save.mods():
             if not Save.getTags(mod):
                 continue
@@ -139,7 +143,7 @@ class Save():
         return sorted(list(allTags))
     
     @staticmethod
-    def setTags(tags: Sequence[str], *mods: str) -> None:
+    def setTags(tags: list[str], *mods: str) -> None:
         if not tags:
             for mod in mods:
                 if Save.hasMod(mod):
@@ -151,10 +155,8 @@ class Save():
                 continue
 
             currentTags = Save.getTags(mod)
-            if currentTags is None:
-                currentTags = []
 
-            updatedTags = list(set(tags + currentTags))
+            updatedTags: list[str] = list(set(tags + currentTags))
             logging.info('Setting the tags of %s from %s to %s', mod, currentTags, updatedTags)
 
             Save.getMod(mod)[ModKeys.tags.value] = updatedTags

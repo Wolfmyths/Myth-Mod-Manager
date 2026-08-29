@@ -2,14 +2,14 @@ import os
 import sys
 import glob
 import subprocess
-import xml.etree
-import xml.etree.ElementTree
+import xml.etree.ElementTree as et
+from xml.etree.ElementTree import Element, ElementTree
 
 # Args:
 # -u is to update .ts files
 # -e exports .txt files with strings that need to be translated
 
-def scrape_translations_needed(*args) -> None:
+def scrape_translations_needed(*args: str) -> None:
 
     # Update translation Files with current code
     py_file_paths: list[str] = []
@@ -32,18 +32,18 @@ def scrape_translations_needed(*args) -> None:
 
     # Export missing translations
     if '-e' in args:
-        messages_to_translate: dict[str:list[str]] = {}
+        messages_to_translate: dict[str, list[str]] = {}
 
         # Find missing translations
         for ts_file in ts_file_paths:
             key: str = os.path.basename(ts_file).split('.')[0]
             messages_to_translate[key] = []
-            f: xml.etree.ElementTree.ElementTree = xml.etree.ElementTree.parse(ts_file)
+            element_tree: ElementTree[Element[str]] = et.parse(ts_file)
 
-            for tag in f.findall('context'):
+            for tag in element_tree.findall('context'):
                 for tag in tag.findall('message'):
-                    source: xml.etree.ElementTree.Element | None = tag.find('source')
-                    translation: xml.etree.ElementTree.Element | None = tag.find('translation')
+                    source: Element | None = tag.find('source')
+                    translation: Element | None = tag.find('translation')
                     if source is not None and translation.get('type') is not None:
                         messages_to_translate[key].append(*source.itertext())
 

@@ -1,26 +1,23 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
-
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
 from PySide6.QtCore import Signal, Qt as qt, Slot
-
-from src.widgets.qmenu.ignored_mods import IgnoredModsQMenu
+from typing_extensions import override
 
 from src.helpers.save_manager import Save
-
-if TYPE_CHECKING:
-    from src.widgets.qwidget.options import Options
+from src.widgets.qmenu.ignored_mods import IgnoredModsQMenu
+    
 
 class IgnoredMods(qtw.QListWidget):
 
     itemsRemoved = Signal()
     itemsChanged = Signal()
 
-    def __init__(self, parent: Options = None) -> None:
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
         super().__init__(parent)
 
         self.contextMenu = IgnoredModsQMenu(self)
+
+        self.contextMenu.removeItem.triggered.connect(self.removeItemWidgets)
 
         self.setSelectionMode(self.SelectionMode.ExtendedSelection)
 
@@ -39,6 +36,7 @@ class IgnoredMods(qtw.QListWidget):
 
 # EVENT OVERRIDES
 
+    @override
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
         if event.button() == qt.MouseButton.RightButton:
             self.contextMenu.exec(qtg.QCursor.pos())
@@ -60,6 +58,7 @@ class IgnoredMods(qtw.QListWidget):
         self.itemsRemoved.emit()
         self.itemsChanged.emit()
 
+    @override
     def showEvent(self, event: qtg.QShowEvent) -> None:
         self.refreshList()
         return super().showEvent(event)

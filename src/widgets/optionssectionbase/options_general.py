@@ -1,9 +1,8 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
 import os
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, Qt, Slot
+from typing_extensions import override
 
 import src.helpers.helper as helper
 from src.api.check_update import CheckUpdate
@@ -12,14 +11,13 @@ from src.constant_vars import LIGHT, DARK, OptionKeys, LANG_STR_TO_CODE, ROOT_PA
 from src.helpers.options_manager import OptionsManager
 from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
 
-if TYPE_CHECKING:
-    from src.widgets.qwidget.options import Options
-
 class OptionsGeneral(OptionsSectionBase):
-    def __init__(self, parent: Options = None) -> None:
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
         super().__init__(parent=parent)
 
         layout = qtw.QVBoxLayout()
+
+        self.run_CheckUpdate = CheckUpdate()
 
         # General Sub Section
         self.general = qtw.QGroupBox(self)
@@ -103,6 +101,7 @@ class OptionsGeneral(OptionsSectionBase):
 
         self.setLayout(layout)
     
+    @override
     def applyStaticText(self) -> None:
         self.general.setTitle(qapp.translate("OptionsGeneral", "General"))
 
@@ -131,7 +130,7 @@ class OptionsGeneral(OptionsSectionBase):
     
     @Slot(str)
     def langChanged(self, lang: str) -> None:
-        lang = LANG_STR_TO_CODE.get(lang)
+        lang = LANG_STR_TO_CODE.get(lang, '')
         changed: bool = True if lang != OptionsManager.getLang() else False
         self.pendingChanges.emit(OptionKeys.lang, changed)
     

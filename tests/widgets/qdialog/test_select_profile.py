@@ -2,7 +2,7 @@ from pytestqt.qtbot import QtBot
 
 from src.widgets.qdialog.select_profile import SelectProfile
 
-def test_dialog(qtbot: QtBot, createTemp_Profiles_ini: str) -> None:
+def test_dialog(qtbot: QtBot, createTemp_Profiles_ini: str) -> None:  # pyright: ignore[reportUnusedParameter]
     widget = SelectProfile()
     qtbot.addWidget(widget)
 

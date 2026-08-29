@@ -1,5 +1,5 @@
 import os
-
+from typing import cast
 import pytest
 
 from src.helpers.options_manager import OptionsManager
@@ -33,4 +33,4 @@ def test_getPath_ModDirs(createTemp_Config_ini: str, create_mod_dirs: str) -> No
 def test_getPath_Mod(type: str, modName: str, expected_outcome: str, createTemp_Config_ini: str, create_mod_dirs: str) -> None:
     OptionsManager(createTemp_Config_ini)
 
-    assert Pathing.mod(type, modName) == os.path.join(create_mod_dirs, expected_outcome)
+    assert Pathing.mod(cast(ModType, type), modName) == os.path.join(create_mod_dirs, expected_outcome)

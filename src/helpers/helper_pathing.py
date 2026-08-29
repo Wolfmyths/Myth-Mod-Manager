@@ -22,7 +22,7 @@ class Pathing():
         return os.path.join(OptionsManager.getGamepath(), 'Maps')
 
     @staticmethod
-    def mod(type: ModType, modName: str) -> list[str] | str:
+    def mod(type: ModType, modName: str) -> str:
         '''
         Returns mod path given the type and name,
         does not check if the return value exists
@@ -33,8 +33,9 @@ class Pathing():
             ModType.mods_override : os.path.join(Pathing.mod_overrides(), modName),
             ModType.maps : os.path.join(Pathing.maps(), modName)
         }
-
-        if type == ModType.all_types():
-            return list(pathsDict.values())
-        else:
-            return pathsDict[type]
+        
+        return pathsDict[type]
+    
+    @staticmethod
+    def all_mod_paths() -> list[str]:
+        return [Pathing.mods(), Pathing.mod_overrides(), Pathing.maps()]

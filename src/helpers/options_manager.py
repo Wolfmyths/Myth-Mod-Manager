@@ -1,6 +1,7 @@
 import os
 import logging
-from typing import Sequence, TextIO
+from typing import Any, TextIO
+from collections.abc import Sequence
 from configparser import ConfigParser
 
 from PySide6.QtCore import QSize
@@ -13,7 +14,9 @@ class OptionsManager():
     config = ConfigParser()
     file: str = ''
 
-    def __init__(self, file=OPTIONS_CONFIG) -> None:
+    DEFAULT_WINDOW_SIZE = QSize(800, 800)
+
+    def __init__(self, file: str = OPTIONS_CONFIG) -> None:
 
         OptionsManager.file = file
 
@@ -31,7 +34,7 @@ class OptionsManager():
             OptionsManager.config.add_section(OptionKeys.section.value)
     
     @staticmethod
-    def getList(section: str, option: str, delimiter: str = ',') -> list:
+    def getList(section: str, option: str, delimiter: str = ',') -> list[Any]:
         sequenceString = OptionsManager.config.get(section, option, fallback=None)
 
         if isinstance(sequenceString, str) and sequenceString:
@@ -41,7 +44,7 @@ class OptionsManager():
             return []
     
     @staticmethod
-    def setList(section: str, option: str, value: Sequence, delimiter: str = ',', sort: bool = False) -> None:
+    def setList(section: str, option: str, value: Sequence[Any], delimiter: str = ',', sort: bool = False) -> None:
         if sort:
             value = sorted(value)
 
@@ -68,10 +71,23 @@ class OptionsManager():
 
     @staticmethod
     def getLaunchParameters() -> str:
+        """
+        Launch parameters for PAYDAY 2. If you want it casted into `list[str]` see `OptionsManager.getLaunchParametersList()`
+        """
         return OptionsManager.config.get(OptionKeys.section.value, OptionKeys.launch_parameters.value, fallback='')
+    
+    # Launch parameters but is converted into a list
+    @staticmethod
+    def getLaunchParametersList() -> list[str]:
+        args = OptionsManager.getLaunchParameters().split("-")
+
+        for i in range(len(args)):
+            args[i] = f"-{args[i]}"
+        
+        return args
 
     @staticmethod
-    def setLaunchParameters(params: str = '') -> str:
+    def setLaunchParameters(params: str = '') -> None:
         OptionsManager.config.set(OptionKeys.section.value, OptionKeys.launch_parameters.value, params)
 
     @staticmethod
@@ -113,7 +129,7 @@ class OptionsManager():
         return QSize(width, height)
 
     @staticmethod
-    def setWindowSize(size: QSize = QSize(800, 800)) -> None:
+    def setWindowSize(size: QSize = DEFAULT_WINDOW_SIZE) -> None:
         OptionsManager.config.set(OptionKeys.section.value, OptionKeys.windowsize_w.value, str(size.width()))
         OptionsManager.config.set(OptionKeys.section.value, OptionKeys.windowsize_h.value, str(size.height()))
     

@@ -8,6 +8,7 @@ import PySide6.QtWidgets as qtw
 from PySide6.QtCore import (
     QThread, QCoreApplication as qapp, Slot, QMutex, QMutexLocker, QSignalBlocker
 )
+from typing_extensions import override
 
 from src.widgets.qdialog.dialog import Dialog
 
@@ -67,6 +68,7 @@ class ProgressWidget(Dialog):
         self.mode.error.connect(self.errorRaised)
         self.mode.succeeded.connect(self.succeeded)
     
+    @override
     def exec(self) -> int:
 
         self.qthread.start()
@@ -97,6 +99,7 @@ class ProgressWidget(Dialog):
         self.qthread.wait()
         self.mode.deleteLater()
 
+    @override
     def closeEvent(self, arg__1: qtg.QCloseEvent) -> None:
         if self.qthread.isRunning():
             self.cancel()
@@ -104,11 +107,13 @@ class ProgressWidget(Dialog):
             self.cleanup()
             return super().closeEvent(arg__1)
     
+    @override
     @Slot()
     def reject(self) -> None:
         self.cleanup()
         return super().reject()
     
+    @override
     @Slot()
     def accept(self) -> None:
         self.cleanup()

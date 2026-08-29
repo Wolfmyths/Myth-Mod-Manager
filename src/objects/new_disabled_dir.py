@@ -2,6 +2,7 @@ import logging
 import os
 
 from PySide6.QtCore import QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.objects.worker import Worker
 
@@ -15,6 +16,7 @@ class NewDisabledDir(Worker):
         self.mods_to_move: list[str] = os.listdir(self.old_path)
         self.mods_moved: list[str] = []
 
+    @override
     @Slot()
     def start(self) -> None:
         '''Moves disabled mods to a new folder'''
@@ -41,6 +43,7 @@ class NewDisabledDir(Worker):
         
         self.succeeded.emit()
     
+    @override
     def onCancel(self) -> None:
         self.setTotalProgress.emit(len(self.mods_moved))
 

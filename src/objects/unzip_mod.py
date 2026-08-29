@@ -1,9 +1,10 @@
 import os
 import logging
 
-import patoolib
+import patoolib  # pyright: ignore[reportMissingTypeStubs]
 
 from PySide6.QtCore import QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.helpers.helper_pathing import Pathing
 from src.objects.worker import Worker
@@ -15,6 +16,7 @@ class UnZipMod(Worker):
 
         self.mods: tuple[tuple[str, ModType], ...] = mods
 
+    @override
     @Slot()
     def start(self) -> None:
         '''Extracts a mod and puts it into a destination based off the ModType Enum given'''

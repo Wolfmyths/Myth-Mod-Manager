@@ -1,11 +1,7 @@
 import os
-import stat
 import logging
-import webbrowser
 
-from semantic_version import Version
-
-from PySide6.QtCore import QCoreApplication as qapp, Slot, QUrl, QRegularExpression, QRegularExpressionMatchIterator
+from PySide6.QtCore import QCoreApplication as qapp, Slot, QUrl
 from PySide6.QtGui import QDesktopServices
 
 from src.widgets.qdialog.notice import Notice
@@ -19,7 +15,7 @@ logging.getLogger(__name__)
 def openWebPage(link: str) -> bool:
     '''`webbrowser.open_new_tab()` but with some exception handling, returns a bool depending if it failed or not'''
 
-    outcome: bool = webbrowser.open_new_tab(link)
+    outcome: bool = QDesktopServices.openUrl(link)
 
     if not outcome:
 
@@ -58,84 +54,34 @@ def isInstalled(mod: str) -> bool:
     logging.debug('helper.isInstalled(): %s, %s', mod, installed)
     return installed
 
-def getFileType(filePath: str) -> str | bool:
+def getFileType(filePath: str) -> str:
     '''
     Returns a string of the file format
 
     If the path leads to a folder, it will return 'dir'
 
-    If FileNotFoundError is raised, it returns False
+    If it could not find the file, returns empty string
     '''
 
-    output = False
+    output = ""
 
-    try:
+    if os.path.isdir(filePath):
 
-        if os.path.isdir(filePath):
+        output = 'dir'
 
-            output = 'dir'
+    elif filePath.endswith(('.zip', '.rar', '.7z')):
 
-        elif filePath.endswith(('.zip', '.rar', '.7z')):
-
-            output = 'zip'
-        
-        else:
-            raise FileNotFoundError
-        
-        logging.debug('File name: %s\nType: %s', filePath.split('/')[-1], output)
-        
-    except FileNotFoundError:
-        logging.warning('The file extension not valid and will be ignored: %s', filePath.split('/')[-1])
-
-    finally:
-        return output
-
-def isPrerelease(version: Version) -> bool:
-    return version.prerelease != ()
-
-def isTypeMod(modType: ModType) -> bool:
-    return isinstance(modType, ModType)
-
-def permissionCheck(src: str) -> int:
-    '''
-    Checks if a file has all perms,
-    if not it will change them to have the correct perms.
-
-    Returns a code depending on the outcome
-    '''
-
-    permission: str = str(oct(os.stat(src).st_mode))[-3:]
-
-    if int(permission) != 777:
-        logging.warning('Permission error found, fixing...')
-        os.chmod(src, stat.S_IRWXU)
-
-        result = 0
-
+        output = 'zip'
+    
     else:
-
-        result = 1
+        logging.warning('The file extension not valid and will be ignored: %s', filePath.split('/')[-1])
     
-    return result
+    logging.debug('File name: %s\nType: %s', filePath.split('/')[-1], output)
 
-def launchParamsToList(params: str = '') -> list[str]:
-    '''
-    Returns launch parameters in a list rather than a single string
+    return output
 
-    If not given an arg, will use the launch parameters from the user's settings
-    '''
-
-    if not params:
-        params = OptionsManager.getLaunchParameters()
-
-    regex = QRegularExpression(r'(-\w+(?: [^-]\S*)*)')
-    regexResult: QRegularExpressionMatchIterator = regex.globalMatch(params)
-
-    finalResult: list[str] = []
-    while regexResult.hasNext():
-        finalResult.append(regexResult.next().captured(1))
-    
-    return finalResult
+def isTypeMod(modType: object) -> bool:
+    return isinstance(modType, ModType)
 
 @Slot(str)
 def startFile(path: str) -> None:

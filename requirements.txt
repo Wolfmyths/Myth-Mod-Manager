@@ -1,9 +1,7 @@
-PySide6==6.9.1           # https://pypi.org/project/PySide6/
-semantic-version==2.10.0 # https://pypi.org/project/semantic-version/
-patool==4.0.1            # https://pypi.org/project/patool/
-Send2Trash==1.8.3        # https://pypi.org/project/Send2Trash/
-pyinstaller==6.14.2      # https://pypi.org/project/pyinstaller/
+PySide6-Essentials==6.10.3 # https://pypi.org/project/PySide6-Essentials/
+patool==4.0.5              # https://pypi.org/project/patool/
+pyinstaller==6.22.2        # https://pypi.org/project/pyinstaller/
 
 # For external purposes
-pytest==8.4.1            # https://pypi.org/project/pytest/
-pytest-qt==4.5.0         # https://pypi.org/project/pytest-qt/
+pytest==9.1.1             # https://pypi.org/project/pytest/
+pytest-qt==4.5.0          # https://pypi.org/project/pytest-qt/

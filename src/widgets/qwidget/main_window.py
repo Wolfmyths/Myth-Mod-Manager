@@ -3,6 +3,7 @@ import os
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, QEvent, Slot
+from typing_extensions import override
 
 from src.widgets.qwidget.mod_manager import ModManager
 from src.widgets.qwidget.tool_manager import ToolManager
@@ -21,7 +22,7 @@ class MainWindow(qtw.QMainWindow):
         super().__init__()
 
         self.setWindowIcon(qtg.QIcon(ICON))
-        self.setWindowTitle(f'{PROGRAM_NAME} {VERSION}')
+        self.setWindowTitle(f'{PROGRAM_NAME} {VERSION.toString()}')
         self.setMinimumSize(800, 800)
         self.resize(OptionsManager.getWindowSize())
 
@@ -104,6 +105,7 @@ class MainWindow(qtw.QMainWindow):
         self.options.shortcuts.applyStaticText()
         self.options.optionsMisc.applyStaticText()
 
+    @override
     def closeEvent(self, event: qtg.QCloseEvent) -> None:
         OptionsManager.setWindowSize(self.size())
         OptionsManager.writeData()
@@ -112,7 +114,8 @@ class MainWindow(qtw.QMainWindow):
             self.app.closeAllWindows()
         return super().closeEvent(event)
 
-    def event(self, event: QEvent) -> None:
+    @override
+    def event(self, event: QEvent) -> bool:
         if event.type() == QEvent.Type.LanguageChange:
             self.languageChange()
  

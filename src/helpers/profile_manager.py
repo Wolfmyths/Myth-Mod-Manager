@@ -1,18 +1,21 @@
+from typing_extensions import override
+
 from src.helpers.json_parser import JSONParser
 
 from src.constant_vars import PROFILES_JSON
 
 class ProfileManager():
-    _file: dict[str:list[str]] = None
+    _file: dict[str, list[str]] = {}
     _path: str = ''
 
     def __init__(self, path: str = PROFILES_JSON) -> None:
         ProfileManager._file = JSONParser.loadJSON(path)
         ProfileManager._path = path
     
-    def __str__() -> str:
+    @override
+    def __str__(self) -> str:
 
-        if ProfileManager._file is not None:
+        if not ProfileManager._file:
             output = str(ProfileManager._file.items())
         else:
             output = 'None'
@@ -29,10 +32,10 @@ class ProfileManager():
 
     @staticmethod
     def getMods(profile: str) -> list[str]:
-        return ProfileManager._file.get(profile)
+        return ProfileManager._file.get(profile, list())
     
     @staticmethod
-    def getJSON() -> dict[str: list[str]]:
+    def getJSON() -> dict[str, list[str]]:
         return ProfileManager._file
 
     @staticmethod

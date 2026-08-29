@@ -1,8 +1,5 @@
-set "ROOT=."
-
-if not exist "%ROOT%\venv" (
-	py -m venv "%ROOT%\venv"
+if not exist .\.venv (
+	py -m venv .venv
 )
-	
-cd "%ROOT%\venv\Scripts"
-activate
+
+.venv/Scripts/activate

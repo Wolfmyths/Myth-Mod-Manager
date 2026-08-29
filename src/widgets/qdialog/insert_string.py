@@ -1,5 +1,6 @@
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.widgets.qdialog.dialog import Dialog
 
@@ -30,6 +31,7 @@ class InsertString(Dialog):
         
         self.setLayout(layout)
 
+    @override
     @Slot()
     def accept(self) -> None:
 
@@ -39,6 +41,7 @@ class InsertString(Dialog):
 
         return super().accept()
 
+    @override
     @Slot()
     def reject(self) -> None:
         self.setResult(0)

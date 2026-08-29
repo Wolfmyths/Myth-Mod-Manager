@@ -2,6 +2,7 @@ import os
 import logging
 
 from PySide6.QtCore import QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.helpers.helper_pathing import Pathing
 from src.helpers.options_manager import OptionsManager
@@ -15,6 +16,7 @@ class MoveToDisabledDir(Worker):
         self.mods: tuple[str, ...] = mods
         self.mods_moved: list[tuple[str, str]] = []
 
+    @override
     @Slot()
     def start(self) -> None:
         '''Moves a mod to the disabled folder'''
@@ -32,7 +34,13 @@ class MoveToDisabledDir(Worker):
             # Checking if the mod is already in the disabled mods folder
             if not os.path.isdir(modDest):
 
-                modPath: list[str] | str = Pathing.mod(Save.getType(mod), mod)
+                modType = Save.getType(mod)
+
+                if modType is None:
+                    logging.warning("mod %s type is none in MoveToDisabledDir.start(), skipping...", mod)
+                    continue
+
+                modPath: str = Pathing.mod(modType, mod)
 
                 self.move(modPath, modDest)
                 self.mods_moved.append((modPath, modDest))
@@ -44,7 +52,7 @@ class MoveToDisabledDir(Worker):
 
         self.succeeded.emit()
 
-    
+    @override
     def onCancel(self) -> None:
         self.setTotalProgress.emit(len(self.mods_moved))
         for modPaths in self.mods_moved:

@@ -4,7 +4,7 @@ from src.helpers.options_manager import OptionsManager
 from src.widgets.qwidget.about import About
 from src.constant_vars import DARK, LIGHT, MODWORKSHOP_LOGO_W, GITHUB_LOGO_W, KOFI_LOGO_B, MODWORKSHOP_LOGO_B, GITHUB_LOGO_B
 
-def test_about(qtbot: QtBot, createTemp_Config_ini: str) -> None:
+def test_about(qtbot: QtBot, createTemp_Config_ini: str) -> None:  # pyright: ignore[reportUnusedParameter]
     widget = About()
 
     qtbot.addWidget(widget)

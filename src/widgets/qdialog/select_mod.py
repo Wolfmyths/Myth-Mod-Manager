@@ -1,6 +1,6 @@
-from typing import List
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.widgets.qdialog.dialog import Dialog
 
@@ -10,7 +10,7 @@ from src.constant_vars import ModRole
 
 class SelectMod(Dialog):
 
-    mods: list[str] = None
+    mods: list[str] = []
 
     def __init__(self) -> None:
         super().__init__()
@@ -41,7 +41,7 @@ class SelectMod(Dialog):
         for i in range(self.modList.count()):
             item: qtw.QListWidgetItem = self.modList.item(i)
             modTags: list[str] = Save.getTags(item.text())
-            if modTags is not None:
+            if modTags:
                 item.setData(ModRole.tags, modTags)
 
         for widget in (self.searchBar, self.modList, self.buttonBox):
@@ -51,7 +51,7 @@ class SelectMod(Dialog):
     
     @Slot(str)
     def search(self, input: str) -> None:
-        searchedTags = None
+        searchedTags = []
 
         if input.startswith('tag:') and len(input) > 4:
             splitStr: list[str] = input.split(' ')
@@ -59,7 +59,7 @@ class SelectMod(Dialog):
             searchedTags: list[str] = splitStr[0][4:].split(',')
 
 
-        results: List[qtw.QListWidgetItem] = self.modList.findItems(
+        results: list[qtw.QListWidgetItem] = self.modList.findItems(
             f'{input}*',
             qt.MatchFlag.MatchWildcard | qt.MatchFlag.MatchExactly
         )
@@ -67,21 +67,21 @@ class SelectMod(Dialog):
         for i in range(self.modList.count()):
 
             item: qtw.QListWidgetItem = self.modList.item(i)
-            if item is not None:
-                modTags: tuple[str] | None = item.data(ModRole.tags)
+            modTags: tuple[str] | None = item.data(ModRole.tags)
 
-            if searchedTags is not None and modTags is not None:
+            if searchedTags and modTags is not None:
                 for tag in searchedTags:
                     if tag in modTags and item in results:
                         self.modList.setRowHidden(i, False)
                     else:
                         self.modList.setRowHidden(i, True)
             else:
-                if item in results and searchedTags is None:
+                if item in results and searchedTags:
                     self.modList.setRowHidden(i, False)
                 else:
                     self.modList.setRowHidden(i, True)
     
+    @override
     @Slot()
     def accept(self) -> None:
 
@@ -90,6 +90,7 @@ class SelectMod(Dialog):
         self.mods = [x.text() for x in self.modList.selectedItems()]
         return super().accept()
     
+    @override
     @Slot()
     def reject(self) -> None:
         self.setResult(0)

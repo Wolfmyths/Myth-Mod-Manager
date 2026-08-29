@@ -1,9 +1,8 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import cast
 
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
-from PySide6.QtCore import Signal, QCoreApplication as qapp
+from PySide6.QtCore import Signal, QCoreApplication as qapp, Slot
 
 from src.constant_vars import ModRole, PROGRAM_NAME, ICON
 from src.helpers.save_manager import Save
@@ -12,21 +11,21 @@ from src.widgets.qdialog.tag_handler import TagHandler
 from src.widgets.qtable.tag_display import TagDisplay
 from src.widgets.qdialog.confirmation import Confirmation
 
-if TYPE_CHECKING:
-    from src.widgets.qtable.mod_list_widget import ModListWidget
-
 class TagViewer(qtw.QWidget):
-    tagChanged = Signal(str, tuple)
-    def __init__(self, managerTable: ModListWidget = None) -> None:
-        super().__init__()
-        self.managerTable: ModListWidget = managerTable
+    tagChanged = Signal(str, tuple[str])
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent = parent)
 
         self.setWindowIcon(qtg.QIcon(ICON))
 
         layout = qtw.QVBoxLayout()
 
-        self.tagQTable = TagDisplay(self)
         self.contextMenu = TagViewerMenu(self)
+        self.tagQTable = TagDisplay(self.contextMenu, self)
+
+        self.contextMenu.addTag.triggered.connect(self.addTags)
+        self.contextMenu.removeTag.triggered.connect(self.removeTags)
+        self.contextMenu.deleteAllTags.triggered.connect(self.deleteAllTags)
 
         self.refreshTable()
 
@@ -41,6 +40,7 @@ class TagViewer(qtw.QWidget):
     def applyStaticText(self) -> None:
         self.setWindowTitle(f'{PROGRAM_NAME}: ' + qapp.translate('TagViewer', 'Mod Tag Viewer'))
     
+    @Slot()
     def deleteAllTags(self) -> None:
         confirmation = Confirmation(
             qapp.translate('TagViewer', 'Delete all tags'),
@@ -53,6 +53,7 @@ class TagViewer(qtw.QWidget):
             Save.clearTags()
             Save.saveJSON()
     
+    @Slot()
     def addTags(self) -> None:
         items = self.tagQTable.selectedItems()[::self.tagQTable.columnCount()]
         allTags = Save.getAllTags()
@@ -71,6 +72,7 @@ class TagViewer(qtw.QWidget):
 
             self.refreshTable()
     
+    @Slot()
     def removeTags(self) -> None:
         items = self.tagQTable.selectedItems()[::self.tagQTable.columnCount()]
         allTags = Save.getAllTags()
@@ -92,16 +94,21 @@ class TagViewer(qtw.QWidget):
             self.refreshTable()
 
     def refreshTable(self) -> None:
+        if self.parent() is None:
+            return
+
+        manager_table = cast(qtw.QTableWidget, self.parent())
+
         if self.tagQTable.rowCount() > 0:
             self.tagQTable.setRowCount(0)
 
-        for i in range(self.managerTable.rowCount()):
-            modNameItem = self.managerTable.item(i, 0)
-            modTagsData: tuple[str] = modNameItem.data(ModRole.tags)
+        for i in range(manager_table.rowCount()):
+            modNameItem = manager_table.item(i, 0)
 
-            # TODO: Figure out what the point of this codeblock is, IDE says code is unreachable
+            modTagsData: tuple[str] | None = modNameItem.data(ModRole.tags)
+
             if modTagsData is None:
-                modTagsData = ()
+                modTagsData = tuple[str]()
             
             self.tagQTable.insertRow(i)
 

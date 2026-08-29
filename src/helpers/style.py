@@ -245,6 +245,6 @@ class StyleManager():
 
             logging.error('This color theme is not valid: %s', theme)
 
-            return
+            return ''
 
         return themeDict[theme]()

@@ -15,8 +15,8 @@ def test_lineEditTextChanged(qtbot: QtBot) -> None:
 
     qtbot.addWidget(widget)
 
-    qtbot.mouseClick(widget.input, qt.MouseButton.LeftButton)
-    qtbot.keyClick(widget.input, qt.Key.Key_A)
+    qtbot.mouseClick(widget.input, qt.MouseButton.LeftButton)  # pyright: ignore[reportUnknownMemberType]
+    qtbot.keyClick(widget.input, qt.Key.Key_A)  # pyright: ignore[reportUnknownMemberType]
     assert widget.completer.completionPrefix() == 'a'
 
     assert widget.buttonBox.buttons()[0].isEnabled()

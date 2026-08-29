@@ -1,16 +1,16 @@
 import pytest
-from typing import Generator
+from collections.abc import Generator
 
 from pytestqt.qtbot import QtBot
 
-from semantic_version import Version
+from PySide6.QtCore import QVersionNumber
 
 from src.widgets.qdialog.update_detected import UpdateDetected
 from src.constant_vars import VERSION
 
 @pytest.fixture(scope='function')
-def create_dialog(qtbot: QtBot) -> Generator:
-    widget = UpdateDetected(Version(major=1, minor=5, patch=6), 'release notes')
+def create_dialog(qtbot: QtBot) -> Generator[UpdateDetected]:
+    widget = UpdateDetected(QVersionNumber(1, 5, 6).toString(), 'release notes')
     qtbot.addWidget(widget)
 
     yield widget
@@ -22,7 +22,7 @@ def test_errorRaised(create_dialog: UpdateDetected) -> None:
     create_dialog.autoUpdate.error.emit('error')
 
 def test_dialog(create_dialog: UpdateDetected) -> None:
-    assert create_dialog.message.text() == f'New update found: 1.5.6\nCurrent Version: {VERSION}\nDo you want to Update?'
+    assert create_dialog.message.text() == f'New update found: 1.5.6\nCurrent Version: {VERSION.toString()}\nDo you want to Update?'
     assert create_dialog.changelog.document().toPlainText() == 'release notes'
 
 def test_succeeded(create_dialog: UpdateDetected) -> None:

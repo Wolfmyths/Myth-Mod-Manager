@@ -60,7 +60,7 @@ class About(qtw.QWidget):
 
         self.aboutLabel.setText('\n\n'.join([
             '',
-            f'{PROGRAM_NAME} {VERSION} ' + qapp.translate('About', 'is an open-source mod manager for PAYDAY 2 created by Wolfmyths.'),
+            f'{PROGRAM_NAME} {VERSION.toString()} ' + qapp.translate('About', 'is an open-source mod manager for PAYDAY 2 created by Wolfmyths.'),
             qapp.translate('About', 'The goal of this program is to streamline the proccess of PAYDAY 2 mod managment without hassle of juggling multiple file explorers.'),
             qapp.translate('About', 'Suggestions are greatly appreciated on modworkshop.net and github.')
         ]))

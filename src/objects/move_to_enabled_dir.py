@@ -2,6 +2,7 @@ import logging
 import os
 
 from PySide6.QtCore import QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.helpers.options_manager import OptionsManager
 from src.helpers.save_manager import Save
@@ -16,6 +17,7 @@ class MoveToEnabledModDir(Worker):
         self.mods: tuple[str, ...] = mods
         self.mods_moved: list[tuple[str, str]] = []
 
+    @override
     @Slot()
     def start(self) -> None:
         '''Returns a mod to their respective directory'''
@@ -32,7 +34,13 @@ class MoveToEnabledModDir(Worker):
 
             if os.path.isdir(modPath):
 
-                modDestPath: list[str] | str = Pathing.mod(Save.getType(mod), mod)
+                modType = Save.getType(mod)
+
+                if modType is None:
+                    logging.warning("mod %s type is none in MoveToEnabledDir.start(), skipping...", mod)
+                    continue
+
+                modDestPath: str = Pathing.mod(modType, mod)
 
                 self.move(modPath, modDestPath)
                 self.mods_moved.append((modPath, modDestPath))
@@ -44,6 +52,7 @@ class MoveToEnabledModDir(Worker):
 
         self.succeeded.emit()
     
+    @override
     def onCancel(self) -> None:
         self.setTotalProgress.emit(len(self.mods_moved))
         for modPaths in self.mods_moved:

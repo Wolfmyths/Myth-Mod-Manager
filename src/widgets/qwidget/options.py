@@ -1,7 +1,6 @@
-from __future__ import annotations
 import os
 import logging
-from typing import TYPE_CHECKING
+from typing import Any, cast
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, Signal, Qt, QTranslator, Slot
@@ -17,9 +16,7 @@ from src.widgets.optionssectionbase.options_ignored_mods import OptionsIgnoredMo
 from src.widgets.optionssectionbase.options_shortcuts import OptionsShortcuts
 from src.widgets.optionssectionbase.options_launch_params import OptionsLaunchParams
 from src.widgets.optionssectionbase.options_misc import OptionsMisc
-
-if TYPE_CHECKING:
-    from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
+from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
 
 class Options(qtw.QWidget):
     themeSwitched = Signal(str)
@@ -41,7 +38,7 @@ class Options(qtw.QWidget):
         self.launchparams = OptionsLaunchParams(self)
         self.optionsMisc = OptionsMisc(self)
 
-        self.sections: dict[str: qtw.QWidget] = {
+        self.sections: dict[str, qtw.QWidget] = {
             'General'      : self.optionsGeneral,
             'Launch Params': self.launchparams,
             'Ignored Mods' : self.ignoredMods,
@@ -69,7 +66,7 @@ class Options(qtw.QWidget):
 
         self.sectionsDisplay.setCurrentIndex(0)
 
-        for widget in (self.sectionsList, self.sectionsDisplay):
+        for widget in tuple[Any, ...]((self.sectionsList, self.sectionsDisplay)):
             centeralLayout.addWidget(widget)
 
         self.centeralWidget.setLayout(centeralLayout)
@@ -110,8 +107,8 @@ class Options(qtw.QWidget):
         self.cancelChanges(reset=True)
 
         # Events
-        for widget in tuple(self.sections.values()):
-            widget: OptionsSectionBase
+        for widget in tuple[qtw.QWidget, ...](self.sections.values()):
+            widget = cast(OptionsSectionBase, widget)
             widget.pendingChanges.connect(self.settingsChanged)
     
     @Slot(qtw.QListWidgetItem)
@@ -192,8 +189,7 @@ class Options(qtw.QWidget):
             theme = LIGHT if self.optionsGeneral.colorThemeLight.isChecked() else DARK
             OptionsManager.setTheme(theme)
 
-            app: qtw.QApplication = qtw.QApplication.instance()
-            app.setStyleSheet(StyleManager().getStyleSheet(theme))
+            qtw.QApplication.setStyle(StyleManager().getStyleSheet(theme))
 
             self.themeSwitched.emit(theme)
 
@@ -201,12 +197,12 @@ class Options(qtw.QWidget):
             OptionsManager.setMMMUpdateAlert(self.optionsGeneral.updateAlertCheckbox.isChecked())
         
         if self.optionChanged.get(OptionKeys.lang):
-            app: qtw.QApplication = qtw.QApplication.instance()
+            app: qapp | None = qtw.QApplication.instance()
 
             old_lang: str = OptionsManager.getLang()
-            new_lang: str | None = LANG_STR_TO_CODE.get(self.optionsGeneral.language.currentText())
+            new_lang: str = LANG_STR_TO_CODE.get(self.optionsGeneral.language.currentText(), '')
 
-            translator: QTranslator = app.findChild(QTranslator)
+            translator: QTranslator | None = app.findChild(QTranslator)
 
             if translator.load(os.path.join(LANG_FOLDER_PATH, new_lang + '.qm')):
                 OptionsManager.setLang(new_lang)
@@ -250,7 +246,7 @@ class Options(qtw.QWidget):
             self.optionsGeneral.updateAlertCheckbox.setChecked(OptionsManager.getMMMUpdateAlert())
 
         if self.optionChanged.get(OptionKeys.lang) or reset:
-            self.optionsGeneral.language.setCurrentText(LANG_CODE_TO_STR.get(OptionsManager.getLang()))
+            self.optionsGeneral.language.setCurrentText(LANG_CODE_TO_STR.get(OptionsManager.getLang(), ''))
 
         if self.optionChanged.get(OptionKeys.launch_parameters) or reset:
             self.launchparams.setup()

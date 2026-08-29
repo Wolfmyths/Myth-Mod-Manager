@@ -1,11 +1,11 @@
 import os
+import platform
 import logging
-import sys
-from typing import List
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, QProcess
 import PySide6.QtGui as qtg
+from typing_extensions import override
 
 from src.widgets.qtable.mod_list_widget import ModListWidget
 from src.widgets.qdialog.notice import Notice
@@ -105,7 +105,7 @@ class ModManager(qtw.QWidget):
     def startPayday(self) -> None:
 
         gamePath: str = OptionsManager.getGamepath()
-        args: list[str] = helper.launchParamsToList()
+        args: list[str] = OptionsManager.getLaunchParametersList()
 
         # Setting the current working directory for PAYDAY 2 if there isn't one predefined
         #for i in range(len(args)):
@@ -121,7 +121,7 @@ class ModManager(qtw.QWidget):
             if not os.path.isabs(gamePath):
                 raise Exception(qapp.translate("ModManager", 'Path is not absolute'))
 
-            gameExe = 'payday2_win32_release.exe' if sys.platform.startswith('win') else 'payday2_release'
+            gameExe = 'payday2_win32_release.exe' if platform.system().startswith('Win') else 'payday2_release'
 
             success, exit_code = QProcess.startDetached(os.path.join(gamePath, gameExe), args, gamePath)
 
@@ -140,11 +140,12 @@ class ModManager(qtw.QWidget):
 
     @Slot()
     def deselectAllShortcut(self) -> None:
-        selectedItems: List[qtw.QTableWidgetItem] = self.modsTable.selectedItems()
+        selectedItems: list[qtw.QTableWidgetItem] = self.modsTable.selectedItems()
         if selectedItems:
             for item in selectedItems:
                 item.setSelected(False)
 
+    @override
     def keyPressEvent(self, event: qtg.QKeyEvent) -> None:
         if event.key() == qt.Key.Key_Delete and self.modsTable.selectedItems():
             self.modsTable.deleteItem()

@@ -1,11 +1,11 @@
 import pytest
-from typing import Generator
+from collections.abc import Generator
 
 from src.helpers.save_manager import Save
 from src.widgets.qlistwidget.ignored_mods import IgnoredMods
 
 @pytest.fixture(scope='module')
-def create_ignoredModList(createTemp_Mod_ini: str) -> Generator:
+def create_ignoredModList(createTemp_Mod_ini: str) -> Generator[IgnoredMods]:  # pyright: ignore[reportUnusedParameter]
     widget = IgnoredMods()
     yield widget
     widget.deleteLater()

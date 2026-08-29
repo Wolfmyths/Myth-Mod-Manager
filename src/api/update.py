@@ -2,7 +2,8 @@ import os
 import shutil
 import logging
 import json
-import sys
+import platform
+from typing import cast
 
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PySide6.QtCore import QObject, QUrl, Signal, Slot
@@ -14,7 +15,7 @@ class Update(QObject):
     exe: str
     tmp: str
 
-    if sys.platform.startswith('win'):
+    if platform.system().startswith('Win'):
         fileName = 'Myth-Mod-Manager.zip'
         exe = 'Myth Mod Manager.exe'
         tmp = os.environ['TEMP']
@@ -36,9 +37,9 @@ class Update(QObject):
 
     def __init__(self) -> None:
         super().__init__()
-        self.downloadUpdateReply: QNetworkReply = None
-
         logging.getLogger(__name__)
+
+        self.network = QNetworkAccessManager()
     
     def start(self) -> None:
         logging.info('Updating program...')
@@ -74,9 +75,9 @@ class Update(QObject):
 
         logging.info('Checking assets')
 
-        reply: QNetworkReply = self.sender()
+        reply: QNetworkReply = cast(QNetworkReply, self.sender())
 
-        data: dict = json.loads(reply.readAll().data().decode())
+        data: dict[str, str] = json.loads(cast(bytearray, reply.readAll().data()).decode())
 
         assetUrl: str = data['assets_url']
 
@@ -99,12 +100,12 @@ class Update(QObject):
 
         logging.info('Fetching asset data complete')
 
-        reply: QNetworkReply = self.sender()
+        reply: QNetworkReply = cast(QNetworkReply, self.sender())
 
-        data: dict = json.loads(reply.readAll().data().decode())
+        data: list[dict[str, str]] = json.loads(cast(bytearray, reply.readAll().data()).decode())
 
         # Incase there are muiltiple assets create a for loop
-        downloadLink: str = None
+        downloadLink: str = ''
 
         for asset in data:
         
@@ -115,7 +116,7 @@ class Update(QObject):
 
                 break
         
-        if downloadLink is None:
+        if not downloadLink:
             self.error.emit('The key "browser_download_url" was not found in Github asset data')
             return
 
@@ -123,9 +124,10 @@ class Update(QObject):
 
         self.setCurrentProgress.emit(0, 'Downloading update')
 
-        self.downloadUpdateReply: QNetworkReply = self.network.get(QNetworkRequest(QUrl(downloadLink)))
-        self.downloadUpdateReply.downloadProgress.connect(self.__on_download_progress)
-        self.downloadUpdateReply.finished.connect(self.__install_update)
+        downloadUpdateReply: QNetworkReply = self.network.get(QNetworkRequest(QUrl(downloadLink)))
+        downloadUpdateReply.downloadProgress.connect(self.__on_download_progress)
+        downloadUpdateReply.finished.connect(self.__install_update)
+        
     @Slot()
     def __install_update(self) -> None:
 
@@ -134,7 +136,7 @@ class Update(QObject):
 
         self.__cancelCheck()
 
-        reply: QNetworkReply = self.sender()
+        reply: QNetworkReply = cast(QNetworkReply, self.sender())
 
         downloadDir: str = os.path.join(self.tmp, self.fileName)
 
@@ -183,9 +185,11 @@ class Update(QObject):
     @Slot()
     def abort(self) -> None:
         self.cancel = True
-    
-        if self.downloadUpdateReply is not None and self.downloadUpdateReply.isRunning():
-            self.downloadUpdateReply.abort()
+
+        reply = self.network.sender()
+
+        if isinstance(reply, QNetworkReply):
+            reply.abort()
 
     @Slot()
     def __cancelCheck(self) -> None:
@@ -201,7 +205,7 @@ class Update(QObject):
         '''
         Returns a bool based on if theres an error
         '''
-        reply: QNetworkReply = self.sender()
+        reply: QNetworkReply = cast(QNetworkReply, self.sender())
         error: QNetworkReply.NetworkError = reply.error()
 
         if error == QNetworkReply.NetworkError.OperationCanceledError:

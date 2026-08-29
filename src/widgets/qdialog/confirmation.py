@@ -1,5 +1,6 @@
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Slot
+from typing_extensions import override
 
 from src.widgets.qdialog.dialog import Dialog
 
@@ -24,11 +25,13 @@ class Confirmation(Dialog):
         
         self.setLayout(layout)
     
+    @override
     @Slot()
     def accept(self) -> None:
         self.setResult(qtw.QDialog.DialogCode.Accepted)
         return super().accept()
     
+    @override
     @Slot()
     def reject(self) -> None:
         self.setResult(qtw.QDialog.DialogCode.Rejected)

@@ -4,7 +4,7 @@ from src.widgets.qwidget.mod_manager import ModManager
 
 from src.constant_vars import ModType
 
-def test_manager(qtbot: QtBot, createTemp_Mod_ini: str, createTemp_Config_ini: str) -> None:
+def test_manager(qtbot: QtBot, createTemp_Mod_ini: str, createTemp_Config_ini: str) -> None:  # pyright: ignore[reportUnusedParameter]
 
     widget = ModManager()
     qtbot.addWidget(widget)

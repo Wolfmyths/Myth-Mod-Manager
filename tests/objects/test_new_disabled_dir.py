@@ -1,7 +1,7 @@
 import os
 import shutil
 import pytest
-from typing import Generator
+from collections.abc import Generator
 
 from PySide6.QtCore import QMutex
 
@@ -11,7 +11,7 @@ from src.objects.new_disabled_dir import NewDisabledDir
 from src.helpers.options_manager import OptionsManager
 
 @pytest.fixture(scope='module')
-def create_worker(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator:
+def create_worker(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator[NewDisabledDir]:  # pyright: ignore[reportUnusedParameter]
     newDisabledDir: str = os.path.join(create_mod_dirs, 'newDisabledMods')
     disabledDir: str = os.path.join(create_mod_dirs, 'disabledMods')
 

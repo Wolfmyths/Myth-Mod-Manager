@@ -1,22 +1,27 @@
 import os
 import pytest
-from typing import Generator
+from collections.abc import Generator
 
 from pytestqt.qtbot import QtBot
 
 import PySide6.QtWidgets as qtw
+from PySide6.QtCore import Qt
 
 from src.widgets.qwidget.options import Options
 from src.constant_vars import DARK, LIGHT, OptionKeys
-from src.widgets.qwidget.options import OptionsManager
+from src.helpers.options_manager import OptionsManager
 
 MOCK_GAMEPATH: str = os.path.abspath('path\\to\\gamepath')
 MOCK_DISMODS: str = os.path.abspath('path\\to\\disabled\\mods')
 MOCK_LANG: str = 'zh_CN'
 
 @pytest.fixture(scope='module')
-def create_Settings(createTemp_Config_ini: str) -> Generator:
-    yield Options()
+def create_Settings(createTemp_Config_ini: str) -> Generator[Options]:  # pyright: ignore[reportUnusedParameter]
+    options = Options()
+    
+    yield options
+
+    options.deleteLater()
 
 def test_Settings(create_Settings: Options) -> None:
     EXPECTED_SECTIONS = 5
@@ -44,14 +49,42 @@ def test_themeChanged(create_Settings: Options) -> None:
     assert create_Settings.optionChanged[OptionKeys.color_theme] is True
 
 def test_langChanged(create_Settings: Options) -> None:
-    create_Settings.optionsGeneral.langChanged(MOCK_LANG)
+    language_combobox = create_Settings.optionsGeneral.language
+    original_text: str = language_combobox.currentText()
+
+    language_combobox.setEditable(True)
+    language_combobox.setCurrentText(MOCK_LANG)
 
     assert create_Settings.optionChanged[OptionKeys.lang] is True
+
+    language_combobox.setCurrentText(original_text)
+    language_combobox.setEditable(False)
+
+def test_launchParamsChanged(qtbot: QtBot, create_Settings: Options) -> None:
+    launch_params = create_Settings.launchparams
+    MOCK_TEXT = "t"
+
+    # Test QCheckBoxes
+    for check_box in launch_params.findChildren(qtw.QCheckBox):
+        assert check_box.property("param") is not None
+
+        check_box.click()
+        assert create_Settings.optionChanged[OptionKeys.launch_parameters] is True
+        check_box.click()
+        assert create_Settings.optionChanged[OptionKeys.launch_parameters] is False
+    
+    # Test QLineEdits
+    for line_edit in (launch_params.customLineEdit, launch_params.dLineEdit, launch_params.oLineEdit):
+        line_edit.setFocus()
+        qtbot.keyClick(line_edit, MOCK_TEXT)  # pyright: ignore[reportUnknownMemberType]
+        assert create_Settings.optionChanged[OptionKeys.launch_parameters] is True
+        qtbot.keyClick(line_edit, Qt.Key.Key_Backspace)  # pyright: ignore[reportUnknownMemberType]
+        assert create_Settings.optionChanged[OptionKeys.launch_parameters] is False
 
 def test_cancelChanges(create_Settings: Options) -> None:
     assert create_Settings.applyButton.isEnabled()
 
-    create_Settings.cancelChanges()
+    create_Settings.cancelButton.click()
 
     assert create_Settings.applyButton.isEnabled() is False
 
@@ -65,7 +98,7 @@ def test_applySettings(qtbot: QtBot, create_Settings: Options, create_mod_dirs: 
     create_Settings.optionsGeneral.disabledModDir.setText(newDisabledMods)
     create_Settings.optionsGeneral.gameDir.setText(create_mod_dirs)
 
-    create_Settings.applyButton.setChecked(True)
+    create_Settings.applyButton.click()
 
     assert OptionsManager.getTheme() == LIGHT
     assert OptionsManager.getGamepath() == create_mod_dirs

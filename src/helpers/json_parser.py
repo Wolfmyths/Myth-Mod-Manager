@@ -2,10 +2,15 @@ import json
 import logging
 import os
 
+from typing import Any
+
 class JSONParser():
     @staticmethod
-    def loadJSON(path: str, fallback: dict = {}) -> dict:
-        file: dict = {}
+    def loadJSON(path: str, fallback: dict[Any, Any] | None = None) -> Any:
+        file: dict[Any, Any] = {}
+
+        if fallback is None:
+            fallback = {}
 
         try:
             file = JSONParser._loadJSON(path)
@@ -21,7 +26,7 @@ class JSONParser():
             return file
 
     @staticmethod
-    def saveJSON(path: str, data: dict) -> None:
+    def saveJSON(path: str, data: Any) -> None:
         with open(path, 'w') as f:
             f.seek(0)
             f.write(json.dumps(data, indent=2))
@@ -30,6 +35,6 @@ class JSONParser():
         logging.info('%s has been saved.', os.path.basename(path))
     
     @staticmethod
-    def _loadJSON(path: str) -> dict:
+    def _loadJSON(path: str) -> Any:
         with open(path, 'r') as f:
             return json.loads(f.read())

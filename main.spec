@@ -1,6 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
-import sys
+import platform
 
 import patoolib
 
@@ -73,7 +73,7 @@ DATA = [
 
 BINARIES = []
 
-if sys.platform.startswith('win'):
+if platform.system().startswith('Win'):
 
     ICON = os.path.join('src', 'icon.ico')
 

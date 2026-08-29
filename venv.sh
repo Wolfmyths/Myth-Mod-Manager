@@ -1,8 +1,5 @@
-ROOT="."
-
-if [ ! -d "${ROOT}/venv"]; then
-	python -m venv "${ROOT}/venv"
+if [ ! -d ".venv"]; then
+	python -m venv ".venv"
 fi
-	
-cd "${ROOT}/venv/bin"
-activate
+
+.venv/bin/activate

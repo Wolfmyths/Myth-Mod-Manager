@@ -2,6 +2,7 @@ import os
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.widgets.qdialog.dialog import Dialog
 
@@ -9,7 +10,7 @@ from src.constant_vars import ModType
 
 class NewModLocation(Dialog):
 
-    typeDict: dict[str : ModType] = {}
+    typeDict: dict[str, ModType] = {}
     
     def __init__(self, *modName: str) -> None:
         super().__init__()
@@ -129,11 +130,13 @@ class NewModLocation(Dialog):
 
             count += 1
 
+    @override
     @Slot()
     def accept(self) -> None:
         self.getData()
         return super().accept()
     
+    @override
     @Slot()
     def reject(self) -> None:
         self.setResult(0)

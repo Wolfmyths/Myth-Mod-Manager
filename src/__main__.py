@@ -11,7 +11,7 @@ from src.helpers.profile_manager import ProfileManager
 from src.helpers.save_manager import Save
 from src.helpers.tools_manager import ToolJSON
 from src.widgets.qdialog.gamepath_not_found import GamePathNotFound
-from src.constant_vars import VERSION, PROGRAM_NAME, LOGS_PATH, IS_SCRIPT, OLD_EXE, ROOT_PATH, MAX_LOGS, OptionKeys, LANG_FOLDER_PATH
+from src.constant_vars import VERSION, PROGRAM_NAME, LOGS_PATH, IS_DEBUG, OLD_EXE, ROOT_PATH, MAX_LOGS, OptionKeys, LANG_FOLDER_PATH
 import src.helpers.helper as helper
 from src.helpers.style import StyleManager
 
@@ -24,7 +24,7 @@ def setup_logging() -> None:
         filemode='a',
         format='%(asctime)s,%(msecs)d %(levelname)s %(message)s',
         datefmt='%H:%M:%S',
-        level=logging.DEBUG if IS_SCRIPT else logging.INFO
+        level=logging.DEBUG if IS_DEBUG else logging.INFO
     )
 
     # Delete extra log files
@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     setup_logging()
 
-    logging.info('\nSTARTING: %s\nVERSION: %s\nEXE PATH: %s', PROGRAM_NAME, VERSION, ROOT_PATH)
+    logging.info('\nSTARTING: %s\nVERSION: %s\nEXE PATH: %s', PROGRAM_NAME, VERSION.toString(), ROOT_PATH)
 
     app = qtw.QApplication(sys.argv)
     QLocale.setDefault(QLocale.Language.English)

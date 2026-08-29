@@ -1,16 +1,13 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
-
 import PySide6.QtWidgets as qtw
 import PySide6.QtGui as qtg
 from PySide6.QtCore import Qt as qt, QCoreApplication as qapp
-
-if TYPE_CHECKING:
-    from src.widgets.qwidget.tag_viewer import TagViewer
+from typing_extensions import override
 
 class TagDisplay(qtw.QTableWidget):
-    def __init__(self, parent: TagViewer) -> None:
+    def __init__(self, context_menu: qtw.QMenu | None = None, parent: qtw.QWidget | None = None) -> None:
         super().__init__(parent=parent)
+        
+        self.context_menu = context_menu
 
         self.setColumnCount(2)
         self.verticalHeader().hide()
@@ -36,9 +33,9 @@ class TagDisplay(qtw.QTableWidget):
         )
     
     # EVENT OVERRIDES
+    @override
     def mousePressEvent(self, event: qtg.QMouseEvent) -> None:
         if event.button() == qt.MouseButton.RightButton:
-            parent: TagViewer = self.parent()
         
             # Will return None if there are no mods causing a traceback
             tableWidgetItem: qtw.QTableWidgetItem | None = self.itemAt(event.pos())
@@ -47,6 +44,6 @@ class TagDisplay(qtw.QTableWidget):
 
                 if len(self.selectedItems()[::self.columnCount()]) <= 1:
                     self.selectRow(tableWidgetItem.row())
-                parent.contextMenu.exec(qtg.QCursor.pos())
+                self.context_menu.exec(qtg.QCursor.pos())
 
         return super().mousePressEvent(event)

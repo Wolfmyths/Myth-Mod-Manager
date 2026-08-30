@@ -1,8 +1,10 @@
+import os
+
 from pytestqt.qtbot import QtBot
 
 from src.widgets.qframe.external_tool import ExternalTool
 
-MOCK_URL = 'C:\\path\\program.exe'
+MOCK_URL = os.path.abspath(os.path.join("path", "program.exe"))
 
 def test_ExternalTool(qtbot: QtBot) -> None:
 

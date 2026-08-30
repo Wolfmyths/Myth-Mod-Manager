@@ -13,19 +13,19 @@ def test_getFileType() -> None:
 
         assert src.helpers.helper.getFileType(tmp) == 'dir'
 
-    with tempfile.TemporaryFile('w', suffix='.zip') as tmp:
+    with tempfile.NamedTemporaryFile('w', suffix='.zip') as tmp:
 
         assert src.helpers.helper.getFileType(tmp.name) == 'zip'
     
-    with tempfile.TemporaryFile('w', suffix='.rar') as tmp:
+    with tempfile.NamedTemporaryFile('w', suffix='.rar') as tmp:
 
         assert src.helpers.helper.getFileType(tmp.name) == 'zip'
 
-    with tempfile.TemporaryFile('w', suffix='.7z') as tmp:
+    with tempfile.NamedTemporaryFile('w', suffix='.7z') as tmp:
 
         assert src.helpers.helper.getFileType(tmp.name) == 'zip'
 
-    with tempfile.TemporaryFile('w', suffix='.invalidType') as tmp:
+    with tempfile.NamedTemporaryFile('w', suffix='.invalidType') as tmp:
 
         assert src.helpers.helper.getFileType(tmp.name) == ''
 

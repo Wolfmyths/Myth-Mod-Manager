@@ -21,7 +21,7 @@ def create_mod_dirs() -> Generator[str]:
     with tempfile.TemporaryDirectory() as tmp_dir:
         os.makedirs(os.path.join(tmp_dir, 'mods', MOCK_MOD_NAME_1))
         os.makedirs(os.path.join(tmp_dir, 'assets', 'mod_overrides', MOCK_MOD_NAME_2))
-        os.makedirs(os.path.join(tmp_dir, 'maps', MOCK_MOD_NAME_3))
+        os.makedirs(os.path.join(tmp_dir, 'Maps', MOCK_MOD_NAME_3))
         os.mkdir(os.path.join(tmp_dir, 'disabledMods'))
         os.mkdir(os.path.join(tmp_dir, 'newDisabledMods'))
 

@@ -77,7 +77,7 @@ def createTemp_Config_ini(create_mod_dirs: str) -> Generator[str]:
 
     config.add_section(OptionKeys.section.value)
     config.set(OptionKeys.section.value, OptionKeys.color_theme.value, LIGHT)
-    config.set(OptionKeys.section.value, OptionKeys.game_path.value, create_mod_dirs)
+    config.set(OptionKeys.section.value, OptionKeys.game_path.value, os.path.join(create_mod_dirs, "PAYDAY2.exe"))
     config.set(OptionKeys.section.value, OptionKeys.dispath.value, os.path.join(create_mod_dirs, 'disabledMods'))
     config.set(OptionKeys.section.value, OptionKeys.mmm_update_alert.value, str(False))
 
@@ -116,7 +116,10 @@ def createTemp_Profiles_ini() -> Generator[str]:
 @pytest.fixture(scope='module')
 def createTemp_externalShortcuts_ini() -> Generator[str]:
 
-    data: dict[str, list[str]] = {'shortcuts' : ['C:\\path\\program.exe', 'D:\\path\\payday.exe', 'C:\\path\\map_builder.exe']}
+    data: dict[str, list[str]] = {'shortcuts' : [
+        os.path.abspath(os.path.join("path", "program.exe")),
+        os.path.abspath(os.path.join('D:', 'path', 'payday.exe')),
+        os.path.abspath(os.path.join('path', 'map_builder.exe'))]}
 
     with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as tmp:
         tmp_name: str = tmp.name

@@ -3,7 +3,7 @@ import platform
 import logging
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, QProcess
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, QProcess, QProcessEnvironment
 import PySide6.QtGui as qtg
 from typing_extensions import override
 
@@ -107,27 +107,41 @@ class ModManager(qtw.QWidget):
         gamePath: str = OptionsManager.getGamepath()
         args: list[str] = OptionsManager.getLaunchParametersList()
 
-        # Setting the current working directory for PAYDAY 2 if there isn't one predefined
-        #for i in range(len(args)):
-        #    if str.startswith(args[i], '-d'):
-        #        break
-        #else:
-        #    args.append(f"-d {gamePath}")
-
-
         #print(f"Launching PAYDAY 2\nargs: {args}\ngame path: {gamePath}")
 
         try:
-            if not os.path.isabs(gamePath):
-                raise Exception(qapp.translate("ModManager", 'Path is not absolute'))
+            game_exe_path = OptionsManager.getGameExecuteable()
 
-            gameExe = 'payday2_win32_release.exe' if platform.system().startswith('Win') else 'payday2_release'
+            success: int
+            exit_code: int
 
-            success, exit_code = QProcess.startDetached(os.path.join(gamePath, gameExe), args, gamePath)
+            process = QProcess()
+
+            if platform.system().startswith("Win"):
+                success, exit_code = process.startDetached(game_exe_path, args, gamePath)
+            else:
+                proton_ver = OptionsManager.getProtonVersion()
+                STEAM_PATH = "~/.local/share/Steam/"
+                STEAM_COMPAT_DATA_PATH = os.path.join(
+                    STEAM_PATH, "steamapps/compatdata/218620")
+                proton_path = os.path.join(
+                    STEAM_PATH, f"steamapps/common/Proton\\ {proton_ver}", "proton")
+                
+                env = QProcessEnvironment()
+                env.insert("STEAM_COMPAT_DATA_PATH", STEAM_COMPAT_DATA_PATH)
+                env.insert("STEAM_COMPAT_CLIENT_INSTALL_PATH", STEAM_PATH)
+
+                process.setProcessEnvironment(env)
+                process.setArguments(
+                    [f"run {game_exe_path}"] + args)
+                process.setWorkingDirectory(gamePath)
+                process.setProgram(proton_path)
+                
+                success, exit_code = process.startDetached()
 
             if not success:
                 raise Exception(
-                    qapp.translate("ModManager", "Exit code:") + f' {exit_code}'
+                    qapp.translate("ModManager", "Exit code:") + f' {exit_code}\n{process.errorString()}'
                 )
 
         except Exception as e:

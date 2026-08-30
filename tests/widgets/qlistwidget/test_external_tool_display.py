@@ -1,17 +1,22 @@
-import pytest
+import os
 from collections.abc import Generator
 
+import pytest
 from pytestqt.qtbot import QtBot
 
 from PySide6.QtWidgets import QListWidgetItem
 
 from src.widgets.qlistwidget.external_tool_display import ExternalToolDisplay
 
-NEW_URL = 'E:\\this\\is\\a\\new\\mock\\url.exe'
-MOCK_URLS = ('C:\\this\\is\\a\\mock\\url.exe', 'D:\\this\\is\\a\\mock\\url2.bat')
+NEW_URL = os.path.abspath(
+    os.path.join('E:', 'this', 'is', 'a', 'new', 'mock', 'url.exe'))
 
-EXPECTED_URL = 'C:\\path\\program.exe'
-URL_TO_BE_DELETED = 'D:\\path\\payday.exe'
+MOCK_URLS = (
+    os.path.abspath(os.path.join('this', 'is', 'a', 'mock', 'url.exe')),
+    os.path.abspath(os.path.join('D:', 'this', 'is', 'a', 'mock', 'url2.bat')))
+
+EXPECTED_URL = os.path.abspath(os.path.join('path', 'program.exe'))
+URL_TO_BE_DELETED = os.path.abspath(os.path.join('D:', 'path', 'payday.exe'))
 
 # ExternalToolDisplay starts with 3 items
 @pytest.fixture(scope='function')

@@ -1,17 +1,14 @@
-import os
-
-from PySide6.QtCore import QCoreApplication as qapp, Slot
+from PySide6.QtCore import QCoreApplication as qapp, Slot, QFileInfo
 import PySide6.QtWidgets as qtw
+
 from typing_extensions import override
 
 from src.widgets.qdialog.dialog import Dialog
 from src.helpers.options_manager import OptionsManager
 
 class GamePathNotFound(Dialog):
-    def __init__(self, QParent: qtw.QWidget | qtw.QApplication) -> None:
-        super().__init__()
-
-        self.QParent: qtw.QWidget | qtw.QApplication = QParent
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent=parent)
 
         style: qtw.QStyle = self.style()
 
@@ -52,13 +49,12 @@ class GamePathNotFound(Dialog):
 
     @Slot()
     def openFileDialog(self) -> None:
-        dialog = qtw.QFileDialog()
-        url: str = dialog.getExistingDirectory(
+        url: str = qtw.QFileDialog.getOpenFileUrl(
             self,
-            caption=qapp.translate('GamePathNotFound', 'Select PAYDAY 2 Directory')
-        )
+            caption=qapp.translate('GamePathNotFound', 'Select PAYDAY 2 Executable')
+        )[1]
 
-        if os.path.isdir(url):
+        if QFileInfo(url).isExecutable():
             self.gameDir.setText(url)
 
     @Slot()
@@ -67,23 +63,17 @@ class GamePathNotFound(Dialog):
         gamePath: str = self.gameDir.text()
         okButton: qtw.QPushButton = self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok)
 
-        if len(gamePath) > 0:
-            okButton.setEnabled(True)
-        else:
-            okButton.setEnabled(False)
+        okButton.setEnabled(len(gamePath) > 0)
     
     @override
     @Slot()
     def accept(self) -> None:
-        OptionsManager.setGamepath(self.gameDir.text())
+        OptionsManager.setGameExecuteable(self.gameDir.text())
         OptionsManager.writeData()
         return super().accept()
 
     @override
     @Slot()
     def reject(self) -> None:
-
-        if isinstance(self.QParent, qtw.QApplication):
-            self.QParent.shutdown()
-        else:
-            return super().reject()
+        qapp.instance().shutdown()
+        return super().reject()

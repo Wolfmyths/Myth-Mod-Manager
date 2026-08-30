@@ -1,11 +1,17 @@
+import os
+
 import pytest
 
 from src.helpers.tools_manager import ToolJSON
 
-MOCK_URL = 'C:\\mock\\url'
+MOCK_URL = os.path.abspath(
+    os.path.join('mock', "url")
+)
 
 EXPECTED_SHORTCUTS: list[str] = [
-    'C:\\path\\program.exe', 'D:\\path\\payday.exe', 'C:\\path\\map_builder.exe'
+    os.path.abspath(os.path.join("path", "program.exe")),
+    os.path.abspath(os.path.join('D:', 'path', 'payday.exe')),
+    os.path.abspath(os.path.join('path', 'map_builder.exe'))
 ]
 
 @pytest.fixture(scope='module')

@@ -43,7 +43,6 @@ class OptionKeys(StrEnum):
     mmm_update_alert  = auto()
     lang              = auto()
     launch_parameters = auto()
-    proton_path       = auto()
     proton_version    = auto()
 
     @staticmethod

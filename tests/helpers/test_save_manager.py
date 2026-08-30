@@ -1,4 +1,6 @@
 import os
+import platform
+from typing import LiteralString
 
 import pytest
 
@@ -68,14 +70,25 @@ def test_testOptions(createTemp_Config_ini: str, create_mod_dirs: str) -> None:
 def test_OptionsMethods(createTemp_Config_ini: str) -> None:
 
     options = OptionsManager(createTemp_Config_ini)
+    expected_fallback_path: LiteralString
+
+    if platform.system().startswith("Win"):
+        expected_fallback_path = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\PAYDAY 2\\PAYDAY2.exe"
+    else:
+        expected_fallback_path ="~/.local/share/Steam/SteamApps/common/PAYDAY 2/PAYDAY2.exe"
 
     options.setDispath('somepath')
     options.writeData()
     assert os.path.basename(options.getDispath()) == 'somepath'
 
-    options.setGamepath('somepath2')
+    # Check fallback value
+    options.config.remove_option(OptionKeys.section, OptionKeys.game_path)
+    assert options.getGameExecuteable() == expected_fallback_path
+
+    options.setGameExecuteable(os.path.abspath(os.path.join('somepath2', 'game.exe')))
     options.writeData()
-    assert os.path.basename(options.getGamepath()) == 'somepath2'
+    assert os.path.basename(options.getGamepath()) == "somepath2"
+    assert os.path.basename(options.getGameExecuteable()) == "game.exe"
 
     options.setTheme('somecolortheme')
     options.writeData()
@@ -92,3 +105,11 @@ def test_OptionsMethods(createTemp_Config_ini: str) -> None:
     options.setLang('language')
     options.writeData()
     assert options.getLang() == 'language'
+
+    options.setGameExecuteable('exe')
+    options.writeData()
+    assert options.getGameExecuteable() == "exe"
+
+    options.setProtonVersion("2.0")
+    options.writeData()
+    assert options.getProtonVersion() == "2.0"

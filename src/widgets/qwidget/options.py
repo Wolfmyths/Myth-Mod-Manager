@@ -3,7 +3,7 @@ import logging
 from typing import Any, cast
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QCoreApplication as qapp, Signal, Qt, QTranslator, Slot
+from PySide6.QtCore import QCoreApplication as qapp, Signal, Qt, QTranslator, Slot, QFileInfo
 
 from src.widgets.qdialog.progress_widget import ProgressWidget
 from src.objects.new_disabled_dir import NewDisabledDir
@@ -145,15 +145,17 @@ class Options(qtw.QWidget):
     @Slot()
     def applySettings(self) -> None:
         if self.optionChanged.get(OptionKeys.game_path):
-            OptionsManager.setGamepath(self.optionsGeneral.gameDir.text())
+            OptionsManager.setGameExecuteable(self.optionsGeneral.gameDir.text())
 
         if self.optionChanged.get(OptionKeys.dispath):
             old_path: str = OptionsManager.getDispath()
             new_path: str = self.optionsGeneral.disabledModDir.text()
 
-            is_dir: bool = os.path.isdir(new_path)
-            is_abs: bool = os.path.isabs(new_path)
-            is_valid: bool = is_dir and is_abs
+            file_info = QFileInfo(new_path)
+
+            is_exe: bool = file_info.isExecutable()
+            is_abs: bool = file_info.isAbsolute()
+            is_valid: bool = is_exe and is_abs
 
             progressWidget = ProgressWidget(NewDisabledDir(old_path, new_path))
 
@@ -181,7 +183,7 @@ class Options(qtw.QWidget):
                 'Changing disabled mods folder from %s to %s\nIs it a directory? %s\n Is it an absolute path? %s',
                 old_path,
                 new_path,
-                is_dir,
+                is_exe,
                 is_abs
             )
 

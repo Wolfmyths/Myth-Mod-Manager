@@ -1,6 +1,5 @@
 import tempfile
 import os
-import platform
 from collections.abc import Generator
 
 import pytest
@@ -11,27 +10,28 @@ import PySide6.QtWidgets as qtw
 from src.helpers.options_manager import OptionsManager
 from src.widgets.qdialog.gamepath_not_found import GamePathNotFound
 
-MOCK_EXE = 'payday2_win32_release.exe' if platform.system().startswith('Win') else 'payday2_release'
+MOCK_EXE = 'PAYDAY2.exe'
 
 @pytest.fixture
 def create_mockexe() -> Generator[str]:
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         with open(os.path.join(tmp_dir, MOCK_EXE), 'w'):
-
             yield tmp_dir
 
 def test_dialog(qtbot: QtBot, createTemp_Config_ini: str, create_mockexe: str) -> None:  # pyright: ignore[reportUnusedParameter]
-    widget = GamePathNotFound(qtw.QWidget())
+    widget = GamePathNotFound()
+    exe_path = os.path.join(create_mockexe, MOCK_EXE)
     okButton: qtw.QPushButton = widget.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok)
     qtbot.addWidget(widget)
 
     assert okButton.isEnabled() is False
 
-    widget.gameDir.setText(create_mockexe)
+    widget.gameDir.setText(exe_path)
 
     assert okButton.isEnabled()
-    assert OptionsManager.getGamepath() != create_mockexe
+    assert not OptionsManager.getGamepath() == create_mockexe
     
     widget.accept()
-    assert OptionsManager.getGamepath() == os.path.abspath(create_mockexe)
+    assert OptionsManager.getGamepath() == create_mockexe
+    assert OptionsManager.getGameExecuteable() == exe_path

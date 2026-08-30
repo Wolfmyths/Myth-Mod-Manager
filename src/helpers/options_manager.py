@@ -1,6 +1,7 @@
 import os
+import platform
 import logging
-from typing import Any, TextIO
+from typing import Any, LiteralString, TextIO
 from collections.abc import Sequence
 from configparser import ConfigParser
 
@@ -107,12 +108,22 @@ class OptionsManager():
         OptionsManager.config.set(OptionKeys.section.value, OptionKeys.color_theme.value, theme)
 
     @staticmethod
-    def getGamepath() -> str:
-        return os.path.abspath(OptionsManager.config.get(OptionKeys.section.value, OptionKeys.game_path, fallback=''))
+    def getGameExecuteable() -> str:
+        fallback: LiteralString
+        if platform.system().startswith("Win"):
+            fallback = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\PAYDAY 2\\PAYDAY2.exe"
+        else:
+            fallback = "~/.local/share/Steam/SteamApps/common/PAYDAY 2/PAYDAY2.exe"
+        return OptionsManager.config.get(OptionKeys.section.value, OptionKeys.game_path, fallback=fallback)
 
     @staticmethod
-    def setGamepath(path: str = '') -> None:
-        OptionsManager.config.set(OptionKeys.section.value, OptionKeys.game_path.name, os.path.abspath(path))
+    def setGameExecuteable(path: str = '') -> None:
+        OptionsManager.config.set(OptionKeys.section.value, OptionKeys.game_path.name, path)
+
+    @staticmethod
+    def getGamepath() -> str:
+        '''Returns the path of the game executable's directory'''
+        return os.path.dirname(OptionsManager.getGameExecuteable())
 
     @staticmethod
     def getDispath() -> str:
@@ -140,3 +151,11 @@ class OptionsManager():
     @staticmethod
     def setLang(lang: str = 'en_US') -> None:
         OptionsManager.config.set(OptionKeys.section.value, OptionKeys.lang.value, lang)
+    
+    @staticmethod
+    def getProtonVersion() -> str:
+        return OptionsManager.config.get(OptionKeys.section, OptionKeys.proton_version, fallback="")
+
+    @staticmethod
+    def setProtonVersion(version: str) -> None:
+        OptionsManager.config.set(OptionKeys.section, OptionKeys.proton_version, version)

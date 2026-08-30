@@ -11,7 +11,7 @@ from src.helpers.profile_manager import ProfileManager
 from src.helpers.save_manager import Save
 from src.helpers.tools_manager import ToolJSON
 from src.widgets.qdialog.gamepath_not_found import GamePathNotFound
-from src.constant_vars import VERSION, PROGRAM_NAME, LOGS_PATH, IS_DEBUG, OLD_EXE, ROOT_PATH, MAX_LOGS, OptionKeys, LANG_FOLDER_PATH
+from src.constant_vars import VERSION, PROGRAM_NAME, LOGS_PATH, IS_DEBUG, OLD_EXE, ROOT_PATH, MAX_LOGS, LANG_FOLDER_PATH
 import src.helpers.helper as helper
 from src.helpers.style import StyleManager
 
@@ -71,8 +71,8 @@ if __name__ == '__main__':
     app.setStyleSheet(StyleManager().getStyleSheet(OptionsManager.getTheme()))
 
     # Checking game path
-    if not OptionsManager.hasOption(OptionKeys.game_path):
-        warning = GamePathNotFound(app)
+    if not os.path.exists(OptionsManager.getGameExecuteable()):
+        warning = GamePathNotFound()
         warning.exec()
 
     # Checking neccessary directories

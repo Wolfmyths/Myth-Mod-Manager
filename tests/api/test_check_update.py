@@ -1,14 +1,12 @@
-from typing import cast
-
-from PySide6.QtNetwork import QNetworkReply
+from pytestqt.qtbot import QtBot
 
 from src.api.check_update import CheckUpdate
 
-#TODO: Test this better with mocking
-def test_CheckUpdate() -> None:
+# TODO: Make test better possibly with mock functions
+def test_CheckUpdate(qtbot: QtBot) -> None:
     obj = CheckUpdate()
-    obj.start()
 
-    assert cast(QNetworkReply, obj.sender()).error() == QNetworkReply.NetworkError.NoError
+    with qtbot.wait_signal(obj.done, raising=True):
+        obj.start()
 
     obj.deleteLater()

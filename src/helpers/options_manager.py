@@ -1,7 +1,7 @@
 import os
 import platform
 import logging
-from typing import Any, LiteralString, TextIO
+from typing import Any, TextIO
 from collections.abc import Sequence
 from configparser import ConfigParser
 

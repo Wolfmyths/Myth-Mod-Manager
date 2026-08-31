@@ -2,7 +2,7 @@ import os
 import platform
 from enum import StrEnum, auto
 
-from PySide6.QtCore import QVersionNumber
+from PySide6.QtCore import QVersionNumber, QStandardPaths
 
 ##
 ## THIS FILE IS PLACED NEXT TO __main__ FOR FILE PATH REASONS
@@ -81,8 +81,11 @@ LANG_CODE_TO_STR = {x:y for y,x in LANG_STR_TO_CODE.items()}
 # Detection if the program is in debug mode or not (Assign manually)
 IS_DEBUG = True
 
-# Linux steam applications path
-STEAMAPPS = "~/.local/share/Steam/steamapps/common/"
+# Linux steam path
+STEAM = QStandardPaths.locate(
+    QStandardPaths.StandardLocation.AppDataLocation, 
+    "Steam",
+    QStandardPaths.LocateOption.LocateDirectory)
 
 # Root Path
 ROOT_PATH = os.path.abspath(os.getcwd())

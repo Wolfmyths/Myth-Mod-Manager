@@ -6,7 +6,7 @@ from PySide6.QtGui import QDesktopServices
 
 from src.widgets.qdialog.notice import Notice
 
-from src.constant_vars import STEAMAPPS
+from src.constant_vars import STEAM
 from src.helpers.helper_pathing import Pathing
 from src.helpers.options_manager import OptionsManager
 from src.constant_vars import ModType
@@ -21,10 +21,12 @@ def findProtonVersions() -> list[str]:
     It checks each folder if it starts with `Proton ` and then checks if the proton executable exists
     '''
 
+    STEAMAPPS_COMMON = f"{STEAM}/steamapps/common"
+
     def filter_app(file_name: str) -> bool:
-        return file_name.startswith("Proton ") and QFileInfo(f"{STEAMAPPS}/{file_name}/proton").isExecutable()
+        return file_name.startswith("Proton ") and QFileInfo(f"{STEAMAPPS_COMMON}/{file_name}/proton").isExecutable()
     
-    steamapps_dir = QDir(STEAMAPPS)
+    steamapps_dir = QDir(STEAMAPPS_COMMON)
         
     return list(filter(filter_app, steamapps_dir.entryList(QDir.Filter.AllDirs)))
 

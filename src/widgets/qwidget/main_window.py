@@ -23,7 +23,7 @@ class MainWindow(qtw.QMainWindow):
 
         self.setWindowIcon(qtg.QIcon(ICON))
         self.setWindowTitle(f'{PROGRAM_NAME} {VERSION.toString()}')
-        self.setMinimumSize(800, 800)
+        self.setMinimumSize(800, 600)
         self.resize(OptionsManager.getWindowSize())
 
         self.app: qapp | None = app

@@ -9,7 +9,7 @@ from typing_extensions import override
 import src.helpers.helper as helper
 from src.api.check_update import CheckUpdate
 from src.widgets.qdialog.update_detected import UpdateDetected
-from src.constant_vars import LIGHT, DARK, OptionKeys, LANG_STR_TO_CODE, ROOT_PATH, STEAMAPPS
+from src.constant_vars import LIGHT, DARK, OptionKeys, LANG_STR_TO_CODE, ROOT_PATH, STEAM
 from src.helpers.options_manager import OptionsManager
 from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
 
@@ -36,19 +36,15 @@ class OptionsGeneral(OptionsSectionBase):
         self.disabledModDir.textChanged.connect(self.disPathChanged)
 
         available_proton_versions: list[str] = ["N/A"]
-        if platform.system() == "Linux" and not OptionsManager.getProtonVersion():
-            if os.path.isdir(STEAMAPPS):
+        if platform.system() == "Linux":
+            if os.path.isdir(STEAM):
                 available_proton_versions = helper.findProtonVersions()
 
                 # Select the latest installed version if the option isn't set
                 if not OptionsManager.getProtonVersion():
-                    PROTON_EXPERIMENTAL = "Proton - Experimental"
-                    if PROTON_EXPERIMENTAL in available_proton_versions:
-                        OptionsManager.setProtonVersion(PROTON_EXPERIMENTAL)
-                    else:
-                        OptionsManager.setProtonVersion(available_proton_versions[0])
+                    OptionsManager.setProtonVersion(available_proton_versions[0])
             else:
-                logging.error("Could not find proton directory!")
+                logging.error("Could not find steam directory! %s", STEAM)
 
         self.protonVerComboBox = qtw.QComboBox(self)
         self.protonVerComboBox.setEditable(False)

@@ -191,7 +191,7 @@ class Options(qtw.QWidget):
             theme = LIGHT if self.optionsGeneral.colorThemeLight.isChecked() else DARK
             OptionsManager.setTheme(theme)
 
-            qtw.QApplication.setStyle(StyleManager().getStyleSheet(theme))
+            cast(qtw.QApplication, qapp.instance()).setStyleSheet(StyleManager.getStyleSheet(theme))
 
             self.themeSwitched.emit(theme)
 
@@ -252,6 +252,11 @@ class Options(qtw.QWidget):
 
         if self.optionChanged.get(OptionKeys.launch_parameters) or reset:
             self.launchparams.setup()
+        
+        if self.optionChanged.get(OptionKeys.proton_version) or reset:
+            combo_box = self.optionsGeneral.protonVerComboBox
+            combo_box.setCurrentIndex(
+                combo_box.findText(OptionsManager.getProtonVersion()))
 
         self.resetPendingOptions()
 

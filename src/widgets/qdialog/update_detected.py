@@ -31,8 +31,9 @@ class UpdateDetected(Dialog):
 
         self.autoUpdate = Update()
 
-        self.progressBar = qtw.QProgressBar(self)
-        self.progressBar.setAlignment(qt.AlignmentFlag.AlignTop)
+        self.progressBar = qtw.QProgressBar(
+            self, 
+            alignment=qt.AlignmentFlag.AlignTop)
 
         self.autoUpdate.setTotalProgress.connect(self.onSetTotalProgress)
         self.autoUpdate.setCurrentProgress.connect(self.updateProgressBar)

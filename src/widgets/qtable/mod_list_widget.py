@@ -7,7 +7,6 @@ import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, Signal
 from typing_extensions import override
 
-from src.api.check_update import CheckUpdate
 from src.widgets.qmenu.manager_menu import ManagerMenu
 from src.widgets.qdialog.progress_widget import ProgressWidget
 from src.widgets.qdialog.confirmation import Confirmation
@@ -35,8 +34,6 @@ class ModListWidget(qtw.QTableWidget):
     def __init__(self) -> None:
         super().__init__()
         logging.getLogger(__name__)
-
-        self.api = CheckUpdate()
 
         self.setSelectionMode(qtw.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.setSelectionBehavior(qtw.QAbstractItemView.SelectionBehavior.SelectRows)
@@ -480,9 +477,10 @@ class ModListWidget(qtw.QTableWidget):
             logging.warning('ModListWidget.CheckModUpdate(), %s is missing an assetID', modName)
             return
 
-        self.api = CheckModUpdate(assetID, modVersion)
-        self.api.upToDate.connect(uptoDate)
-        self.api.updateDetected.connect(updateDetected)
+        api = CheckModUpdate(assetID, modVersion)
+        api.upToDate.connect(uptoDate)
+        api.updateDetected.connect(updateDetected)
+        api.done.connect(api.deleteLater)
 
     def openModDir(self) -> None:
         if not len(self.getSelectedNameItems()) <= 0:

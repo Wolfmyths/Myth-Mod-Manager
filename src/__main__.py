@@ -71,8 +71,10 @@ if __name__ == '__main__':
     app.setStyleSheet(StyleManager().getStyleSheet(OptionsManager.getTheme()))
 
     logging.info("Gamepath: %s", OptionsManager.getGameExecuteable())
+    
     # Checking game path
-    if not QFileInfo(OptionsManager.getGameExecuteable()).isExecutable():
+    gameEXE = QFileInfo(OptionsManager.getGameExecuteable())
+    if not gameEXE.isExecutable() or not gameEXE.isFile():
         warning = GamePathNotFound()
         warning.exec()
 

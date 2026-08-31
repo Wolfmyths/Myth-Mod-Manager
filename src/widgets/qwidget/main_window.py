@@ -55,8 +55,9 @@ class MainWindow(qtw.QMainWindow):
         self.applyStaticText()
 
         if OptionsManager.getMMMUpdateAlert():
-            self.run_CheckUpdate = CheckUpdate()
-            self.run_CheckUpdate.updateDetected.connect(self.updateDetected)
+            run_CheckUpdate = CheckUpdate()
+            run_CheckUpdate.updateDetected.connect(self.updateDetected)
+            run_CheckUpdate.done.connect(run_CheckUpdate.deleteLater)
 
     def applyStaticText(self) -> None:
         tab: qtw.QTabBar = self.tab.tabBar()

@@ -19,15 +19,19 @@ class OptionsGeneral(OptionsSectionBase):
 
         layout = qtw.QVBoxLayout()
 
-        self.run_CheckUpdate = CheckUpdate()
+        self.run_CheckUpdate = CheckUpdate(self)
+        self.run_CheckUpdate.updateDetected.connect(self.updateFound)
+        self.run_CheckUpdate.error.connect(lambda: self.CheckUpdateButton.setText(qapp.translate("OptionsGeneral", 'Error: Check logs for more info')))
+        self.run_CheckUpdate.upToDate.connect(lambda: self.CheckUpdateButton.setText(qapp.translate("OptionsGeneral", 'Up to date!' ) + ' ^_^' ))
 
         # General Sub Section
         self.general = qtw.QGroupBox(self)
 
-        self.generalLayout = qtw.QFormLayout()
+        self.generalLayout = qtw.QFormLayout(
+            rowWrapPolicy=qtw.QFormLayout.RowWrapPolicy.WrapAllRows,
+            verticalSpacing=10,
+        )
         self.generalLayout.setContentsMargins(10, 30, 10, 10)
-        self.generalLayout.setVerticalSpacing(10)
-        self.generalLayout.setRowWrapPolicy(qtw.QFormLayout.RowWrapPolicy.WrapAllRows)
 
         self.gameDir = qtw.QLineEdit(self)
         self.gameDir.textChanged.connect(self.gamePathChanged)
@@ -46,12 +50,11 @@ class OptionsGeneral(OptionsSectionBase):
             else:
                 logging.error("Could not find steam directory! %s", STEAM)
 
-        self.protonVerComboBox = qtw.QComboBox(self)
-        self.protonVerComboBox.setEditable(False)
+        self.protonVerComboBox = qtw.QComboBox(self, editable=False)
         self.protonVerComboBox.addItems(available_proton_versions)
+        self.protonVerComboBox.currentTextChanged.connect(self.protonVerChanged)
 
-        self.language = qtw.QComboBox(self)
-        self.language.setEditable(False)
+        self.language = qtw.QComboBox(self, editable=False)
         self.language.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.language.addItems(list(LANG_STR_TO_CODE.keys()))
         self.language.currentTextChanged.connect(self.langChanged)
@@ -128,7 +131,7 @@ class OptionsGeneral(OptionsSectionBase):
         self.colorThemeDark.setText(qapp.translate("OptionsGeneral", "Dark"))
         self.colorThemeLight.setText(qapp.translate("OptionsGeneral", "Light"))
 
-        self.gameDirLabel.setText(qapp.translate("OptionsGeneral", "Payday 2 Game Directory:"))
+        self.gameDirLabel.setText(qapp.translate("OptionsGeneral", "Payday 2 Game Path:"))
         self.disabledModDirLabel.setText(qapp.translate("OptionsGeneral", "Disabled Mods Path:"))
         self.protonLabel.setText(qapp.translate("OptionsGeneral", "Proton Version:"))
         self.LanguageLabel.setText(qapp.translate("OptionsGeneral", "Language:"))
@@ -137,47 +140,48 @@ class OptionsGeneral(OptionsSectionBase):
         self.updateAlertCheckbox.setText(qapp.translate("OptionsGeneral", 'Update alerts on startup'))
         self.CheckUpdateButton.setText(qapp.translate("OptionsGeneral", "Check for updates"))
 
+    @Slot(str, str)
+    def updateFound(self, latestVersion: str, changelog: str) -> None:
+        notice = UpdateDetected(latestVersion, changelog)
+        notice.rejected.connect(lambda: self.CheckUpdateButton.setText(qapp.translate("OptionsGeneral", 'Check for updates')))
+        notice.exec()
+        
+        if notice.result():
+            helper.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
+            qapp.quit()
+
+    @Slot(str)
+    def protonVerChanged(self, version: str) -> None:
+        changed: bool = version != OptionsManager.getProtonVersion()
+        self.pendingChanges.emit(OptionKeys.proton_version, changed)
+
     @Slot(str)
     def gamePathChanged(self, path: str) -> None:
-        changed: bool = True if path != OptionsManager.getGamepath() else False
+        changed: bool = path != OptionsManager.getGamepath()
         self.pendingChanges.emit(OptionKeys.game_path, changed)
     
     @Slot(str)
     def disPathChanged(self, path: str) -> None:
         path = repr(path)
-        changed: bool = True if path != OptionsManager.getDispath() else False
+        changed: bool = path != OptionsManager.getDispath()
         self.pendingChanges.emit(OptionKeys.dispath, changed)
     
     @Slot(str)
     def langChanged(self, lang: str) -> None:
         lang = LANG_STR_TO_CODE.get(lang, '')
-        changed: bool = True if lang != OptionsManager.getLang() else False
+        changed: bool = lang != OptionsManager.getLang()
         self.pendingChanges.emit(OptionKeys.lang, changed)
     
     @Slot(str)
     def themeChanged(self, theme: str) -> None:
-        changed: bool = True if theme != OptionsManager.getTheme() else False
+        changed: bool = theme != OptionsManager.getTheme()
         self.pendingChanges.emit(OptionKeys.color_theme, changed)
     
     @Slot()
     def setUpdateAlert(self) -> None:
-        changed: bool = True if self.updateAlertCheckbox.isChecked() != OptionsManager.getMMMUpdateAlert() else False
+        changed: bool = self.updateAlertCheckbox.isChecked() != OptionsManager.getMMMUpdateAlert()
         self.pendingChanges.emit(OptionKeys.mmm_update_alert, changed)
     
     def CheckUpdate(self) -> None:
-        @Slot(str, str)
-        def updateFound(latestVersion: str, changelog: str) -> None:
-            notice = UpdateDetected(latestVersion, changelog)
-            notice.rejected.connect(lambda: self.CheckUpdateButton.setText(qapp.translate("OptionsGeneral", 'Check for updates')))
-            notice.exec()
-            
-            if notice.result():
-                helper.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
-                qapp.quit()
-
         self.CheckUpdateButton.setText(qapp.translate("OptionsGeneral", 'Checking...'))
-
-        self.run_CheckUpdate = CheckUpdate()
-        self.run_CheckUpdate.updateDetected.connect(updateFound)
-        self.run_CheckUpdate.error.connect(lambda: self.CheckUpdateButton.setText(qapp.translate("OptionsGeneral", 'Error: Check logs for more info')))
-        self.run_CheckUpdate.upToDate.connect(lambda: self.CheckUpdateButton.setText(qapp.translate("OptionsGeneral", 'Up to date!' ) + ' ^_^' ))
+        self.run_CheckUpdate.start()

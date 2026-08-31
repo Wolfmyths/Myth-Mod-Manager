@@ -23,12 +23,10 @@ class OptionsLaunchParams(OptionsSectionBase):
 
         self.warningLabel            = qtw.QLabel(qapp.translate("OptionsLaunchParams", "USE THESE IF YOU KNOW WHAT YOU'RE DOING"), self)
         
-        self.dLineEdit            = qtw.QLineEdit(self)
+        self.dLineEdit            = qtw.QLineEdit(self, placeholderText="<dir>")
         self.dLineEdit.setProperty(PARAM, "-d")
-        self.dLineEdit.setPlaceholderText("<dir>")
-        self.oLineEdit            = qtw.QLineEdit(self)
+        self.oLineEdit            = qtw.QLineEdit(self, placeholderText="<file>")
         self.oLineEdit.setProperty(PARAM, "-o")
-        self.oLineEdit.setPlaceholderText("<file>")
         
         self.sCheckBox            = qtw.QCheckBox(self)
         self.sCheckBox.setProperty(PARAM, "-s")
@@ -54,9 +52,7 @@ class OptionsLaunchParams(OptionsSectionBase):
         self.removevtuneCheckBox.setProperty(PARAM, "-removevtune")
 
         self.customLineEdit       = qtw.QLineEdit(self)
-        self.previewLineEdit      = qtw.QLineEdit(self)
-        self.previewLineEdit.setReadOnly(True)
-
+        self.previewLineEdit      = qtw.QLineEdit(self, readOnly=True)
         
         launchParamPairs = self._get_param_widget_pairs()
 

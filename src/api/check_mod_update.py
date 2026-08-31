@@ -10,16 +10,15 @@ class CheckModUpdate(QObject):
     '''
     Instancing this object will run a series of 
     functions to get the latest Myth Mod Manager version.
-
-    `checkUpdate` will delete itself after it's finished.
     '''
 
     updateDetected = Signal(str)
     upToDate = Signal()
     error = Signal()
+    done = Signal()
 
-    def __init__(self, modId: str, localVer: str) -> None:
-        super().__init__()
+    def __init__(self, modId: str, localVer: str, parent: QObject | None = None) -> None:
+        super().__init__(parent=parent)
         logging.getLogger(__file__)
 
         try:
@@ -27,7 +26,7 @@ class CheckModUpdate(QObject):
         except Exception as e:
             logging.error('checkModUpdate.__init__(), An error occured trying to parse mod local version %s:\n%s', localVer, str(e))
             self.error.emit()
-            self.deleteLater()
+            self.done.emit()
 
         link: str = f'https://api.modworkshop.net/mods/{modId}/version'
 
@@ -47,7 +46,7 @@ class CheckModUpdate(QObject):
         else:
             logging.error('Internet error in checkModUpdate():\n%s', reply.error())
             self.error.emit()
-            self.deleteLater()
+            self.done.emit()
     
     def __checkVersion(self) -> None:
         reply: QNetworkReply = cast(QNetworkReply, self.sender())
@@ -59,7 +58,7 @@ class CheckModUpdate(QObject):
         except Exception as e:
             logging.error('An error occured trying to access a modworkshop.net API reply in checkModUpdate().__checkversion():\n%s', str(e))
             self.error.emit()
-            self.deleteLater()
+            self.done.emit()
             return
 
         logging.info('Latest Version: %s', latestVersion.toString())
@@ -68,5 +67,4 @@ class CheckModUpdate(QObject):
             self.updateDetected.emit(replyDecoded)
         else:
             self.upToDate.emit()
-
-        self.deleteLater()
+            self.done.emit()

@@ -7,7 +7,7 @@ from configparser import ConfigParser
 
 from PySide6.QtCore import QSize
 
-from src.constant_vars import OptionKeys, OPTIONS_CONFIG, LIGHT, MODS_DISABLED_PATH_DEFAULT
+from src.constant_vars import OptionKeys, OPTIONS_CONFIG, LIGHT, MODS_DISABLED_PATH_DEFAULT, STEAM
 
 class OptionsManager():
     '''Manages Program's Settings'''
@@ -109,11 +109,11 @@ class OptionsManager():
 
     @staticmethod
     def getGameExecuteable() -> str:
-        fallback: LiteralString
+        fallback: str
         if platform.system().startswith("Win"):
             fallback = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\PAYDAY 2\\PAYDAY2.exe"
         else:
-            fallback = "~/.local/share/Steam/SteamApps/common/PAYDAY 2/PAYDAY2.exe"
+            fallback = f"{STEAM}/steamapps/common/PAYDAY 2/PAYDAY2.exe"
         return OptionsManager.config.get(OptionKeys.section.value, OptionKeys.game_path, fallback=fallback)
 
     @staticmethod

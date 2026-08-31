@@ -233,7 +233,7 @@ class Options(qtw.QWidget):
         has a pending change.
         '''
         if self.optionChanged.get(OptionKeys.game_path) or reset:
-            self.optionsGeneral.gameDir.setText(OptionsManager.getGamepath())
+            self.optionsGeneral.gameDir.setText(OptionsManager.getGameExecuteable())
 
         if self.optionChanged.get(OptionKeys.dispath) or reset:
             self.optionsGeneral.disabledModDir.setText(OptionsManager.getDispath())

@@ -1,4 +1,6 @@
 import os
+import logging
+import platform
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, Qt, Slot
@@ -7,7 +9,7 @@ from typing_extensions import override
 import src.helpers.helper as helper
 from src.api.check_update import CheckUpdate
 from src.widgets.qdialog.update_detected import UpdateDetected
-from src.constant_vars import LIGHT, DARK, OptionKeys, LANG_STR_TO_CODE, ROOT_PATH
+from src.constant_vars import LIGHT, DARK, OptionKeys, LANG_STR_TO_CODE, ROOT_PATH, STEAMAPPS
 from src.helpers.options_manager import OptionsManager
 from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
 
@@ -32,6 +34,25 @@ class OptionsGeneral(OptionsSectionBase):
 
         self.disabledModDir = qtw.QLineEdit(self)
         self.disabledModDir.textChanged.connect(self.disPathChanged)
+
+        available_proton_versions: list[str] = ["N/A"]
+        if platform.system() == "Linux" and not OptionsManager.getProtonVersion():
+            if os.path.isdir(STEAMAPPS):
+                available_proton_versions = helper.findProtonVersions()
+
+                # Select the latest installed version if the option isn't set
+                if not OptionsManager.getProtonVersion():
+                    PROTON_EXPERIMENTAL = "Proton - Experimental"
+                    if PROTON_EXPERIMENTAL in available_proton_versions:
+                        OptionsManager.setProtonVersion(PROTON_EXPERIMENTAL)
+                    else:
+                        OptionsManager.setProtonVersion(available_proton_versions[0])
+            else:
+                logging.error("Could not find proton directory!")
+
+        self.protonVerComboBox = qtw.QComboBox(self)
+        self.protonVerComboBox.setEditable(False)
+        self.protonVerComboBox.addItems(available_proton_versions)
 
         self.language = qtw.QComboBox(self)
         self.language.setEditable(False)
@@ -81,12 +102,14 @@ class OptionsGeneral(OptionsSectionBase):
 
         self.gameDirLabel = qtw.QLabel(self)
         self.disabledModDirLabel = qtw.QLabel(self)
+        self.protonLabel = qtw.QLabel(self)
         self.LanguageLabel = qtw.QLabel(self)
 
         # Setting rows for General Sub Section Layout
         for label, widget in (
                                 (self.gameDirLabel, self.gameDir),
                                 (self.disabledModDirLabel, self.disabledModDir),
+                                (self.protonLabel, self.protonVerComboBox),
                                 (self.LanguageLabel, self.language)
                               ):
             self.generalLayout.addRow(label, widget)
@@ -111,6 +134,7 @@ class OptionsGeneral(OptionsSectionBase):
 
         self.gameDirLabel.setText(qapp.translate("OptionsGeneral", "Payday 2 Game Directory:"))
         self.disabledModDirLabel.setText(qapp.translate("OptionsGeneral", "Disabled Mods Path:"))
+        self.protonLabel.setText(qapp.translate("OptionsGeneral", "Proton Version:"))
         self.LanguageLabel.setText(qapp.translate("OptionsGeneral", "Language:"))
 
         self.gbUpdates.setTitle(qapp.translate("OptionsGeneral", "Updates"))

@@ -81,6 +81,9 @@ LANG_CODE_TO_STR = {x:y for y,x in LANG_STR_TO_CODE.items()}
 # Detection if the program is in debug mode or not (Assign manually)
 IS_DEBUG = True
 
+# Linux steam applications path
+STEAMAPPS = "~/.local/share/Steam/steamapps/common/"
+
 # Root Path
 ROOT_PATH = os.path.abspath(os.getcwd())
 

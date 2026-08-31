@@ -1,3 +1,5 @@
+import logging
+
 from PySide6.QtCore import QCoreApplication as qapp, Slot, QFileInfo
 import PySide6.QtWidgets as qtw
 
@@ -52,7 +54,9 @@ class GamePathNotFound(Dialog):
         url: str = qtw.QFileDialog.getOpenFileUrl(
             self,
             caption=qapp.translate('GamePathNotFound', 'Select PAYDAY 2 Executable')
-        )[1]
+        )[0].toLocalFile()
+
+        logging.debug("url: %s", url)
 
         if QFileInfo(url).isExecutable():
             self.gameDir.setText(url)
@@ -76,4 +80,3 @@ class GamePathNotFound(Dialog):
     @Slot()
     def reject(self) -> None:
         qapp.instance().shutdown()
-        return super().reject()

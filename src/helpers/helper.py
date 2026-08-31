@@ -1,19 +1,45 @@
 import os
 import logging
 
-from PySide6.QtCore import QCoreApplication as qapp, Slot, QUrl
+from PySide6.QtCore import QCoreApplication as qapp, Slot, QUrl, QDir, QFileInfo
 from PySide6.QtGui import QDesktopServices
 
 from src.widgets.qdialog.notice import Notice
 
+from src.constant_vars import STEAMAPPS
 from src.helpers.helper_pathing import Pathing
 from src.helpers.options_manager import OptionsManager
 from src.constant_vars import ModType
 logging.getLogger(__name__)
 
+def findProtonVersions() -> list[str]:
+    '''
+    Linux only!!!
+
+    Finds proton versions within `~/.local/share/Steam/steamapps/common/`
+
+    It checks each folder if it starts with `Proton ` and then checks if the proton executable exists
+    '''
+
+    def filter_app(file_name: str) -> bool:
+        return file_name.startswith("Proton ") and QFileInfo(f"{STEAMAPPS}/{file_name}/proton").isExecutable()
+    
+    steamapps_dir = QDir(STEAMAPPS)
+        
+    return list(filter(filter_app, steamapps_dir.entryList(QDir.Filter.AllDirs)))
+
+def protonVersionExists() -> bool:
+    '''
+    Linux Only!!!
+
+    Checks of the user's set proton version option exists
+    '''
+
+    return QFileInfo(f"~/.local/share/Steam/steamapps/common/{OptionsManager.getProtonVersion()}").exists()
+
 @Slot(str)
 def openWebPage(link: str) -> bool:
-    '''`webbrowser.open_new_tab()` but with some exception handling, returns a bool depending if it failed or not'''
+    '''`QDesktopServices.openUrl()` but with some exception handling, returns a bool depending if it failed or not'''
 
     outcome: bool = QDesktopServices.openUrl(link)
 
@@ -31,6 +57,7 @@ def createModDirs() -> None:
 
     for modDir in (Pathing.maps(), Pathing.mod_overrides(), Pathing.mods(), disPath):
         if not os.path.isdir(modDir):
+            logging.info("Creating directory at %s", modDir)
             os.mkdir(modDir)
 
 def isInstalled(mod: str) -> bool:
@@ -74,9 +101,9 @@ def getFileType(filePath: str) -> str:
         output = 'zip'
     
     else:
-        logging.warning('The file extension not valid and will be ignored: %s', filePath.split('/')[-1])
+        logging.warning('The file extension not valid and will be ignored: %s', os.path.basename(filePath))
     
-    logging.debug('File name: %s\nType: %s', filePath.split('/')[-1], output)
+    logging.debug('File name: %s\nType: %s', os.path.basename(filePath), output)
 
     return output
 

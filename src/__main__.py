@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QTranslator, QLocale
+from PySide6.QtCore import QTranslator, QLocale, QFileInfo
 
 from src.widgets.qwidget.main_window import MainWindow
 from src.helpers.options_manager import OptionsManager
@@ -70,8 +70,9 @@ if __name__ == '__main__':
 
     app.setStyleSheet(StyleManager().getStyleSheet(OptionsManager.getTheme()))
 
+    logging.info("Gamepath: %s", OptionsManager.getGameExecuteable())
     # Checking game path
-    if not os.path.exists(OptionsManager.getGameExecuteable()):
+    if not QFileInfo(OptionsManager.getGameExecuteable()).isExecutable():
         warning = GamePathNotFound()
         warning.exec()
 

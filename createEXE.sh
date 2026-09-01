@@ -1,14 +1,13 @@
 echo Setting Variables
-ROOT="../"
 disFolder="Myth Mod Manager"
 Exe="Myth Mod Manager.exe"
 Txt="requirements.txt"
 Spec="main.spec"
 
 echo Installing Dependencies
-pip install -r "${ROOT}${Txt}"
+pip install -r "${Txt}"
 
 echo Running Pyinstaller
-pyinstaller --clean "${ROOT}${Spec}" --distpath "${ROOT}${disFolder}"
+pyinstaller --clean "${Spec}" --distpath "${disFolder}"
 
 echo Installation Finished!

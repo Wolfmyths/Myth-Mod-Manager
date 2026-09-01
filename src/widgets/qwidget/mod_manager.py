@@ -3,7 +3,7 @@ import platform
 import logging
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, QProcess, QProcessEnvironment
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, QProcess, QProcessEnvironment, QDir
 import PySide6.QtGui as qtg
 from typing_extensions import override
 
@@ -11,7 +11,7 @@ from src.widgets.qtable.mod_list_widget import ModListWidget
 from src.widgets.qdialog.notice import Notice
 from src.helpers.options_manager import OptionsManager
 import src.helpers.helper as helper
-from src.constant_vars import ModType
+from src.constant_vars import ModType, STEAM
 
 class ModManager(qtw.QWidget):
 
@@ -121,15 +121,12 @@ class ModManager(qtw.QWidget):
                 success, exit_code = process.startDetached(game_exe_path, args, gamePath)
             else:
                 proton_ver = OptionsManager.getProtonVersion()
-                STEAM_PATH = "~/.local/share/Steam/"
-                STEAM_COMPAT_DATA_PATH = os.path.join(
-                    STEAM_PATH, "steamapps/compatdata/218620")
-                proton_path = os.path.join(
-                    STEAM_PATH, f"steamapps/common/Proton\\ {proton_ver}", "proton")
+                STEAM_COMPAT_DATA_PATH = f"{STEAM}/steamapps/compatdata/218620"
+                proton_path = QDir(f"{STEAM}/steamapps/common").filePath(f"{proton_ver}/proton")
                 
                 env = QProcessEnvironment()
                 env.insert("STEAM_COMPAT_DATA_PATH", STEAM_COMPAT_DATA_PATH)
-                env.insert("STEAM_COMPAT_CLIENT_INSTALL_PATH", STEAM_PATH)
+                env.insert("STEAM_COMPAT_CLIENT_INSTALL_PATH", STEAM)
 
                 process.setProcessEnvironment(env)
                 process.setArguments(

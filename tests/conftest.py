@@ -2,15 +2,18 @@ from collections.abc import Generator
 import tempfile
 import os
 import json
-from configparser import ConfigParser
 
 import pytest
+
+from PySide6.QtCore import QStandardPaths
 
 from src.helpers.profile_manager import ProfileManager
 from src.helpers.tools_manager import ToolJSON
 from src.helpers.save_manager import Save
 from src.helpers.options_manager import OptionsManager
 from src.constant_vars import OptionKeys, ModKeys, ModType, LIGHT
+
+QStandardPaths.setTestModeEnabled(True)
 
 MOCK_MOD_NAME_1 = 'make game easy mod'
 MOCK_MOD_NAME_2 = 'best mod ever'
@@ -71,25 +74,19 @@ def createTemp_Config_ini(create_mod_dirs: str) -> Generator[str]:
     with tempfile.NamedTemporaryFile('w', suffix='.ini', delete=False) as tmp:
         tmp_filename: str = tmp.name
 
-    config = ConfigParser()
+        tmp.write("")
 
-    config.read(tmp_filename)
+    OptionsManager(tmp_filename)
 
-    config.add_section(OptionKeys.section.value)
-    config.set(OptionKeys.section.value, OptionKeys.color_theme.value, LIGHT)
-    config.set(OptionKeys.section.value, OptionKeys.game_path.value, os.path.join(create_mod_dirs, "PAYDAY2.exe"))
-    config.set(OptionKeys.section.value, OptionKeys.dispath.value, os.path.join(create_mod_dirs, 'disabledMods'))
-    config.set(OptionKeys.section.value, OptionKeys.mmm_update_alert.value, str(False))
-
-    with open(tmp_filename, 'w') as f:
-        config.write(f)
-
-    OptionsManager.config = config
-    OptionsManager.file = tmp_filename
+    OptionsManager.config.set(OptionKeys.section.value, OptionKeys.color_theme.value, LIGHT)
+    OptionsManager.config.set(OptionKeys.section.value, OptionKeys.game_path.value, os.path.join(create_mod_dirs, "PAYDAY2.exe"))
+    OptionsManager.config.set(OptionKeys.section.value, OptionKeys.dispath.value, os.path.join(create_mod_dirs, 'disabledMods'))
+    OptionsManager.config.set(OptionKeys.section.value, OptionKeys.mmm_update_alert.value, str(False))
+    OptionsManager.config.set(OptionKeys.section.value, OptionKeys.proton_dirs.value, "~/path/to/proton, ~/path/to/proton2")
 
     yield tmp_filename
 
-    OptionsManager.config = ConfigParser()
+    OptionsManager.config.clear()
     OptionsManager.file = ''
 
     os.remove(tmp_filename)

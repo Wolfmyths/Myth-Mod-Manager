@@ -44,6 +44,7 @@ class OptionKeys(StrEnum):
     lang              = auto()
     launch_parameters = auto()
     proton_version    = auto()
+    proton_dirs       = auto()
 
     @staticmethod
     def all_keys() -> list[str]:
@@ -81,11 +82,20 @@ LANG_CODE_TO_STR = {x:y for y,x in LANG_STR_TO_CODE.items()}
 # Detection if the program is in debug mode or not (Assign manually)
 IS_DEBUG = True
 
-# Linux steam path
+# Linux steam paths
 STEAM = QStandardPaths.locate(
     QStandardPaths.StandardLocation.AppDataLocation, 
     "Steam",
     QStandardPaths.LocateOption.LocateDirectory)
+
+STEAM_ALT = QStandardPaths.locate(
+    QStandardPaths.StandardLocation.HomeLocation,
+    ".steam",
+    QStandardPaths.LocateOption.LocateDirectory)
+
+STEAMAPPS_COMMON = f"{STEAM}/steamapps/common"
+STEAMAPPS_COMMON_ALT = f"{STEAM_ALT}/steam/steamapps/common"
+STEAM_COMPATIBILITY = f"{STEAM}/compatibilitytools.d"
 
 # Root Path
 ROOT_PATH = os.path.abspath(os.getcwd())

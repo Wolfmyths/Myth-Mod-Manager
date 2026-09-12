@@ -1,3 +1,4 @@
+from typing import Callable
 import os
 import logging
 
@@ -6,38 +7,53 @@ from PySide6.QtGui import QDesktopServices
 
 from src.widgets.qdialog.notice import Notice
 
-from src.constant_vars import STEAM
+from src.constant_vars import STEAMAPPS_COMMON, STEAMAPPS_COMMON_ALT, STEAM_COMPATIBILITY
 from src.helpers.helper_pathing import Pathing
 from src.helpers.options_manager import OptionsManager
 from src.constant_vars import ModType
 logging.getLogger(__name__)
 
+def getProtonDirs() -> list[str]:
+    """
+    Linux Only!!!
+    
+    Returns a list of all proton paths, from user settings and default
+    """
+    return [STEAMAPPS_COMMON, STEAMAPPS_COMMON_ALT, STEAM_COMPATIBILITY] + OptionsManager.getProtonDirs()
+
 def findProtonVersions() -> list[str]:
     '''
     Linux only!!!
 
-    Finds proton versions within `~/.local/share/Steam/steamapps/common/`
+    Finds proton versions within\n
+    `~/.local/share/Steam/steamapps/common/`\n
+    `~/.steam/steam/steamapps/common/`\n
+    `~/.local/share/Steam/compatibility.d/`\n
+    and custom directories the user sets
 
     It checks each folder if it starts with `Proton ` and then checks if the proton executable exists
     '''
 
-    STEAMAPPS_COMMON = f"{STEAM}/steamapps/common"
-
-    def filter_app(file_name: str) -> bool:
-        return file_name.startswith("Proton ") and QFileInfo(f"{STEAMAPPS_COMMON}/{file_name}/proton").isExecutable()
+    def filter_app(start_path: str, file_name: str) -> bool:
+        return file_name.startswith("Proton ") and QFileInfo(f"{start_path}/{file_name}/proton").isExecutable()
     
-    steamapps_dir = QDir(STEAMAPPS_COMMON)
+    paths_to_search = getProtonDirs()
+
+    ret_val: list[str] = []
+
+    for path in paths_to_search:
+        filterApp: Callable[[str], bool] = lambda x: filter_app(path, x)
+
+        dir = QDir(path)
+
+        proton_vers = list(filter(filterApp, dir.entryList(QDir.Filter.AllDirs)))
+
+        if not proton_vers:
+            continue
+
+        ret_val += proton_vers
         
-    return list(filter(filter_app, steamapps_dir.entryList(QDir.Filter.AllDirs)))
-
-def protonVersionExists() -> bool:
-    '''
-    Linux Only!!!
-
-    Checks of the user's set proton version option exists
-    '''
-
-    return QFileInfo(f"~/.local/share/Steam/steamapps/common/{OptionsManager.getProtonVersion()}").exists()
+    return ret_val
 
 @Slot(str)
 def openWebPage(link: str) -> bool:

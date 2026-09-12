@@ -3,7 +3,8 @@ import logging
 import platform
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QCoreApplication as qapp, Qt, Slot
+import PySide6.QtGui as qtg
+from PySide6.QtCore import QCoreApplication as qapp, QFileInfo, QModelIndex, QStringListModel, Qt, Slot
 from typing_extensions import override
 
 import src.helpers.helper as helper
@@ -50,10 +51,6 @@ class OptionsGeneral(OptionsSectionBase):
             else:
                 logging.error("Could not find steam directory! %s", STEAM)
 
-        self.protonVerComboBox = qtw.QComboBox(self, editable=False)
-        self.protonVerComboBox.addItems(available_proton_versions)
-        self.protonVerComboBox.currentTextChanged.connect(self.protonVerChanged)
-
         self.language = qtw.QComboBox(self, editable=False)
         self.language.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.language.addItems(list(LANG_STR_TO_CODE.keys()))
@@ -83,6 +80,36 @@ class OptionsGeneral(OptionsSectionBase):
         
         self.buttonFrame.setLayout(gbLayout)
 
+        # Proton Settings Subgroup (Linux Only)
+        protonLayout = qtw.QVBoxLayout()
+        protonDirButtonLayout = qtw.QHBoxLayout()
+        protonDirButtonLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.protonGroupBox = qtw.QGroupBox(self)
+
+        self.protonVerComboBox = qtw.QComboBox(self.protonGroupBox, editable=False)
+        self.protonVerComboBox.addItems(available_proton_versions)
+        self.protonVerComboBox.currentTextChanged.connect(self.protonVerChanged)
+
+        addIcon = qtg.QIcon.fromTheme(qtg.QIcon.ThemeIcon.ListAdd)
+        removeIcon = qtg.QIcon.fromTheme(qtg.QIcon.ThemeIcon.ListRemove)
+
+        self.protonDirsButtonAdd = qtw.QPushButton(addIcon, "", self.protonGroupBox)
+        self.protonDirsButtonAdd.pressed.connect(self.addProtonDir)
+        protonDirButtonLayout.addWidget(self.protonDirsButtonAdd)
+
+        self.protonDirsButtonRemove = qtw.QPushButton(removeIcon, "", self.protonGroupBox)
+        self.protonDirsButtonRemove.pressed.connect(self.removeProtonDir)
+        protonDirButtonLayout.addWidget(self.protonDirsButtonRemove)
+
+        self.protonDirsModel = QStringListModel(OptionsManager.getProtonDirs(), self)
+        self.protonDirsModel.dataChanged.connect(self.protonDirsDataChanged)
+        self.protonDirsListView = qtw.QListView(
+            self.protonGroupBox, 
+            viewMode=qtw.QListView.ViewMode.ListMode,
+            flow=qtw.QListView.Flow.TopToBottom)
+        self.protonDirsListView.setEditTriggers(qtw.QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.protonDirsListView.setModel(self.protonDirsModel)
+
         # GroupBox Updates
         self.gbUpdates = qtw.QGroupBox(self)
         gbUpdatesLayout = qtw.QVBoxLayout()
@@ -102,21 +129,29 @@ class OptionsGeneral(OptionsSectionBase):
         self.gameDirLabel = qtw.QLabel(self)
         self.disabledModDirLabel = qtw.QLabel(self)
         self.protonLabel = qtw.QLabel(self)
+        self.protonDirsLabel = qtw.QLabel(self)
         self.LanguageLabel = qtw.QLabel(self)
 
         # Setting rows for General Sub Section Layout
         for label, widget in (
                                 (self.gameDirLabel, self.gameDir),
                                 (self.disabledModDirLabel, self.disabledModDir),
-                                (self.protonLabel, self.protonVerComboBox),
                                 (self.LanguageLabel, self.language)
                               ):
             self.generalLayout.addRow(label, widget)
         
         self.general.setLayout(self.generalLayout)
         
+        # Setting rows for Proton Sub Section Layout
+        protonLayout.addWidget(self.protonLabel)
+        protonLayout.addWidget(self.protonVerComboBox)
+        protonLayout.addWidget(self.protonDirsLabel)
+        protonLayout.addLayout(protonDirButtonLayout)
+        protonLayout.addWidget(self.protonDirsListView)
+        self.protonGroupBox.setLayout(protonLayout)
+
         # Setting General Section Layout
-        for widget in (self.general, self.gbUpdates, self.buttonFrame):
+        for widget in (self.general, self.protonGroupBox, self.gbUpdates, self.buttonFrame):
             layout.addWidget(widget)
         
         self.applyStaticText()
@@ -133,8 +168,11 @@ class OptionsGeneral(OptionsSectionBase):
 
         self.gameDirLabel.setText(qapp.translate("OptionsGeneral", "Payday 2 Game Path:"))
         self.disabledModDirLabel.setText(qapp.translate("OptionsGeneral", "Disabled Mods Path:"))
-        self.protonLabel.setText(qapp.translate("OptionsGeneral", "Proton Version:"))
         self.LanguageLabel.setText(qapp.translate("OptionsGeneral", "Language:"))
+
+        self.protonGroupBox.setTitle(qapp.translate("OptionsGeneral", "Proton"))
+        self.protonLabel.setText(qapp.translate("OptionsGeneral", "Version:"))
+        self.protonDirsLabel.setText(qapp.translate("OptionsGeneral", "Custom Proton Directories:"))
 
         self.gbUpdates.setTitle(qapp.translate("OptionsGeneral", "Updates"))
         self.updateAlertCheckbox.setText(qapp.translate("OptionsGeneral", 'Update alerts on startup'))
@@ -149,6 +187,28 @@ class OptionsGeneral(OptionsSectionBase):
         if notice.result():
             helper.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
             qapp.quit()
+
+    @Slot()
+    def addProtonDir(self) -> None:
+        url = qtw.QFileDialog.getExistingDirectoryUrl(
+            self,
+            caption=qapp.translate('OptionsGeneral', 'Select a Location Where Proton Versions Are Stored')
+        ).toLocalFile()
+
+        if not QFileInfo(url).exists():
+            return
+        
+        self.protonDirsModel.setStringList(self.protonDirsModel.stringList() + [url])
+
+    @Slot()
+    def removeProtonDir(self) -> None:
+        for qmodelindex in self.protonDirsListView.selectedIndexes():
+            self.protonDirsModel.removeRow(qmodelindex.row())
+
+    @Slot(QModelIndex, QModelIndex, list)
+    def protonDirsDataChanged(self, _topLeft: QModelIndex, _bottomRight: QModelIndex, _roles: list[int]) -> None:
+        changed: bool = self.protonDirsModel.stringList() != OptionsManager.getProtonDirs()
+        self.pendingChanges.emit(OptionKeys.proton_dirs, changed)
 
     @Slot(str)
     def protonVerChanged(self, version: str) -> None:

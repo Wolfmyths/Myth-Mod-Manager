@@ -1,9 +1,8 @@
-import os
 import platform
 import logging
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, QProcess, QProcessEnvironment, QDir
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, QProcess, QProcessEnvironment
 import PySide6.QtGui as qtg
 from typing_extensions import override
 
@@ -122,7 +121,7 @@ class ModManager(qtw.QWidget):
             else:
                 proton_ver = OptionsManager.getProtonVersion()
                 STEAM_COMPAT_DATA_PATH = f"{STEAM}/steamapps/compatdata/218620"
-                proton_path = QDir(f"{STEAM}/steamapps/common").filePath(f"{proton_ver}/proton")
+                proton_path = f"{proton_ver}/proton"
                 
                 env = QProcessEnvironment()
                 env.insert("STEAM_COMPAT_DATA_PATH", STEAM_COMPAT_DATA_PATH)

@@ -3,13 +3,14 @@ import logging
 from typing import Any, cast
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QCoreApplication as qapp, Signal, Qt, QTranslator, Slot, QFileInfo
+from PySide6.QtCore import QCoreApplication as qapp, QDir, Signal, Qt, QTranslator, Slot, QFileInfo
 
+from src.helpers import helper
 from src.widgets.qdialog.progress_widget import ProgressWidget
 from src.objects.new_disabled_dir import NewDisabledDir
 from src.helpers.options_manager import OptionsManager
 from src.helpers.style import StyleManager
-from src.constant_vars import DARK, LIGHT, OptionKeys, LANG_FOLDER_PATH, LANG_CODE_TO_STR, LANG_STR_TO_CODE 
+from src.constant_vars import DARK, LIGHT, OptionKeys, LANG_FOLDER_PATH, LANG_CODE_TO_STR, LANG_STR_TO_CODE
 from src.widgets.qdialog.notice import Notice
 from src.widgets.optionssectionbase.options_general import OptionsGeneral
 from src.widgets.optionssectionbase.options_ignored_mods import OptionsIgnoredMods
@@ -213,6 +214,23 @@ class Options(qtw.QWidget):
             else:
                 logging.error('Loading lang %s failed', new_lang)
         
+        if self.optionChanged.get(OptionKeys.proton_version):
+            combobox = self.optionsGeneral.protonVerComboBox.currentText()
+            version = ""
+            proton_dirs = helper.getProtonDirs()
+            for path in proton_dirs:
+                dir = QDir(path)
+                if combobox not in set(dir.entryList()):
+                    continue
+                
+                version = dir.filePath(combobox)
+                break
+            
+            if version:
+                OptionsManager.setProtonVersion(version)
+            else:
+                logging.error("Could not find proton version %s in the following folders: %s", combobox, proton_dirs)
+
         if self.optionChanged.get(OptionKeys.launch_parameters):
             OptionsManager.setLaunchParameters(self.launchparams.previewLineEdit.text())
 
@@ -257,6 +275,10 @@ class Options(qtw.QWidget):
             combo_box = self.optionsGeneral.protonVerComboBox
             combo_box.setCurrentIndex(
                 combo_box.findText(OptionsManager.getProtonVersion()))
+        
+        if self.optionChanged.get(OptionKeys.proton_dirs) or reset:
+            self.optionsGeneral.protonDirsModel.setStringList(
+                OptionsManager.getProtonDirs())
 
         self.resetPendingOptions()
 

@@ -2,7 +2,6 @@ import os
 import platform
 import logging
 from typing import Any, TextIO
-from collections.abc import Sequence
 from configparser import ConfigParser
 
 from PySide6.QtCore import QSize
@@ -12,7 +11,8 @@ from src.constant_vars import OptionKeys, OPTIONS_CONFIG, LIGHT, MODS_DISABLED_P
 class OptionsManager():
     '''Manages Program's Settings'''
 
-    config = ConfigParser()
+    config = ConfigParser(
+        converters={'list': lambda x: [i.strip() for i in x.split(',')]})
     file: str = ''
 
     DEFAULT_WINDOW_SIZE = QSize(800, 800)
@@ -35,24 +35,20 @@ class OptionsManager():
             OptionsManager.config.add_section(OptionKeys.section.value)
     
     @staticmethod
-    def getList(section: str, option: str, delimiter: str = ',') -> list[Any]:
-        sequenceString = OptionsManager.config.get(section, option, fallback=None)
+    def _get_list(section: str, option: str, fallback: list[Any] | None = None) -> list[Any]:
+        """
+        A type safe wrapper for list conversion (ConfigParser does not support it by default)
 
-        if isinstance(sequenceString, str) and sequenceString:
-            sequence = sequenceString.split(delimiter)
-            return sequence
-        else:
-            return []
-    
-    @staticmethod
-    def setList(section: str, option: str, value: Sequence[Any], delimiter: str = ',', sort: bool = False) -> None:
-        if sort:
-            value = sorted(value)
+        ConfigParser creates a function called `getlist()` due to the use of the `converters` kwarg
+        
+        If `fallback` is `None` returns an empty list
+        """
+        if fallback is None: fallback = []
 
-        list_: str = delimiter.join(value)
+        # for k, v in OptionsManager.config.converters.items():
+        #     print(k, v)
+        return OptionsManager.config[section].getlist(option, fallback)
 
-        OptionsManager.config.set(section, option, list_)
-    
     @staticmethod
     def read() -> list[str]:
         '''Reads `OptionsManager.file`'''
@@ -69,6 +65,14 @@ class OptionsManager():
     @staticmethod
     def hasOption(option: str) -> bool:
         return OptionsManager.config.has_option(OptionKeys.section.value, option)
+
+    @staticmethod
+    def getProtonDirs() -> list[str]:
+        return OptionsManager._get_list(OptionKeys.section.value, OptionKeys.proton_dirs.value)
+
+    @staticmethod
+    def setProtonDirs(proton_dirs: list[str]) -> None:
+        OptionsManager.config.set(OptionKeys.section.value, OptionKeys.proton_dirs.value, ", ".join(proton_dirs))
 
     @staticmethod
     def getLaunchParameters() -> str:

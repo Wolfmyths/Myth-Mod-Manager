@@ -61,7 +61,6 @@ if __name__ == '__main__':
     ProfileManager()
 
     translator = QTranslator(app)
-    path: str = os.path.join(LANG_FOLDER_PATH, OptionsManager.getLang() + '.qm')
     path: str = f"{LANG_FOLDER_PATH}/{OptionsManager.getLang()}.qm"
     if not translator.load(path):
        logging.error('Translator failed to load: %s', os.path.basename(path))

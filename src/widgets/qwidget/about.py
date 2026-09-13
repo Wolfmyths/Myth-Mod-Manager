@@ -1,4 +1,3 @@
-import os
 import logging
 
 import PySide6.QtGui as qtg
@@ -12,8 +11,8 @@ from src.constant_vars import VERSION, PROGRAM_NAME, UI_GRAPHICS_PATH, GITHUB_LO
 
 
 class About(qtw.QWidget):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
 
         logging.getLogger(__file__)
 
@@ -86,11 +85,14 @@ class About(qtw.QWidget):
         self.kofiIcon = KOFI_LOGO_B
         self.modworkshopIcon = MODWORKSHOP_LOGO_B if themeIsLight else MODWORKSHOP_LOGO_W
 
-        githubPixmap = qtg.QIcon(os.path.join(UI_GRAPHICS_PATH, self.githubIcon))
+        githubPixmap = qtg.QIcon(
+            f"{UI_GRAPHICS_PATH}/{self.githubIcon}")
 
-        kofiPixmap = qtg.QIcon(os.path.join(UI_GRAPHICS_PATH, self.kofiIcon))
+        kofiPixmap = qtg.QIcon(
+            f"{UI_GRAPHICS_PATH}/{self.kofiIcon}")
 
-        modworkshopPixmap = qtg.QIcon(os.path.join(UI_GRAPHICS_PATH, self.modworkshopIcon))
+        modworkshopPixmap = qtg.QIcon(
+            f"{UI_GRAPHICS_PATH}/{self.modworkshopIcon}")
 
         self.githubLabel.setIcon(githubPixmap)
         self.kofiLabel.setIcon(kofiPixmap)

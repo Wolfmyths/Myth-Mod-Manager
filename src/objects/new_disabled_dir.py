@@ -1,15 +1,15 @@
 import logging
 import os
 
-from PySide6.QtCore import QCoreApplication as qapp, Slot
+from PySide6.QtCore import QCoreApplication as qapp, QObject, Slot
 from typing_extensions import override
 
 from src.objects.worker import Worker
 
 class NewDisabledDir(Worker):
 
-    def __init__(self, old_path: str, new_path: str) -> None:
-        super().__init__()
+    def __init__(self, old_path: str, new_path: str, parent: QObject | None = None) -> None:
+        super().__init__(parent)
 
         self.old_path: str = old_path
         self.new_path: str = new_path

@@ -14,8 +14,8 @@ from src.constant_vars import ModType, STEAM
 
 class ModManager(qtw.QWidget):
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
 
         self.setObjectName('manager')
 

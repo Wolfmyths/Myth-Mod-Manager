@@ -1,7 +1,7 @@
 import logging
 import os
 
-from PySide6.QtCore import QCoreApplication as qapp, Slot
+from PySide6.QtCore import QCoreApplication as qapp, QObject, Slot
 from typing_extensions import override
 
 from src.helpers.options_manager import OptionsManager
@@ -11,8 +11,8 @@ from src.objects.worker import Worker
 
 class MoveToEnabledModDir(Worker):
 
-    def __init__(self, *mods: str) -> None:
-        super().__init__()
+    def __init__(self, *mods: str, parent: QObject | None = None) -> None:
+        super().__init__(parent)
 
         self.mods: tuple[str, ...] = mods
         self.mods_moved: list[tuple[str, str]] = []

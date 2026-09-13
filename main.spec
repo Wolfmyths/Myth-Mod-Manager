@@ -67,11 +67,7 @@ HIDDEN_IMPORTS = [
     'patoolib.programs.zip',
 ]
 
-DATA = [
-    (os.path.join('src', 'icon.ico'), os.path.join('.', 'src')), 
-    (os.path.join('src', 'graphics'), os.path.join('.', 'src', 'graphics')),
-    (os.path.join('src', 'lang'), os.path.join('.', 'src', 'lang'))
-]
+DATA = []
 
 BINARIES = []
 

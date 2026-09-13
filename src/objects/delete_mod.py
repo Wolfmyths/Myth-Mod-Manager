@@ -1,7 +1,7 @@
 import logging
 import os
 
-from PySide6.QtCore import QCoreApplication as qapp, Slot, QFile
+from PySide6.QtCore import QCoreApplication as qapp, QObject, Slot, QFile
 from typing_extensions import override
 
 from src.helpers.helper_pathing import Pathing
@@ -12,10 +12,14 @@ from src.objects.worker import Worker
 from src.constant_vars import ModType
 
 class DeleteMod(Worker):
-    def __init__(self, *mods: str) -> None:
-        super().__init__()
+    def __init__(self, *mods: str, parent: QObject | None = None) -> None:
+        super().__init__(parent)
 
         self.mods: tuple[str, ...] = mods
+
+    @override
+    def onCancel(self) -> None:
+        return
 
     @override
     @Slot()

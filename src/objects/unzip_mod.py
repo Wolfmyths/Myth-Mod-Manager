@@ -3,7 +3,7 @@ import logging
 
 import patoolib  # pyright: ignore[reportMissingTypeStubs]
 
-from PySide6.QtCore import QCoreApplication as qapp, Slot
+from PySide6.QtCore import QCoreApplication as qapp, QObject, Slot
 from typing_extensions import override
 
 from src.helpers.helper_pathing import Pathing
@@ -11,10 +11,14 @@ from src.objects.worker import Worker
 from src.constant_vars import ModType
 
 class UnZipMod(Worker):
-    def __init__(self, *mods: tuple[str, ModType]) -> None:
-        super().__init__()
+    def __init__(self, *mods: tuple[str, ModType], parent: QObject | None = None) -> None:
+        super().__init__(parent)
 
         self.mods: tuple[tuple[str, ModType], ...] = mods
+
+    @override
+    def onCancel(self) -> None:
+        return
 
     @override
     @Slot()

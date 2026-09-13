@@ -10,4 +10,4 @@ class OptionsSectionBase(qtw.QWidget):
         super().__init__(parent=parent)
 
     def applyStaticText(self) -> None:
-        return
+        ...

@@ -2,6 +2,7 @@ from typing import LiteralString, cast
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.constant_vars import OptionKeys
 from src.helpers.options_manager import OptionsManager
@@ -11,17 +12,18 @@ class OptionsLaunchParams(OptionsSectionBase):
     def __init__(self, parent: qtw.QWidget | None = None) -> None:
         super().__init__(parent)
         layout = qtw.QVBoxLayout()
-        childLayout = qtw.QFormLayout()
+
+        childLayout = qtw.QFormLayout(verticalSpacing=10)
         childLayout.setContentsMargins(0, 0, 300, 20)
-        childLayout.setVerticalSpacing(10)
-        childLayout2 = qtw.QFormLayout()
-        childLayout2.setVerticalSpacing(10)
+
+        childLayout2 = qtw.QFormLayout(
+            verticalSpacing=10, 
+            rowWrapPolicy=qtw.QFormLayout.RowWrapPolicy.WrapAllRows)
         childLayout2.setSpacing(10)
-        childLayout2.setRowWrapPolicy(qtw.QFormLayout.RowWrapPolicy.WrapAllRows)
 
         PARAM: LiteralString = "param"
 
-        self.warningLabel            = qtw.QLabel(qapp.translate("OptionsLaunchParams", "USE THESE IF YOU KNOW WHAT YOU'RE DOING"), self)
+        self.warningLabel            = qtw.QLabel(self)
         
         self.dLineEdit            = qtw.QLineEdit(self, placeholderText="<dir>")
         self.dLineEdit.setProperty(PARAM, "-d")
@@ -52,7 +54,9 @@ class OptionsLaunchParams(OptionsSectionBase):
         self.removevtuneCheckBox.setProperty(PARAM, "-removevtune")
 
         self.customLineEdit       = qtw.QLineEdit(self)
+        self.customLabel             = qtw.QLabel(self)
         self.previewLineEdit      = qtw.QLineEdit(self, readOnly=True)
+        self.previewLabel            = qtw.QLabel(self)
         
         launchParamPairs = self._get_param_widget_pairs()
 
@@ -71,8 +75,8 @@ class OptionsLaunchParams(OptionsSectionBase):
 
         # Assigning for child layout 2
         for title, widget in (
-            (qapp.translate("OptionsLaunchParams", "Custom Args:"), self.customLineEdit),
-            (qapp.translate("OptionsLaunchParams", "Preview:"), self.previewLineEdit)
+            (self.customLabel, self.customLineEdit),
+            (self.previewLabel, self.previewLineEdit)
         ):
             childLayout2.addRow(title, widget)
 
@@ -82,7 +86,16 @@ class OptionsLaunchParams(OptionsSectionBase):
         layout.addLayout(childLayout)
         layout.addLayout(childLayout2)
         self.setLayout(layout)
+
+        self.applyStaticText()
     
+    @override
+    def applyStaticText(self) -> None:
+        self.warningLabel.setText(qapp.translate("OptionsLaunchParams", "USE THESE IF YOU KNOW WHAT YOU'RE DOING"))
+
+        self.customLabel.setText(qapp.translate("OptionsLaunchParams", "Custom Args:"))
+        self.previewLabel.setText(qapp.translate("OptionsLaunchParams", "Preview:"))
+
     def setup(self) -> None:
         launchParamPairs = self._get_param_widget_pairs()
         lineEditPairs = [x for x in launchParamPairs if isinstance(x[1], qtw.QLineEdit)]

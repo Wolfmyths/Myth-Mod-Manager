@@ -14,7 +14,7 @@ from src.widgets.qdialog.confirmation import Confirmation
 class TagViewer(qtw.QWidget):
     tagChanged = Signal(str, tuple[str])
     def __init__(self, parent: qtw.QWidget | None = None) -> None:
-        super().__init__(parent = parent)
+        super().__init__(parent)
 
         self.setWindowIcon(qtg.QIcon(ICON))
 

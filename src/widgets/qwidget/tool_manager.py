@@ -6,8 +6,8 @@ from PySide6.QtCore import QUrl, Qt as qt, QCoreApplication as qapp, Slot
 from src.widgets.qlistwidget.external_tool_display import ExternalToolDisplay
 
 class ToolManager(qtw.QWidget):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
 
         layout = qtw.QVBoxLayout()
 

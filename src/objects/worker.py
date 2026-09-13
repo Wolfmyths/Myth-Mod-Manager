@@ -20,8 +20,8 @@ class Worker(QObject):
 
     mutex: QMutex = QMutex() # Should be set externally by the ProgressWidget class
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent: QObject | None = None) -> None:
+        super().__init__(parent)
         logging.getLogger(__name__)
 
     def start(self) -> None:

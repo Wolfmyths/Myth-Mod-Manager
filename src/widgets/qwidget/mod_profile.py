@@ -17,8 +17,8 @@ from src.objects.move_to_enabled_dir import MoveToEnabledModDir
 from src.helpers.save_manager import Save
 
 class ModProfile(qtw.QWidget):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
 
         layout = qtw.QVBoxLayout()
 

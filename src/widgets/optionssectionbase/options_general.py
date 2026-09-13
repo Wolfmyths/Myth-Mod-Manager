@@ -186,7 +186,7 @@ class OptionsGeneral(OptionsSectionBase):
         
         if notice.result():
             helper.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
-            qapp.quit()
+            qapp.instance().shutdown()
 
     @Slot()
     def addProtonDir(self) -> None:
@@ -242,6 +242,7 @@ class OptionsGeneral(OptionsSectionBase):
         changed: bool = self.updateAlertCheckbox.isChecked() != OptionsManager.getMMMUpdateAlert()
         self.pendingChanges.emit(OptionKeys.mmm_update_alert, changed)
     
+    @Slot()
     def CheckUpdate(self) -> None:
         self.CheckUpdateButton.setText(qapp.translate("OptionsGeneral", 'Checking...'))
         self.run_CheckUpdate.start()

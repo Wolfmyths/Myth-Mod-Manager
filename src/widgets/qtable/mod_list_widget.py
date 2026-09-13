@@ -186,7 +186,7 @@ class ModListWidget(qtw.QTableWidget):
 
                         color = MODWORKSHOP_LOGO_B if OptionsManager.getTheme() == LIGHT else MODWORKSHOP_LOGO_W
 
-                        item.setIcon(qtg.QIcon(os.path.join(UI_GRAPHICS_PATH, color)))
+                        item.setIcon(qtg.QIcon(f"{UI_GRAPHICS_PATH}/{color}"))
 
                     self.setItem(self.rowCount() - 1, 0, item)
 
@@ -570,7 +570,7 @@ class ModListWidget(qtw.QTableWidget):
             item: qtw.QTableWidgetItem | None = self.getNameItem(i)
 
             if not item.icon().isNull():
-                item.setIcon(qtg.QIcon(os.path.join(UI_GRAPHICS_PATH, reverseDict[newIcon])))
+                item.setIcon(qtg.QIcon(f"{UI_GRAPHICS_PATH}/{reverseDict[newIcon]}"))
 
     def installMods(self, *urls: str) -> None:
 

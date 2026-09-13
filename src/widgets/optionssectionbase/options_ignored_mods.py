@@ -1,5 +1,6 @@
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, Slot
+from typing_extensions import override
 
 from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
 from src.widgets.qlistwidget.ignored_mods import IgnoredMods
@@ -21,6 +22,10 @@ class OptionsIgnoredMods(OptionsSectionBase):
         
         self.setLayout(layout)
     
+    @override
+    def applyStaticText(self) -> None:
+        self.updateModIgnoreLabel()
+
     @Slot()
     def updateModIgnoreLabel(self) -> None:
         self.ignoredModsLabel.setText(qapp.translate("OptionsIgnoredMods", 'Hidden Mods:') + f' {self.ignoredModsListWidget.count()}')

@@ -30,11 +30,11 @@ class MainWindow(qtw.QMainWindow):
 
         self.tab = qtw.QTabWidget(self)
 
-        self.manager = ModManager()
-        self.profile = ModProfile()
-        self.tools = ToolManager()
-        self.options = Options()
-        self.about = About()
+        self.manager = ModManager(self)
+        self.profile = ModProfile(self)
+        self.tools = ToolManager(self)
+        self.options = Options(self)
+        self.about = About(self)
 
         self.options.ignoredMods.ignoredModsListWidget.itemsRemoved.connect(self.manager.modsTable.refreshMods)
         self.options.themeSwitched.connect(self.manager.modsTable.swapIcons)
@@ -74,7 +74,7 @@ class MainWindow(qtw.QMainWindow):
 
         if notice.result():
             helper.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
-            qapp.quit()
+            qapp.instance().shutdown()
 
     @Slot()
     def languageChange(self) -> None:

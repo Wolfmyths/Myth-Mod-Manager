@@ -1,8 +1,9 @@
 import logging
+import platform
 from typing import Any, cast
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QCoreApplication as qapp, QDir, Signal, Qt, QTranslator, Slot, QFileInfo
+from PySide6.QtCore import QCoreApplication as qapp, Signal, Qt, QTranslator, Slot, QFileInfo
 
 from src.helpers import helper
 from src.widgets.qdialog.progress_widget import ProgressWidget
@@ -214,21 +215,13 @@ class Options(qtw.QWidget):
                 logging.error('Loading lang %s failed', new_lang)
         
         if self.optionChanged.get(OptionKeys.proton_version):
-            combobox = self.optionsGeneral.protonVerComboBox.currentText()
-            version = ""
-            proton_dirs = helper.getProtonDirs()
-            for path in proton_dirs:
-                dir = QDir(path)
-                if combobox not in set(dir.entryList()):
-                    continue
-                
-                version = dir.filePath(combobox)
-                break
+            protonVerComboBoxText = self.optionsGeneral.protonGroupBox.protonVerComboBox.currentText()
+            version = helper.getProtonPath(protonVerComboBoxText)
             
             if version:
                 OptionsManager.setProtonVersion(version)
             else:
-                logging.error("Could not find proton version %s in the following folders: %s", combobox, proton_dirs)
+                logging.error("Could not find proton version %s", protonVerComboBoxText)
 
         if self.optionChanged.get(OptionKeys.launch_parameters):
             OptionsManager.setLaunchParameters(self.launchparams.previewLineEdit.text())
@@ -249,6 +242,9 @@ class Options(qtw.QWidget):
         Reset bool will reset pending changes reguardless if the option
         has a pending change.
         '''
+
+        is_windows = platform.system().startswith("Win")
+
         if self.optionChanged.get(OptionKeys.game_path) or reset:
             self.optionsGeneral.gameDir.setText(OptionsManager.getGameExecuteable())
 
@@ -269,14 +265,14 @@ class Options(qtw.QWidget):
 
         if self.optionChanged.get(OptionKeys.launch_parameters) or reset:
             self.launchparams.setup()
-        
-        if self.optionChanged.get(OptionKeys.proton_version) or reset:
-            combo_box = self.optionsGeneral.protonVerComboBox
+
+        if self.optionChanged.get(OptionKeys.proton_version) or reset and not is_windows:
+            combo_box = self.optionsGeneral.protonGroupBox.protonVerComboBox
             combo_box.setCurrentIndex(
                 combo_box.findText(OptionsManager.getProtonVersion()))
         
-        if self.optionChanged.get(OptionKeys.proton_dirs) or reset:
-            self.optionsGeneral.protonDirsModel.setStringList(
+        if self.optionChanged.get(OptionKeys.proton_dirs) or reset and not is_windows:
+            self.optionsGeneral.protonGroupBox.protonDirsModel.setStringList(
                 OptionsManager.getProtonDirs())
 
         self.resetPendingOptions()

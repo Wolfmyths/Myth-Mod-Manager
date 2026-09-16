@@ -1,18 +1,17 @@
 import os
-import logging
 import platform
 
 import PySide6.QtWidgets as qtw
-import PySide6.QtGui as qtg
-from PySide6.QtCore import QCoreApplication as qapp, QFileInfo, QModelIndex, QStringListModel, Qt, Slot
+from PySide6.QtCore import QCoreApplication as qapp, QModelIndex, Qt, Slot
 from typing_extensions import override
 
 import src.helpers.helper as helper
 from src.api.check_update import CheckUpdate
 from src.widgets.qdialog.update_detected import UpdateDetected
-from src.constant_vars import LIGHT, DARK, OptionKeys, LANG_STR_TO_CODE, ROOT_PATH, STEAM
+from src.constant_vars import LIGHT, DARK, OptionKeys, LANG_STR_TO_CODE, ROOT_PATH
 from src.helpers.options_manager import OptionsManager
 from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
+from src.widgets.qgroupbox.proton_settings import ProtonSettingsGroupBox
 
 class OptionsGeneral(OptionsSectionBase):
     def __init__(self, parent: qtw.QWidget | None = None) -> None:
@@ -39,17 +38,6 @@ class OptionsGeneral(OptionsSectionBase):
 
         self.disabledModDir = qtw.QLineEdit(self)
         self.disabledModDir.textChanged.connect(self.disPathChanged)
-
-        available_proton_versions: list[str] = ["N/A"]
-        if platform.system() == "Linux":
-            if os.path.isdir(STEAM):
-                available_proton_versions = helper.findProtonVersions()
-
-                # Select the latest installed version if the option isn't set
-                if not OptionsManager.getProtonVersion():
-                    OptionsManager.setProtonVersion(available_proton_versions[0])
-            else:
-                logging.error("Could not find steam directory! %s", STEAM)
 
         self.language = qtw.QComboBox(self, editable=False)
         self.language.setFocusPolicy(Qt.FocusPolicy.NoFocus)
@@ -80,35 +68,13 @@ class OptionsGeneral(OptionsSectionBase):
         
         self.buttonFrame.setLayout(gbLayout)
 
-        # Proton Settings Subgroup (Linux Only)
-        protonLayout = qtw.QVBoxLayout()
-        protonDirButtonLayout = qtw.QHBoxLayout()
-        protonDirButtonLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        self.protonGroupBox = qtw.QGroupBox(self)
-
-        self.protonVerComboBox = qtw.QComboBox(self.protonGroupBox, editable=False)
-        self.protonVerComboBox.addItems(available_proton_versions)
-        self.protonVerComboBox.currentTextChanged.connect(self.protonVerChanged)
-
-        addIcon = qtg.QIcon.fromTheme(qtg.QIcon.ThemeIcon.ListAdd)
-        removeIcon = qtg.QIcon.fromTheme(qtg.QIcon.ThemeIcon.ListRemove)
-
-        self.protonDirsButtonAdd = qtw.QPushButton(addIcon, "", self.protonGroupBox)
-        self.protonDirsButtonAdd.pressed.connect(self.addProtonDir)
-        protonDirButtonLayout.addWidget(self.protonDirsButtonAdd)
-
-        self.protonDirsButtonRemove = qtw.QPushButton(removeIcon, "", self.protonGroupBox)
-        self.protonDirsButtonRemove.pressed.connect(self.removeProtonDir)
-        protonDirButtonLayout.addWidget(self.protonDirsButtonRemove)
-
-        self.protonDirsModel = QStringListModel(OptionsManager.getProtonDirs(), self)
-        self.protonDirsModel.dataChanged.connect(self.protonDirsDataChanged)
-        self.protonDirsListView = qtw.QListView(
-            self.protonGroupBox, 
-            viewMode=qtw.QListView.ViewMode.ListMode,
-            flow=qtw.QListView.Flow.TopToBottom)
-        self.protonDirsListView.setEditTriggers(qtw.QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.protonDirsListView.setModel(self.protonDirsModel)
+        self.protonGroupBox: ProtonSettingsGroupBox | None
+        if not platform.system().startswith("Win"):
+            self.protonGroupBox = ProtonSettingsGroupBox(self)
+            self.protonGroupBox.protonDirsModel.dataChanged.connect(self.protonDirsDataChanged)
+            self.protonGroupBox.protonVerComboBox.currentTextChanged.connect(self.protonVerChanged)
+        else:
+            self.protonGroupBox = None
 
         # GroupBox Updates
         self.gbUpdates = qtw.QGroupBox(self)
@@ -128,8 +94,6 @@ class OptionsGeneral(OptionsSectionBase):
 
         self.gameDirLabel = qtw.QLabel(self)
         self.disabledModDirLabel = qtw.QLabel(self)
-        self.protonLabel = qtw.QLabel(self)
-        self.protonDirsLabel = qtw.QLabel(self)
         self.LanguageLabel = qtw.QLabel(self)
 
         # Setting rows for General Sub Section Layout
@@ -141,23 +105,18 @@ class OptionsGeneral(OptionsSectionBase):
             self.generalLayout.addRow(label, widget)
         
         self.general.setLayout(self.generalLayout)
-        
-        # Setting rows for Proton Sub Section Layout
-        protonLayout.addWidget(self.protonLabel)
-        protonLayout.addWidget(self.protonVerComboBox)
-        protonLayout.addWidget(self.protonDirsLabel)
-        protonLayout.addLayout(protonDirButtonLayout)
-        protonLayout.addWidget(self.protonDirsListView)
-        self.protonGroupBox.setLayout(protonLayout)
 
         # Setting General Section Layout
-        for widget in (self.general, self.protonGroupBox, self.gbUpdates, self.buttonFrame):
+        for widget in (self.general, self.gbUpdates, self.buttonFrame):
             layout.addWidget(widget)
         
+        if self.protonGroupBox is not None:
+            layout.insertWidget(1, self.protonGroupBox)
+
         self.applyStaticText()
 
         self.setLayout(layout)
-    
+
     @override
     def applyStaticText(self) -> None:
         self.general.setTitle(qapp.translate("OptionsGeneral", "General"))
@@ -170,9 +129,8 @@ class OptionsGeneral(OptionsSectionBase):
         self.disabledModDirLabel.setText(qapp.translate("OptionsGeneral", "Disabled Mods Path:"))
         self.LanguageLabel.setText(qapp.translate("OptionsGeneral", "Language:"))
 
-        self.protonGroupBox.setTitle(qapp.translate("OptionsGeneral", "Proton"))
-        self.protonLabel.setText(qapp.translate("OptionsGeneral", "Version:"))
-        self.protonDirsLabel.setText(qapp.translate("OptionsGeneral", "Custom Proton Directories:"))
+        if self.protonGroupBox is not None:
+            self.protonGroupBox.applyStaticText()
 
         self.gbUpdates.setTitle(qapp.translate("OptionsGeneral", "Updates"))
         self.updateAlertCheckbox.setText(qapp.translate("OptionsGeneral", 'Update alerts on startup'))
@@ -188,27 +146,9 @@ class OptionsGeneral(OptionsSectionBase):
             helper.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
             qapp.instance().shutdown()
 
-    @Slot()
-    def addProtonDir(self) -> None:
-        url = qtw.QFileDialog.getExistingDirectoryUrl(
-            self,
-            caption=qapp.translate('OptionsGeneral', 'Select a Location Where Proton Versions Are Stored')
-        ).toLocalFile()
-
-        if not QFileInfo(url).exists():
-            return
-        
-        self.protonDirsModel.setStringList(self.protonDirsModel.stringList() + [url])
-
-    @Slot()
-    def removeProtonDir(self) -> None:
-        for qmodelindex in self.protonDirsListView.selectedIndexes():
-            self.protonDirsModel.removeRow(qmodelindex.row())
-
     @Slot(QModelIndex, QModelIndex, list)
     def protonDirsDataChanged(self, _topLeft: QModelIndex, _bottomRight: QModelIndex, _roles: list[int]) -> None:
-        changed: bool = self.protonDirsModel.stringList() != OptionsManager.getProtonDirs()
-        self.pendingChanges.emit(OptionKeys.proton_dirs, changed)
+        self.pendingChanges.emit(OptionKeys.proton_dirs, self.protonGroupBox.isProtonDirsChanged())
 
     @Slot(str)
     def protonVerChanged(self, version: str) -> None:

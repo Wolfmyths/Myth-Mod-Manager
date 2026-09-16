@@ -55,6 +55,31 @@ def findProtonVersions() -> list[str]:
         
     return ret_val
 
+def getProtonPath(proton_version: str) -> str:
+    """
+    Linux Only!!!
+
+    Returns a valid path of the proton version given, example:
+
+    ```py
+    path = getProtonPath("Proton - Experimental")
+    print(path) # /home/User/.local/share/Steam/steamapps/common/Proton - Experimental
+    ```
+
+    If it cannot find a proton version, returns `""`
+    """
+
+    version = ""
+    proton_dirs = getProtonDirs()
+
+    for path in map(lambda x: QDir(x), proton_dirs):
+        
+        if proton_version in set(path.entryList()):
+            version = path.filePath(proton_version)
+            break
+    
+    return version
+
 @Slot(str)
 def openWebPage(link: str) -> bool:
     '''`QDesktopServices.openUrl()` but with some exception handling, returns a bool depending if it failed or not'''

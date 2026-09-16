@@ -207,7 +207,7 @@ class Options(qtw.QWidget):
 
             translator: QTranslator | None = app.findChild(QTranslator)
 
-            if translator.load(f"{LANG_FOLDER_PATH}/{new_lang}.qm"):
+            if translator is not None and translator.load(f"{LANG_FOLDER_PATH}/{new_lang}.qm"):
                 OptionsManager.setLang(new_lang)
 
                 logging.info('Changed lang from %s to %s', old_lang, new_lang)

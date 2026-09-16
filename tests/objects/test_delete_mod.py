@@ -13,12 +13,16 @@ MOCK_MODS = (
 
 @pytest.mark.parametrize(("mod_name", "disabled"), MOCK_MODS)
 def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str, mod_name: str, disabled: bool) -> None:  # pyright: ignore[reportUnusedParameter]
+    Save(createTemp_Mod_ini)
     Save.setEnabled(mod_name, disabled)
-    worker = DeleteMod('make game easy mod')
 
+    worker = DeleteMod('make game easy mod')
     worker.start()
 
     assert os.path.isdir(os.path.join(create_mod_dirs, 'mods', 'make game easy mod')) is False
     assert os.path.isdir(create_mod_dirs)
 
     worker.deleteLater()
+    
+    Save.clearModData()
+    Save._path = ''  # pyright: ignore[reportPrivateUsage]

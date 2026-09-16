@@ -1,5 +1,6 @@
 import os
 import platform
+from typing import Any
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, QModelIndex, Qt, Slot
@@ -71,7 +72,8 @@ class OptionsGeneral(OptionsSectionBase):
         self.protonGroupBox: ProtonSettingsGroupBox | None
         if not platform.system().startswith("Win"):
             self.protonGroupBox = ProtonSettingsGroupBox(self)
-            self.protonGroupBox.protonDirsModel.dataChanged.connect(self.protonDirsDataChanged)
+            self.protonGroupBox.protonDirsModel.modelReset.connect(self.protonDirsDataChanged)
+            self.protonGroupBox.protonDirsModel.rowsRemoved.connect(self.protonDirsDataChanged)
             self.protonGroupBox.protonVerComboBox.currentTextChanged.connect(self.protonVerChanged)
         else:
             self.protonGroupBox = None
@@ -146,8 +148,9 @@ class OptionsGeneral(OptionsSectionBase):
             helper.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
             qapp.instance().shutdown()
 
-    @Slot(QModelIndex, QModelIndex, list)
-    def protonDirsDataChanged(self, _topLeft: QModelIndex, _bottomRight: QModelIndex, _roles: list[int]) -> None:
+    @Slot()
+    @Slot(QModelIndex, int, int)
+    def protonDirsDataChanged(self, *_args: Any) -> None:
         self.pendingChanges.emit(OptionKeys.proton_dirs, self.protonGroupBox.isProtonDirsChanged())
 
     @Slot(str)

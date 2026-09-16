@@ -57,3 +57,16 @@ def test_OptionsMethods(createTemp_Config_ini: str) -> None:
     options.setProtonDirs(["path", "path2"])
     options.writeData()
     assert options.getProtonDirs() == ["path", "path2"]
+
+def test_get_list(createTemp_Config_ini: str) -> None:
+    options = OptionsManager(createTemp_Config_ini)
+    options.config.add_section("test")
+
+    _list = ", ".join(["path1", "path2"])
+    #print("List:", _list)
+    
+    options.config.set("test", "mock_option_list", _list)
+
+    _get_list: list[str] = options._get_list("test", "mock_option_list") # pyright: ignore[reportPrivateUsage]
+
+    assert _get_list == ["path1", "path2"]

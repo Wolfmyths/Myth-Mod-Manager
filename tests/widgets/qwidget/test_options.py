@@ -1,4 +1,5 @@
 import os
+import platform
 import pytest
 from collections.abc import Generator
 
@@ -92,13 +93,17 @@ def test_cancelChanges(create_Settings: Options) -> None:
 
 def test_applySettings(qtbot: QtBot, create_Settings: Options, create_mod_dirs: str) -> None:
     newDisabledMods: str = os.path.join(create_mod_dirs, 'disabledMods')
+
+    # Default setting in conftest.py createTemp_Config_ini fixture
     newProtonDirs = ["~/path/to/proton", "~/path/to/proton2"]
 
     qtbot.addWidget(create_Settings)
     create_Settings.optionsGeneral.colorThemeDark.setChecked(True)
     create_Settings.optionsGeneral.disabledModDir.setText(newDisabledMods)
     create_Settings.optionsGeneral.gameDir.setText(create_mod_dirs)
-    create_Settings.optionsGeneral.protonGroupBox.protonDirsModel.setStringList(newProtonDirs)
+    if not platform.system().startswith("Win"):
+        newProtonDirs = ["/a/different/path"]
+        create_Settings.optionsGeneral.protonGroupBox.protonDirsModel.setStringList(newProtonDirs)
 
     create_Settings.applyButton.click()
 

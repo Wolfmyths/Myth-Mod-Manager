@@ -12,7 +12,7 @@ class OptionsManager():
     '''Manages Program's Settings'''
 
     config = ConfigParser(
-        converters={'list': lambda x: [i.strip() for i in x.split(',')]})
+        converters={'list': lambda x: [i.strip() for i in x.split(',')] if len(x) > 0 else []})
     file: str = ''
 
     DEFAULT_WINDOW_SIZE = QSize(800, 800)

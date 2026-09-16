@@ -52,7 +52,7 @@ class Save():
             for mod in arg[0]:
 
                 if Save.hasMod(mod):
-                    logging.info('Mod %s, %s already exists.', MOD_CONFIG, mod)
+                    logging.info('Tried to add mod %s to %s but it already exists.', MOD_CONFIG, mod)
                     continue
 
                 logging.info('Adding new mod to %s: %s', MOD_CONFIG, mod)

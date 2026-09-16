@@ -22,7 +22,6 @@ class ProtonSettingsGroupBox(qtw.QGroupBox):
 
         self.protonVerComboBox = qtw.QComboBox(self, editable=False)
         self.protonVerComboBox.addItems(available_proton_versions)
-        self.protonVerComboBox.currentTextChanged.connect(self.protonVerChanged)
 
         addIcon = qtg.QIcon.fromTheme(qtg.QIcon.ThemeIcon.ListAdd)
         removeIcon = qtg.QIcon.fromTheme(qtg.QIcon.ThemeIcon.ListRemove)
@@ -36,7 +35,6 @@ class ProtonSettingsGroupBox(qtw.QGroupBox):
         protonDirButtonLayout.addWidget(protonDirsButtonRemove)
 
         self.protonDirsModel = QStringListModel(OptionsManager.getProtonDirs(), self)
-        self.protonDirsModel.dataChanged.connect(self.protonDirsDataChanged)
         self.protonDirsListView = qtw.QListView(
             self, 
             viewMode=qtw.QListView.ViewMode.ListMode,

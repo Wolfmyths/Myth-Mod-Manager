@@ -1,7 +1,7 @@
 import logging
 import os
 
-from PySide6.QtCore import QCoreApplication as qapp, QObject, Slot, QFile
+from PySide6.QtCore import QCoreApplication as qapp, QMutex, QObject, Slot, QFile
 from typing_extensions import override
 
 from src.helpers.helper_pathing import Pathing
@@ -12,8 +12,8 @@ from src.objects.worker import Worker
 from src.constant_vars import ModType
 
 class DeleteMod(Worker):
-    def __init__(self, *mods: str, parent: QObject | None = None) -> None:
-        super().__init__(parent)
+    def __init__(self, *mods: str, parent: QObject | None = None, mutex: QMutex | None = None) -> None:
+        super().__init__(parent, mutex)
 
         self.mods: tuple[str, ...] = mods
 
@@ -49,10 +49,10 @@ class DeleteMod(Worker):
 
                 path: str = Pathing.mod(type, modName) if is_enabled else os.path.join(disPath, modName)
 
-                if os.path.isdir(path):
-                    QFile.moveToTrash(path)
-                else:
-                    logging.error('An error was raised in FileMover.deleteMod(), %s path does not exist:\n%s', os.path.basename(path), path)
+                move_to_trash = QFile.moveToTrash(path)
+
+                if not move_to_trash[0]:
+                    logging.error('An error was raised in FileMover.deleteMod(), %s:\n%s', os.path.basename(path), move_to_trash[1])
 
                 self.cancelCheck()
                 self.rest()

@@ -3,8 +3,6 @@ import shutil
 import pytest
 from collections.abc import Generator
 
-from PySide6.QtCore import QMutex
-
 from pytestqt.qtbot import QtBot
 
 from src.objects.move_to_enabled_dir import MoveToEnabledModDir
@@ -17,9 +15,7 @@ def create_worker(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_M
 
     shutil.move(enabledDir, disabledDir)
 
-    mutex = QMutex()
     worker = MoveToEnabledModDir('make game easy mod')
-    worker.mutex = mutex
 
     yield worker
 

@@ -3,8 +3,6 @@ import shutil
 import pytest
 from collections.abc import Generator
 
-from PySide6.QtCore import QMutex
-
 from pytestqt.qtbot import QtBot
 
 from src.objects.new_disabled_dir import NewDisabledDir
@@ -20,9 +18,7 @@ def create_worker(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_M
         os.path.join(disabledDir, 'best mod ever')
     )
 
-    mutex = QMutex()
     worker = NewDisabledDir(disabledDir, newDisabledDir)
-    worker.mutex = mutex
 
     yield worker
 

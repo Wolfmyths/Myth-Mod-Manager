@@ -2,8 +2,6 @@ import os
 import pytest
 from collections.abc import Generator
 
-from PySide6.QtCore import QMutex
-
 from pytestqt.qtbot import QtBot
 
 from src.objects.change_mod_type import ChangeModType
@@ -14,9 +12,8 @@ from src.helpers.options_manager import OptionsManager
 def create_worker(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator[ChangeModType]:  # pyright: ignore[reportUnusedParameter]
     url: str = os.path.join(create_mod_dirs, 'mods', 'make game easy mod')
     url2: str = os.path.join(create_mod_dirs, 'assets', 'mod_overrides', 'best mod ever')
-    mutex = QMutex()
+
     worker = ChangeModType((url, ModType.mods_override), (url2, ModType.mods))
-    worker.mutex = mutex
 
     yield worker
 

@@ -16,13 +16,16 @@ class Worker(QObject):
 
     error = Signal(str)
 
-    cancel = False
-
-    mutex: QMutex = QMutex() # Should be set externally by the ProgressWidget class
-
-    def __init__(self, parent: QObject | None = None) -> None:
+    def __init__(self, parent: QObject | None = None, mutex: QMutex | None = None) -> None:
         super().__init__(parent)
         logging.getLogger(__name__)
+
+        self.cancel = False
+        
+        if mutex is not None:
+            self.mutex = mutex
+        else:
+            self.mutex = QMutex()
 
     def start(self) -> None:
         ...

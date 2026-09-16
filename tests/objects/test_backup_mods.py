@@ -3,20 +3,16 @@ import shutil
 
 import pytest
 
-from PySide6.QtCore import QMutex
-
 from src.objects.backup_mods import BackupMods
 from src.constant_vars import BACKUP_MODS
 
 #TODO: os.mkdir() isn't working
 @pytest.mark.skip
 def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> None:  # pyright: ignore[reportUnusedParameter]
-    mutex = QMutex()
     worker = BackupMods()
     
     bundledFilePath: str = os.path.join(create_mod_dirs, BACKUP_MODS)
     worker.bundledFilePath = bundledFilePath
-    worker.mutex = mutex
 
     worker.start()
 

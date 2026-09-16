@@ -2,8 +2,6 @@ import os
 import pytest
 from collections.abc import Generator
 
-from PySide6.QtCore import QMutex
-
 from pytestqt.qtbot import QtBot
 
 from src.objects.move_to_disabled_dir import MoveToDisabledDir
@@ -11,9 +9,7 @@ from src.helpers.options_manager import OptionsManager
 
 @pytest.fixture(scope='module')
 def create_worker(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator[MoveToDisabledDir]:  # pyright: ignore[reportUnusedParameter]
-    mutex = QMutex()
     worker = MoveToDisabledDir('make game easy mod')
-    worker.mutex = mutex
 
     yield worker
 

@@ -3,8 +3,6 @@ import shutil
 
 import pytest
 
-from PySide6.QtCore import QMutex
-
 from pytestqt.qtbot import QtBot
 
 from src.objects.unzip_mod import UnZipMod
@@ -19,9 +17,7 @@ def test_thread(qtbot: QtBot, create_mod_dirs: str, createTemp_Config_ini: str, 
 
     url: str = os.path.join(create_mod_dirs, 'zip.zip')
 
-    mutex = QMutex()
     worker = UnZipMod((url, ModType.mods))
-    worker.mutex = mutex
 
     with qtbot.wait_signal(worker.succeeded):
         worker.start()

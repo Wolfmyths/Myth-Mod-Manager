@@ -1,4 +1,3 @@
-import platform
 import logging
 
 import PySide6.QtWidgets as qtw
@@ -10,7 +9,7 @@ from src.widgets.qtable.mod_list_widget import ModListWidget
 from src.widgets.qdialog.notice import Notice
 from src.helpers.options_manager import OptionsManager
 import src.helpers.helper as helper
-from src.constant_vars import ModType, STEAM
+from src.constant_vars import IS_WINDOWS, ModType, STEAM
 
 class ModManager(qtw.QWidget):
 
@@ -116,7 +115,7 @@ class ModManager(qtw.QWidget):
 
             process = QProcess()
 
-            if platform.system().startswith("Win"):
+            if IS_WINDOWS:
                 success, exit_code = process.startDetached(game_exe_path, args, gamePath)
             else:
                 proton_ver = OptionsManager.getProtonVersion()

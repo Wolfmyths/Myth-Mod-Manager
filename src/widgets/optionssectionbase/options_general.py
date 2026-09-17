@@ -1,5 +1,4 @@
 import os
-import platform
 from typing import Any
 
 import PySide6.QtWidgets as qtw
@@ -9,7 +8,7 @@ from typing_extensions import override
 import src.helpers.helper as helper
 from src.api.check_update import CheckUpdate
 from src.widgets.qdialog.update_detected import UpdateDetected
-from src.constant_vars import LIGHT, DARK, OptionKeys, LANG_STR_TO_CODE, ROOT_PATH
+from src.constant_vars import IS_WINDOWS, LIGHT, DARK, OptionKeys, LANG_STR_TO_CODE, ROOT_PATH
 from src.helpers.options_manager import OptionsManager
 from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
 from src.widgets.qgroupbox.proton_settings import ProtonSettingsGroupBox
@@ -70,7 +69,7 @@ class OptionsGeneral(OptionsSectionBase):
         self.buttonFrame.setLayout(gbLayout)
 
         self.protonGroupBox: ProtonSettingsGroupBox | None
-        if not platform.system().startswith("Win"):
+        if not IS_WINDOWS:
             self.protonGroupBox = ProtonSettingsGroupBox(self)
             self.protonGroupBox.protonDirsModel.modelReset.connect(self.protonDirsDataChanged)
             self.protonGroupBox.protonDirsModel.rowsRemoved.connect(self.protonDirsDataChanged)

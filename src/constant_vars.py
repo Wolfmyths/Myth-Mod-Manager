@@ -85,19 +85,15 @@ LANG_CODE_TO_STR: Final[dict[str, str]] = {x:y for y,x in LANG_STR_TO_CODE.items
 # Detection if the program is in debug mode or not (Assign manually)
 IS_DEBUG: Final[bool] = True
 
+IS_WINDOWS: Final[bool] = platform.system().startswith("Win")
+
 # Linux steam paths
 STEAM: Final[str] = QStandardPaths.locate(
     QStandardPaths.StandardLocation.AppDataLocation, 
     "Steam",
     QStandardPaths.LocateOption.LocateDirectory)
 
-STEAM_ALT: Final[str] = QStandardPaths.locate(
-    QStandardPaths.StandardLocation.HomeLocation,
-    ".steam",
-    QStandardPaths.LocateOption.LocateDirectory)
-
 STEAMAPPS_COMMON: Final[str] = f"{STEAM}/steamapps/common"
-STEAMAPPS_COMMON_ALT: Final[str] = f"{STEAM_ALT}/steam/steamapps/common"
 STEAM_COMPATIBILITY: Final[str] = f"{STEAM}/compatibilitytools.d"
 
 # Root Path

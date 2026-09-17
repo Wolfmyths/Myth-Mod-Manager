@@ -7,7 +7,7 @@ from PySide6.QtGui import QDesktopServices
 
 from src.widgets.qdialog.notice import Notice
 
-from src.constant_vars import STEAMAPPS_COMMON, STEAMAPPS_COMMON_ALT, STEAM_COMPATIBILITY
+from src.constant_vars import STEAMAPPS_COMMON, STEAM_COMPATIBILITY
 from src.helpers.helper_pathing import Pathing
 from src.helpers.options_manager import OptionsManager
 from src.constant_vars import ModType
@@ -19,7 +19,7 @@ def getProtonDirs() -> list[str]:
     
     Returns a list of all proton paths, from user settings and default
     """
-    return [STEAMAPPS_COMMON, STEAMAPPS_COMMON_ALT, STEAM_COMPATIBILITY] + OptionsManager.getProtonDirs()
+    return [STEAMAPPS_COMMON, STEAM_COMPATIBILITY] + OptionsManager.getProtonDirs()
 
 def findProtonVersions() -> list[str]:
     '''

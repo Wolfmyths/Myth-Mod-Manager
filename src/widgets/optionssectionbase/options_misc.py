@@ -1,10 +1,10 @@
-import platform
 import os
 
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, Slot
 from typing_extensions import override
 
+from src.constant_vars import IS_WINDOWS
 import src.helpers.helper as helper
 from src.helpers.helper_pathing import Pathing
 from src.widgets.qdialog.notice import Notice
@@ -65,7 +65,7 @@ class OptionsMisc(OptionsSectionBase):
     @Slot()
     def openCrashLogs(self) -> None:
 
-        if platform.system().startswith('Win'):
+        if IS_WINDOWS:
             os.startfile(os.path.join('C:', 'Users', os.environ['USERNAME'], 'AppData', 'Local', 'PAYDAY 2'))
         else:
             notice = Notice(

@@ -2,20 +2,19 @@ import os
 import shutil
 import logging
 import json
-import platform
 from typing import cast
 
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 from PySide6.QtCore import QObject, QUrl, Signal, Slot
 
-from src.constant_vars import ROOT_PATH, OLD_EXE
+from src.constant_vars import IS_WINDOWS, ROOT_PATH, OLD_EXE
 
 class Update(QObject):
     fileName: str
     exe: str
     tmp: str
 
-    if platform.system().startswith('Win'):
+    if IS_WINDOWS:
         fileName = 'Myth-Mod-Manager.zip'
         exe = 'Myth Mod Manager.exe'
         tmp = os.environ['TEMP']

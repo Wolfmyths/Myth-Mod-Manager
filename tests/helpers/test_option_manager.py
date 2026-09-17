@@ -1,9 +1,8 @@
 import os
-import platform
 
 from PySide6.QtCore import QSize, QDir
 
-from src.constant_vars import OptionKeys
+from src.constant_vars import IS_WINDOWS, OptionKeys
 from src.helpers.options_manager import OptionsManager
 
 def test_OptionsMethods(createTemp_Config_ini: str) -> None:
@@ -11,7 +10,7 @@ def test_OptionsMethods(createTemp_Config_ini: str) -> None:
     options = OptionsManager(createTemp_Config_ini)
     expected_fallback_path: str
 
-    if platform.system().startswith("Win"):
+    if IS_WINDOWS:
         expected_fallback_path = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\PAYDAY 2\\PAYDAY2.exe"
     else:
         expected_fallback_path = QDir.home().filePath(

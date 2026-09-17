@@ -1,5 +1,4 @@
 import logging
-import platform
 from typing import Any, cast
 
 import PySide6.QtWidgets as qtw
@@ -10,7 +9,7 @@ from src.widgets.qdialog.progress_widget import ProgressWidget
 from src.objects.new_disabled_dir import NewDisabledDir
 from src.helpers.options_manager import OptionsManager
 from src.helpers.style import StyleManager
-from src.constant_vars import DARK, LIGHT, OptionKeys, LANG_FOLDER_PATH, LANG_CODE_TO_STR, LANG_STR_TO_CODE
+from src.constant_vars import DARK, IS_WINDOWS, LIGHT, OptionKeys, LANG_FOLDER_PATH, LANG_CODE_TO_STR, LANG_STR_TO_CODE
 from src.widgets.qdialog.notice import Notice
 from src.widgets.optionssectionbase.options_general import OptionsGeneral
 from src.widgets.optionssectionbase.options_ignored_mods import OptionsIgnoredMods
@@ -253,8 +252,6 @@ class Options(qtw.QWidget):
         has a pending change.
         '''
 
-        is_windows = platform.system().startswith("Win")
-
         if self.optionChanged.get(OptionKeys.game_path) or reset:
             self.optionsGeneral.gameDir.setText(OptionsManager.getGameExecuteable())
 
@@ -276,11 +273,11 @@ class Options(qtw.QWidget):
         if self.optionChanged.get(OptionKeys.launch_parameters) or reset:
             self.launchparams.setup()
 
-        if self.optionChanged.get(OptionKeys.proton_version) or reset and not is_windows:
+        if self.optionChanged.get(OptionKeys.proton_version) or reset and not IS_WINDOWS:
             proton_group_box = self.optionsGeneral.protonGroupBox
             proton_group_box.refresh_combobox()
         
-        if self.optionChanged.get(OptionKeys.proton_dirs) or reset and not is_windows:
+        if self.optionChanged.get(OptionKeys.proton_dirs) or reset and not IS_WINDOWS:
             self.optionsGeneral.protonGroupBox.protonDirsModel.setStringList(
                 OptionsManager.getProtonDirs())
 

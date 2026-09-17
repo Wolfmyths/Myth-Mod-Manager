@@ -49,10 +49,11 @@ class DeleteMod(Worker):
 
                 path: str = Pathing.mod(type, modName) if is_enabled else os.path.join(disPath, modName)
 
-                move_to_trash = QFile.moveToTrash(path)
+                file = QFile(path)
 
-                if not move_to_trash[0]:
-                    logging.error('An error was raised in FileMover.deleteMod(), %s:\n%s', os.path.basename(path), move_to_trash[1])
+                if not file.moveToTrash():
+                    logging.error('An error was raised in FileMover.deleteMod(), %s:\n%s, %s', 
+                        os.path.basename(path), file.errorString(), file.error())
 
                 self.cancelCheck()
                 self.rest()

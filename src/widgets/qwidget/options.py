@@ -214,6 +214,13 @@ class Options(qtw.QWidget):
             else:
                 logging.error('Loading lang %s failed', new_lang)
         
+        proton_dirs_changed = self.optionChanged.get(OptionKeys.proton_dirs)
+
+        if proton_dirs_changed:
+            protonGroupBox = self.optionsGeneral.protonGroupBox
+            OptionsManager.setProtonDirs(
+                protonGroupBox.protonDirsModel.stringList())
+
         if self.optionChanged.get(OptionKeys.proton_version):
             protonVerComboBoxText = self.optionsGeneral.protonGroupBox.protonVerComboBox.currentText()
             version = helper.getProtonPath(protonVerComboBoxText)
@@ -222,6 +229,9 @@ class Options(qtw.QWidget):
                 OptionsManager.setProtonVersion(version)
             else:
                 logging.error("Could not find proton version %s", protonVerComboBoxText)
+            
+            if proton_dirs_changed:
+                self.optionsGeneral.protonGroupBox.refresh_combobox()
 
         if self.optionChanged.get(OptionKeys.launch_parameters):
             OptionsManager.setLaunchParameters(self.launchparams.previewLineEdit.text())
@@ -267,9 +277,8 @@ class Options(qtw.QWidget):
             self.launchparams.setup()
 
         if self.optionChanged.get(OptionKeys.proton_version) or reset and not is_windows:
-            combo_box = self.optionsGeneral.protonGroupBox.protonVerComboBox
-            combo_box.setCurrentIndex(
-                combo_box.findText(OptionsManager.getProtonVersion()))
+            proton_group_box = self.optionsGeneral.protonGroupBox
+            proton_group_box.refresh_combobox()
         
         if self.optionChanged.get(OptionKeys.proton_dirs) or reset and not is_windows:
             self.optionsGeneral.protonGroupBox.protonDirsModel.setStringList(

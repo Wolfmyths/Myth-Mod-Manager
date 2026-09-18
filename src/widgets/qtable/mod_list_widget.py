@@ -482,6 +482,8 @@ class ModListWidget(qtw.QTableWidget):
         api.updateDetected.connect(updateDetected)
         api.done.connect(api.deleteLater)
 
+        api.start()
+
     def openModDir(self) -> None:
         if not len(self.getSelectedNameItems()) <= 0:
             selectedItem: qtw.QTableWidgetItem = self.getSelectedNameItems()[0]

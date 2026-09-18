@@ -21,35 +21,41 @@ class CheckModUpdate(QObject):
         super().__init__(parent=parent)
         logging.getLogger(__file__)
 
+        self.localVer = localVer
+        self.localVerVersionNumber = QVersionNumber()
+
+        self.link: str = f'https://api.modworkshop.net/mods/{modId}/version'
+
+        self.network = QNetworkAccessManager(self)
+    
+    def start(self) -> None:
         try:
-            self.localVer = QVersionNumber.fromString(localVer)
+            self.localVerVersionNumber = QVersionNumber.fromString(self.localVer)
         except Exception as e:
-            logging.error('checkModUpdate.__init__(), An error occured trying to parse mod local version %s:\n%s', localVer, str(e))
+            logging.error('checkModUpdate.start(), An error occured trying to parse mod local version %s:\n%s', self.localVer, str(e))
             self.error.emit()
             self.done.emit()
+            return
 
-        link: str = f'https://api.modworkshop.net/mods/{modId}/version'
+        request = QNetworkRequest(QUrl(self.link))
+        logging.debug('Request for %s from checkModUpdate() started', self.link)
 
-        network = QNetworkAccessManager(self)
-        request = QNetworkRequest(QUrl(link))
-        logging.debug('Request for %s from checkModUpdate() started', link)
+        reply: QNetworkReply = self.network.get(request)
+        reply.finished.connect(self._checkVersion)
+        reply.finished.connect(reply.deleteLater)
+        reply.errorOccurred.connect(self._onErrorOccurred)
 
-        self.reply: QNetworkReply = network.get(request)
-        self.reply.finished.connect(self.__reply_handler)
+    @Slot(QNetworkReply.NetworkError)
+    def _onErrorOccurred(self, error_code: QNetworkReply.NetworkError) -> None:
+
+        logging.error(
+            'Internet error in checkModUpdate():\n%s', error_code)
+
+        self.error.emit()
+        self.done.emit()
     
-    @Slot()
-    def __reply_handler(self) -> None:
-        reply: QNetworkReply = cast(QNetworkReply, self.sender())
-
-        if reply.error() == QNetworkReply.NetworkError.NoError:
-            self.__checkVersion()
-        else:
-            logging.error('Internet error in checkModUpdate():\n%s', reply.error())
-            self.error.emit()
-            self.done.emit()
-    
-    def __checkVersion(self) -> None:
-        reply: QNetworkReply = cast(QNetworkReply, self.sender())
+    @Slot(QNetworkReply)
+    def _checkVersion(self, reply: QNetworkReply) -> None:
         latestVersion = QVersionNumber()
 
         try:
@@ -63,7 +69,8 @@ class CheckModUpdate(QObject):
 
         logging.info('Latest Version: %s', latestVersion.toString())
 
-        if latestVersion > self.localVer:
+        print("Latest version:", latestVersion.toString(), "vs local Version:", self.localVerVersionNumber.toString())
+        if latestVersion > self.localVerVersionNumber:
             self.updateDetected.emit(replyDecoded)
         else:
             self.upToDate.emit()

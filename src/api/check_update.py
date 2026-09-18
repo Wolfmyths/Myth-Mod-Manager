@@ -32,21 +32,24 @@ class CheckUpdate(QObject):
         logging.debug('Request for %s from checkUpdate() started', link)
         
         reply: QNetworkReply = network.get(request)
-        reply.finished.connect(self.__reply_handler)
+        reply.finished.connect(self._checkVersion)
+        reply.finished.connect(reply.deleteLater)
+        reply.errorOccurred.connect(self._onErrorOccurred)
 
-    @Slot()
-    def __reply_handler(self) -> None:
-        reply: QNetworkReply = cast(QNetworkReply, self.sender())
+    @Slot(QNetworkReply.NetworkError)
+    def _onErrorOccurred(self, error_code: QNetworkReply.NetworkError) -> None:
 
-        if reply.error() == QNetworkReply.NetworkError.NoError:
-            self.__checkVersion()
-        else:
-            logging.error('Internet error in checkUpdate():\n%s', reply.error())
-            self.error.emit()
-            self.done.emit()
+        logging.error(
+            'Internet error in checkUpdate():\n%s', error_code)
+
+        self.error.emit()
+        self.done.emit()
     
-    def __checkVersion(self) -> None:
-        reply: QNetworkReply = cast(QNetworkReply, self.sender())
+    @Slot(QNetworkReply)
+    def _checkVersion(self, reply: QNetworkReply) -> None:
+
+        if reply.error() != QNetworkReply.NetworkError.NoError:
+            return
 
         try:
             data: dict = json.loads(cast(bytearray, reply.readAll().data()).decode())  # pyright: ignore[reportMissingTypeArgument]

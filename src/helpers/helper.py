@@ -1,7 +1,7 @@
 import os
 import logging
 
-from PySide6.QtCore import QCoreApplication as qapp, QDir, Slot, QUrl
+from PySide6.QtCore import QCoreApplication as qapp, Slot, QUrl
 from PySide6.QtGui import QDesktopServices
 
 from src.widgets.qdialog.notice import Notice
@@ -10,11 +10,6 @@ from src.helpers.helper_pathing import Pathing
 from src.helpers.options_manager import OptionsManager
 from src.constant_vars import ModType
 logging.getLogger(__name__)
-
-def isGameNotFromSteam() -> bool:
-    gamePath = OptionsManager.getGamepath()
-
-    return "steam_api64.dll" not in QDir(gamePath).entryList()
 
 @Slot(str)
 def openWebPage(link: str) -> bool:

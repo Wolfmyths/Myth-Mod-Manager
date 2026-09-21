@@ -82,7 +82,6 @@ def createTemp_Config_ini(create_mod_dirs: str) -> Generator[str]:
     OptionsManager.config.set(OptionKeys.section.value, OptionKeys.game_path.value, os.path.join(create_mod_dirs, "PAYDAY2.exe"))
     OptionsManager.config.set(OptionKeys.section.value, OptionKeys.dispath.value, os.path.join(create_mod_dirs, 'disabledMods'))
     OptionsManager.config.set(OptionKeys.section.value, OptionKeys.mmm_update_alert.value, str(False))
-    OptionsManager.config.set(OptionKeys.section.value, OptionKeys.proton_dirs.value, "~/path/to/proton, ~/path/to/proton2")
 
     yield tmp_filename
 

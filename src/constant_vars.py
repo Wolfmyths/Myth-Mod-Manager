@@ -3,7 +3,7 @@ import platform
 from typing import Final
 from enum import StrEnum, auto, IntEnum
 
-from PySide6.QtCore import QVersionNumber, QStandardPaths
+from PySide6.QtCore import QVersionNumber
 
 import src.rc_resources  # pyright: ignore[reportUnusedImport]
 
@@ -86,15 +86,6 @@ LANG_CODE_TO_STR: Final[dict[str, str]] = {x:y for y,x in LANG_STR_TO_CODE.items
 IS_DEBUG: Final[bool] = True
 
 IS_WINDOWS: Final[bool] = platform.system().startswith("Win")
-
-# Linux steam paths
-STEAM: Final[str] = QStandardPaths.locate(
-    QStandardPaths.StandardLocation.AppDataLocation, 
-    "Steam",
-    QStandardPaths.LocateOption.LocateDirectory)
-
-STEAMAPPS_COMMON: Final[str] = f"{STEAM}/steamapps/common"
-STEAM_COMPATIBILITY: Final[str] = f"{STEAM}/compatibilitytools.d"
 
 # Root Path
 ROOT_PATH: Final[str] = os.getcwd()

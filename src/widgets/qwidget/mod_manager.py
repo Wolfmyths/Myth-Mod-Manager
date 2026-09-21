@@ -1,7 +1,7 @@
 import logging
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QStandardPaths, Qt as qt, QCoreApplication as qapp, Slot, QProcess
+from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, QProcess
 import PySide6.QtGui as qtg
 from typing_extensions import override
 
@@ -111,24 +111,16 @@ class ModManager(qtw.QWidget):
             game_exe_path = OptionsManager.getGameExecuteable()
 
             process = QProcess()
-            # Use steam command if on linux
-            steam_path: str = QStandardPaths.findExecutable("steam") if IS_WINDOWS else "steam"
-            is_game_not_from_steam = helper.isGameNotFromSteam()
+            process.setStandardInputFile(QProcess.nullDevice())
 
-            # Steam executable could not be found
-            if not steam_path and not is_game_not_from_steam:
-                logging.warning(
-                    "Game is steam installation, but steam exe path could not be found! Starting from the executable itself...")
-
-            # Use steam to launch
-            if not is_game_not_from_steam and steam_path:
-                process.setProgram(steam_path)
-                process.setArguments(["-applaunch", "218620"] + args)
-            else:
-                # Start from the exe itself
+            if IS_WINDOWS:
                 process.setProgram(game_exe_path)
                 process.setArguments(args)
                 process.setWorkingDirectory(gamePath)
+            else:
+                # Use steam to launch on linux (May not work if steam was installed manually)
+                process.setProgram("steam")
+                process.setArguments(["-applaunch", "218620"] + args)
             
             # PySide return type hint is wrong with QProcess.startDetatched()???
             # Returns bool as said online, does not return a Tuple[bool, int]

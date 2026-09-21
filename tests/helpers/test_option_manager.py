@@ -49,14 +49,6 @@ def test_OptionsMethods(createTemp_Config_ini: str) -> None:
     options.writeData()
     assert options.getGameExecuteable() == "exe"
 
-    options.setProtonVersion("2.0")
-    options.writeData()
-    assert options.getProtonVersion() == "2.0"
-
-    options.setProtonDirs(["path", "path2"])
-    options.writeData()
-    assert options.getProtonDirs() == ["path", "path2"]
-
 def test_get_list(createTemp_Config_ini: str) -> None:
     options = OptionsManager(createTemp_Config_ini)
     options.config.add_section("test")

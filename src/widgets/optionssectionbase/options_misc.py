@@ -1,13 +1,13 @@
 import os
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QCoreApplication as qapp, Slot
+from PySide6.QtCore import QCoreApplication as qapp, QDir, Slot
 from typing_extensions import override
 
 from src.constant_vars import IS_WINDOWS
 import src.helpers.helper as helper
 from src.helpers.helper_pathing import Pathing
-from src.widgets.qdialog.notice import Notice
+from src.helpers.options_manager import OptionsManager
 from src.widgets.qdialog.progress_widget import ProgressWidget
 from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
 from src.objects.backup_mods import BackupMods
@@ -66,13 +66,11 @@ class OptionsMisc(OptionsSectionBase):
     def openCrashLogs(self) -> None:
 
         if IS_WINDOWS:
-            os.startfile(os.path.join('C:', 'Users', os.environ['USERNAME'], 'AppData', 'Local', 'PAYDAY 2'))
+            os.startfile(f"C:\\Users\\{os.environ['USERNAME']}\\AppData\\Local\\PAYDAY 2")
         else:
-            notice = Notice(
-                qapp.translate("OptionsMisc", 'Overkill did not implement a vanilla crash log for linux') + ' :(',
-                qapp.translate("OptionsMisc", 'Myth Mod Manager: Vanilla crash logs unsupported')
-            )
-            notice.exec()
+            compatdata_path = QDir(f'{OptionsManager.getGamepath()}/../../compatdata').canonicalPath()
+            helper.startFile(
+                f"{compatdata_path}/218620/pfx/drive_c/users/steamuser/AppData/Local/PAYDAY 2")
     
     @Slot()
     def startBackupMods(self) -> None:

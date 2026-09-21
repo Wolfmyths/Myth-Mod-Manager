@@ -3,9 +3,9 @@ import logging
 from typing import Any, TextIO
 from configparser import ConfigParser
 
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, QStandardPaths
 
-from src.constant_vars import IS_WINDOWS, OptionKeys, OPTIONS_CONFIG, LIGHT, MODS_DISABLED_PATH_DEFAULT, STEAM
+from src.constant_vars import IS_WINDOWS, OptionKeys, OPTIONS_CONFIG, LIGHT, MODS_DISABLED_PATH_DEFAULT
 
 class OptionsManager():
     '''Manages Program's Settings'''
@@ -104,11 +104,17 @@ class OptionsManager():
 
     @staticmethod
     def getGameExecuteable() -> str:
-        fallback: str
+        fallback = ""
+        
         if IS_WINDOWS:
             fallback = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\PAYDAY 2\\PAYDAY2.exe"
         else:
-            fallback = f"{STEAM}/steamapps/common/PAYDAY 2/PAYDAY2.exe"
+            STEAM = QStandardPaths.locate(
+                QStandardPaths.StandardLocation.AppDataLocation, 
+                "Steam",
+                QStandardPaths.LocateOption.LocateDirectory)
+            if STEAM:
+                fallback = f"{STEAM}/steamapps/common/PAYDAY 2/PAYDAY2.exe"
         return OptionsManager.config.get(OptionKeys.section.value, OptionKeys.game_path, fallback=fallback)
 
     @staticmethod

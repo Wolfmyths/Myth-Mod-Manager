@@ -1,7 +1,7 @@
 import logging
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QDir, Qt as qt, QCoreApplication as qapp, Slot, QProcess, QProcessEnvironment
+from PySide6.QtCore import QStandardPaths, Qt as qt, QCoreApplication as qapp, Slot, QProcess
 import PySide6.QtGui as qtg
 from typing_extensions import override
 
@@ -9,7 +9,7 @@ from src.widgets.qtable.mod_list_widget import ModListWidget
 from src.widgets.qdialog.notice import Notice
 from src.helpers.options_manager import OptionsManager
 import src.helpers.helper as helper
-from src.constant_vars import IS_WINDOWS, ModType, STEAM
+from src.constant_vars import IS_WINDOWS, ModType
 
 class ModManager(qtw.QWidget):
 
@@ -110,32 +110,30 @@ class ModManager(qtw.QWidget):
         try:
             game_exe_path = OptionsManager.getGameExecuteable()
 
+            process = QProcess()
+            # Use steam command if on linux
+            steam_path: str = QStandardPaths.findExecutable("steam") if IS_WINDOWS else "steam"
+            is_game_not_from_steam = helper.isGameNotFromSteam()
+
+            # Steam executable could not be found
+            if not steam_path and not is_game_not_from_steam:
+                logging.warning(
+                    "Game is steam installation, but steam exe path could not be found! Starting from the executable itself...")
+
+            # Use steam to launch
+            if not is_game_not_from_steam and steam_path:
+                process.setProgram(steam_path)
+                process.setArguments(["-applaunch", "218620"] + args)
+            else:
+                # Start from the exe itself
+                process.setProgram(game_exe_path)
+                process.setArguments(args)
+                process.setWorkingDirectory(gamePath)
+            
             # PySide return type hint is wrong with QProcess.startDetatched()???
             # Returns bool as said online, does not return a Tuple[bool, int]
             # https://doc.qt.io/qtforpython-6/PySide6/QtCore/QProcess.html
-            success: bool
-
-            process = QProcess()
-
-            if IS_WINDOWS:
-                success = process.startDetached(game_exe_path, args, gamePath)  # pyright: ignore[reportAssignmentType]
-            else:
-                proton_ver = OptionsManager.getProtonVersion()
-                STEAM_COMPAT_DATA_PATH = QDir(f"{gamePath}/../../compatdata/218620").canonicalPath()
-                proton_path = f"{proton_ver}/proton"
-                
-                env = QProcessEnvironment()
-                env.insert("STEAM_COMPAT_DATA_PATH", STEAM_COMPAT_DATA_PATH)
-                env.insert("STEAM_COMPAT_CLIENT_INSTALL_PATH", STEAM)
-
-                process.setProcessEnvironment(env)
-                process.setArguments(
-                    ['run', f'"{game_exe_path}"'] + args)
-                process.setWorkingDirectory(gamePath)
-                process.setProgram(proton_path)
-                
-                logging.info("STEAM_COMPAT_DATA_PATH: %s\nArguments: %s", STEAM_COMPAT_DATA_PATH, process.arguments())
-                success = process.startDetached()  # pyright: ignore[reportAssignmentType]
+            success: bool = process.startDetached() # pyright: ignore[reportAssignmentType]
 
             if not success:
                 raise Exception(

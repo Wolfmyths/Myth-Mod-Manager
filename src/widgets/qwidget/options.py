@@ -4,12 +4,11 @@ from typing import Any, cast
 import PySide6.QtWidgets as qtw
 from PySide6.QtCore import QCoreApplication as qapp, Signal, Qt, QTranslator, Slot, QFileInfo
 
-from src.helpers import helper
 from src.widgets.qdialog.progress_widget import ProgressWidget
 from src.objects.new_disabled_dir import NewDisabledDir
 from src.helpers.options_manager import OptionsManager
 from src.helpers.style import StyleManager
-from src.constant_vars import DARK, IS_WINDOWS, LIGHT, OptionKeys, LANG_FOLDER_PATH, LANG_CODE_TO_STR, LANG_STR_TO_CODE
+from src.constant_vars import DARK, LIGHT, OptionKeys, LANG_FOLDER_PATH, LANG_CODE_TO_STR, LANG_STR_TO_CODE
 from src.widgets.qdialog.notice import Notice
 from src.widgets.optionssectionbase.options_general import OptionsGeneral
 from src.widgets.optionssectionbase.options_ignored_mods import OptionsIgnoredMods
@@ -212,25 +211,6 @@ class Options(qtw.QWidget):
                 logging.info('Changed lang from %s to %s', old_lang, new_lang)
             else:
                 logging.error('Loading lang %s failed', new_lang)
-        
-        proton_dirs_changed = self.optionChanged.get(OptionKeys.proton_dirs)
-
-        if proton_dirs_changed:
-            protonGroupBox = self.optionsGeneral.protonGroupBox
-            OptionsManager.setProtonDirs(
-                protonGroupBox.protonDirsModel.stringList())
-
-        if self.optionChanged.get(OptionKeys.proton_version):
-            protonVerComboBoxText = self.optionsGeneral.protonGroupBox.protonVerComboBox.currentText()
-            version = helper.getProtonPath(protonVerComboBoxText)
-            
-            if version:
-                OptionsManager.setProtonVersion(version)
-            else:
-                logging.error("Could not find proton version %s", protonVerComboBoxText)
-            
-            if proton_dirs_changed:
-                self.optionsGeneral.protonGroupBox.refresh_combobox()
 
         if self.optionChanged.get(OptionKeys.launch_parameters):
             OptionsManager.setLaunchParameters(self.launchparams.previewLineEdit.text())
@@ -272,14 +252,6 @@ class Options(qtw.QWidget):
 
         if self.optionChanged.get(OptionKeys.launch_parameters) or reset:
             self.launchparams.setup()
-
-        if self.optionChanged.get(OptionKeys.proton_version) or reset and not IS_WINDOWS:
-            proton_group_box = self.optionsGeneral.protonGroupBox
-            proton_group_box.refresh_combobox()
-        
-        if self.optionChanged.get(OptionKeys.proton_dirs) or reset and not IS_WINDOWS:
-            self.optionsGeneral.protonGroupBox.protonDirsModel.setStringList(
-                OptionsManager.getProtonDirs())
 
         self.resetPendingOptions()
 

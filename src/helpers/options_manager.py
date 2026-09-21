@@ -66,14 +66,6 @@ class OptionsManager():
         return OptionsManager.config.has_option(OptionKeys.section.value, option)
 
     @staticmethod
-    def getProtonDirs() -> list[str]:
-        return OptionsManager._get_list(OptionKeys.section.value, OptionKeys.proton_dirs.value)
-
-    @staticmethod
-    def setProtonDirs(proton_dirs: list[str]) -> None:
-        OptionsManager.config.set(OptionKeys.section.value, OptionKeys.proton_dirs.value, ", ".join(proton_dirs))
-
-    @staticmethod
     def getLaunchParameters() -> str:
         """
         Launch parameters for PAYDAY 2. If you want it casted into `list[str]` see `OptionsManager.getLaunchParametersList()`
@@ -154,11 +146,3 @@ class OptionsManager():
     @staticmethod
     def setLang(lang: str = 'en_US') -> None:
         OptionsManager.config.set(OptionKeys.section.value, OptionKeys.lang.value, lang)
-    
-    @staticmethod
-    def getProtonVersion() -> str:
-        return OptionsManager.config.get(OptionKeys.section, OptionKeys.proton_version, fallback="")
-
-    @staticmethod
-    def setProtonVersion(version: str) -> None:
-        OptionsManager.config.set(OptionKeys.section, OptionKeys.proton_version, version)

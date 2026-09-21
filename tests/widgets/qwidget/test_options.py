@@ -1,5 +1,4 @@
 import os
-import platform
 import pytest
 from collections.abc import Generator
 
@@ -101,9 +100,6 @@ def test_applySettings(qtbot: QtBot, create_Settings: Options, create_mod_dirs: 
     create_Settings.optionsGeneral.colorThemeDark.setChecked(True)
     create_Settings.optionsGeneral.disabledModDir.setText(newDisabledMods)
     create_Settings.optionsGeneral.gameDir.setText(create_mod_dirs)
-    if not platform.system().startswith("Win"):
-        newProtonDirs = ["/a/different/path"]
-        create_Settings.optionsGeneral.protonGroupBox.protonDirsModel.setStringList(newProtonDirs)
 
     create_Settings.applyButton.click()
 

@@ -1,17 +1,15 @@
 import os
-from typing import Any
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import QCoreApplication as qapp, QModelIndex, Qt, Slot
+from PySide6.QtCore import QCoreApplication as qapp, Qt, Slot
 from typing_extensions import override
 
 import src.helpers.helper as helper
 from src.api.check_update import CheckUpdate
 from src.widgets.qdialog.update_detected import UpdateDetected
-from src.constant_vars import IS_WINDOWS, LIGHT, DARK, OptionKeys, LANG_STR_TO_CODE, ROOT_PATH
+from src.constant_vars import LIGHT, DARK, OptionKeys, LANG_STR_TO_CODE, ROOT_PATH
 from src.helpers.options_manager import OptionsManager
 from src.widgets.optionssectionbase.option_section_base import OptionsSectionBase
-from src.widgets.qgroupbox.proton_settings import ProtonSettingsGroupBox
 
 class OptionsGeneral(OptionsSectionBase):
     def __init__(self, parent: qtw.QWidget | None = None) -> None:
@@ -68,15 +66,6 @@ class OptionsGeneral(OptionsSectionBase):
         
         self.buttonFrame.setLayout(gbLayout)
 
-        self.protonGroupBox: ProtonSettingsGroupBox | None
-        if not IS_WINDOWS:
-            self.protonGroupBox = ProtonSettingsGroupBox(self)
-            self.protonGroupBox.protonDirsModel.modelReset.connect(self.protonDirsDataChanged)
-            self.protonGroupBox.protonDirsModel.rowsRemoved.connect(self.protonDirsDataChanged)
-            self.protonGroupBox.protonVerComboBox.currentTextChanged.connect(self.protonVerChanged)
-        else:
-            self.protonGroupBox = None
-
         # GroupBox Updates
         self.gbUpdates = qtw.QGroupBox(self)
         gbUpdatesLayout = qtw.QVBoxLayout()
@@ -110,9 +99,6 @@ class OptionsGeneral(OptionsSectionBase):
         # Setting General Section Layout
         for widget in (self.general, self.gbUpdates, self.buttonFrame):
             layout.addWidget(widget)
-        
-        if self.protonGroupBox is not None:
-            layout.insertWidget(1, self.protonGroupBox)
 
         self.applyStaticText()
 
@@ -130,9 +116,6 @@ class OptionsGeneral(OptionsSectionBase):
         self.disabledModDirLabel.setText(qapp.translate("OptionsGeneral", "Disabled Mods Path:"))
         self.LanguageLabel.setText(qapp.translate("OptionsGeneral", "Language:"))
 
-        if self.protonGroupBox is not None:
-            self.protonGroupBox.applyStaticText()
-
         self.gbUpdates.setTitle(qapp.translate("OptionsGeneral", "Updates"))
         self.updateAlertCheckbox.setText(qapp.translate("OptionsGeneral", 'Update alerts on startup'))
         self.CheckUpdateButton.setText(qapp.translate("OptionsGeneral", "Check for updates"))
@@ -146,16 +129,6 @@ class OptionsGeneral(OptionsSectionBase):
         if notice.result():
             helper.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
             qapp.instance().shutdown()
-
-    @Slot()
-    @Slot(QModelIndex, int, int)
-    def protonDirsDataChanged(self, *_args: Any) -> None:
-        self.pendingChanges.emit(OptionKeys.proton_dirs, self.protonGroupBox.isProtonDirsChanged())
-
-    @Slot(str)
-    def protonVerChanged(self, version: str) -> None:
-        changed: bool = version != OptionsManager.getProtonVersion()
-        self.pendingChanges.emit(OptionKeys.proton_version, changed)
 
     @Slot(str)
     def gamePathChanged(self, path: str) -> None:

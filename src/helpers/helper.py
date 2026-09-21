@@ -1,84 +1,20 @@
-from typing import Callable
 import os
 import logging
 
-from PySide6.QtCore import QCoreApplication as qapp, Slot, QUrl, QDir, QFileInfo
+from PySide6.QtCore import QCoreApplication as qapp, QDir, Slot, QUrl
 from PySide6.QtGui import QDesktopServices
 
 from src.widgets.qdialog.notice import Notice
 
-from src.constant_vars import STEAMAPPS_COMMON, STEAM_COMPATIBILITY
 from src.helpers.helper_pathing import Pathing
 from src.helpers.options_manager import OptionsManager
 from src.constant_vars import ModType
 logging.getLogger(__name__)
 
-def getProtonDirs() -> list[str]:
-    """
-    Linux Only!!!
-    
-    Returns a list of all proton paths, from user settings and default
-    """
-    return [STEAMAPPS_COMMON, STEAM_COMPATIBILITY] + OptionsManager.getProtonDirs()
+def isGameNotFromSteam() -> bool:
+    gamePath = OptionsManager.getGamepath()
 
-def findProtonVersions() -> list[str]:
-    '''
-    Linux only!!!
-
-    Finds proton versions within\n
-    `~/.local/share/Steam/steamapps/common/`\n
-    `~/.steam/steam/steamapps/common/`\n
-    `~/.local/share/Steam/compatibility.d/`\n
-    and custom directories the user sets
-
-    It checks each folder if it starts with `Proton ` and then checks if the proton executable exists
-    '''
-
-    def filter_app(start_path: str, file_name: str) -> bool:
-        return file_name.startswith("Proton ") and QFileInfo(f"{start_path}/{file_name}/proton").isExecutable()
-    
-    paths_to_search = getProtonDirs()
-
-    ret_val: list[str] = []
-
-    for path in paths_to_search:
-        filterApp: Callable[[str], bool] = lambda x: filter_app(path, x)
-
-        dir = QDir(path)
-
-        proton_vers = list(filter(filterApp, dir.entryList(QDir.Filter.AllDirs)))
-
-        if not proton_vers:
-            continue
-
-        ret_val += proton_vers
-        
-    return ret_val
-
-def getProtonPath(proton_version: str) -> str:
-    """
-    Linux Only!!!
-
-    Returns a valid path of the proton version given, example:
-
-    ```py
-    path = getProtonPath("Proton - Experimental")
-    print(path) # /home/User/.local/share/Steam/steamapps/common/Proton - Experimental
-    ```
-
-    If it cannot find a proton version, returns `""`
-    """
-
-    version = ""
-    proton_dirs = getProtonDirs()
-
-    for path in map(lambda x: QDir(x), proton_dirs):
-        
-        if proton_version in set(path.entryList()):
-            version = path.filePath(proton_version)
-            break
-    
-    return version
+    return "steam_api64.dll" not in QDir(gamePath).entryList()
 
 @Slot(str)
 def openWebPage(link: str) -> bool:

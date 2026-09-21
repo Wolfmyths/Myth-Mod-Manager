@@ -50,7 +50,7 @@ class OptionsMisc(OptionsSectionBase):
         self.backupMods.setText(qapp.translate("OptionsMisc", "Backup Mods"))
         self.backupMods.setToolTip(qapp.translate("OptionsMisc", "Copies and compresses all of your mods to MMM's installation folder"))
 
-        self.log.setText(qapp.translate("OptionsMisc", "Open Crash Logs..."))
+        self.log.setText(qapp.translate("OptionsMisc", "Open Crash Logs and Save Data..."))
         self.log.setToolTip(qapp.translate("OptionsMisc", "Opens the crash log directory used by vanilla Payday 2"))
 
         self.modLog.setText(qapp.translate("OptionsMisc", "Open Mod Crash Logs..."))

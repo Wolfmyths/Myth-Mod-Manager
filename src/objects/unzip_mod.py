@@ -51,7 +51,7 @@ class UnZipMod(Worker):
                     patoolib.extract_archive(src, outdir=modDestDict[modType])
 
                 else:
-                    logging.warning('%s does not exist', src)
+                    logging.warning('%s does not exist or is not a file', src)
 
                 self.cancelCheck()
                 self.rest()

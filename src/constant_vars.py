@@ -136,4 +136,4 @@ LIGHT: Final[str] = 'light'
 # Program Info
 PROGRAM_NAME: Final[str] = 'Myth Mod Manager'
 
-VERSION: Final[QVersionNumber] = QVersionNumber(1, 7, 1)
+VERSION: Final[QVersionNumber] = QVersionNumber(1, 8, 0)

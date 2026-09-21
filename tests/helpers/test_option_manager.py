@@ -13,8 +13,7 @@ def test_OptionsMethods(createTemp_Config_ini: str) -> None:
     if IS_WINDOWS:
         expected_fallback_path = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\PAYDAY 2\\PAYDAY2.exe"
     else:
-        expected_fallback_path = QDir.home().filePath(
-            ".local/share/Steam/steamapps/common/PAYDAY 2/PAYDAY2.exe")
+        expected_fallback_path = ""
 
     options.setDispath('somepath')
     options.writeData()

@@ -1,7 +1,7 @@
 import logging
 
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, QProcess, QProcessEnvironment
+from PySide6.QtCore import QDir, Qt as qt, QCoreApplication as qapp, Slot, QProcess, QProcessEnvironment
 import PySide6.QtGui as qtg
 from typing_extensions import override
 
@@ -103,23 +103,25 @@ class ModManager(qtw.QWidget):
     def startPayday(self) -> None:
 
         gamePath: str = OptionsManager.getGamepath()
-        args: list[str] = OptionsManager.getLaunchParametersList()
+        args: list[str] = QProcess.splitCommand(OptionsManager.getLaunchParameters())
 
-        #print(f"Launching PAYDAY 2\nargs: {args}\ngame path: {gamePath}")
+        logging.info(f"Launching PAYDAY 2\nargs: {args}\ngame path: {gamePath}")
 
         try:
             game_exe_path = OptionsManager.getGameExecuteable()
 
-            success: int
-            exit_code: int
+            # PySide return type hint is wrong with QProcess.startDetatched()???
+            # Returns bool as said online, does not return a Tuple[bool, int]
+            # https://doc.qt.io/qtforpython-6/PySide6/QtCore/QProcess.html
+            success: bool
 
             process = QProcess()
 
             if IS_WINDOWS:
-                success, exit_code = process.startDetached(game_exe_path, args, gamePath)
+                success = process.startDetached(game_exe_path, args, gamePath)  # pyright: ignore[reportAssignmentType]
             else:
                 proton_ver = OptionsManager.getProtonVersion()
-                STEAM_COMPAT_DATA_PATH = f"{STEAM}/steamapps/compatdata/218620"
+                STEAM_COMPAT_DATA_PATH = QDir(f"{gamePath}/../../compatdata/218620").canonicalPath()
                 proton_path = f"{proton_ver}/proton"
                 
                 env = QProcessEnvironment()
@@ -128,15 +130,16 @@ class ModManager(qtw.QWidget):
 
                 process.setProcessEnvironment(env)
                 process.setArguments(
-                    [f"run {game_exe_path}"] + args)
+                    ['run', f'"{game_exe_path}"'] + args)
                 process.setWorkingDirectory(gamePath)
                 process.setProgram(proton_path)
                 
-                success, exit_code = process.startDetached()
+                logging.info("STEAM_COMPAT_DATA_PATH: %s\nArguments: %s", STEAM_COMPAT_DATA_PATH, process.arguments())
+                success = process.startDetached()  # pyright: ignore[reportAssignmentType]
 
             if not success:
                 raise Exception(
-                    qapp.translate("ModManager", "Exit code:") + f' {exit_code}\n{process.errorString()}'
+                    qapp.translate("ModManager", "Exit code:") + f' {process.exitCode()}\n{process.errorString()}'
                 )
 
         except Exception as e:

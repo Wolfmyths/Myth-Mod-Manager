@@ -208,6 +208,7 @@ class ModListWidget(qtw.QTableWidget):
                     self.setItem(self.rowCount() - 1, 3, qtw.QTableWidgetItem(value))
 
                 case _:
+                    logging.warning('Unknown key "%s", ignoring', key)
                     continue
     
     def setItemDisabled(self) -> None:

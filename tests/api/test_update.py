@@ -72,19 +72,34 @@ def patch_network_stuff(monkeypatch: pytest.MonkeyPatch) -> Generator[str]:
         with open(path, "w") as _f:
             pass
 
-    shutil_patch: Callable[[str, str], None] = lambda x, y: None
-
-    monkeypatch.setattr("src.api.update.QNetworkAccessManager", Mock_QNetworkAccessManager)
-    monkeypatch.setattr("src.api.update.QNetworkReply", Mock_QNetworkReply)
     monkeypatch.setattr("src.api.update.ROOT_PATH", tmp_root)
-    monkeypatch.setattr("src.api.update.shutil.unpack_archive", shutil_patch)
 
     yield tmp_dir.name
 
     tmp_dir.cleanup()
 
-def test_update(patch_network_stuff: str, qtbot: QtBot) -> None:
+@pytest.fixture
+def update(monkeypatch: pytest.MonkeyPatch, patch_network_stuff: str) -> Generator[Update]:  # pyright: ignore[reportUnusedParameter]
+    shutil_patch: Callable[[str, str], None] = lambda x, y: None
+
+    monkeypatch.setattr("src.api.update.QNetworkAccessManager", Mock_QNetworkAccessManager)
+    monkeypatch.setattr("src.api.update.QNetworkReply", Mock_QNetworkReply)
+    monkeypatch.setattr("src.api.update.shutil.unpack_archive", shutil_patch)
+
+    is_destroyed = False
+
+    def on_destroyed() -> None:
+        nonlocal is_destroyed
+        is_destroyed = True
+
     update = Update()
+    update.destroyed.connect(on_destroyed) # Update deletes itself in most cases
+    yield update
+
+    if not is_destroyed:
+        update.deleteLater()
+
+def test_update(update: Update, patch_network_stuff: str, qtbot: QtBot) -> None:
     update.exe = TMP_EXECUTABLE_NAME
     update.folder = patch_network_stuff
 

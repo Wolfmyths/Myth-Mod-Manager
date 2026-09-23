@@ -1,6 +1,6 @@
 import os
 
-from PySide6.QtCore import QSize, QDir
+from PySide6.QtCore import QSize
 
 from src.constant_vars import IS_WINDOWS, OptionKeys
 from src.helpers.options_manager import OptionsManager

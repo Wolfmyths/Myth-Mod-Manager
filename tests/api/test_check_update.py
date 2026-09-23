@@ -1,3 +1,4 @@
+from collections.abc import Generator
 import json
 from typing import override
 
@@ -51,30 +52,27 @@ class Mock_QNetworkAccessManagerError(Mock_QNetworkAccessManagerBase):
     def get(self, _request: QNetworkRequest) -> Mock_QNetworkReplyError:
         return Mock_QNetworkReplyError()
 
-def test_CheckUpdate(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.fixture
+def checkupdate() -> Generator[CheckUpdate]:
+    checkupdate = CheckUpdate()
+    yield checkupdate
+    checkupdate.deleteLater()
+
+def test_CheckUpdate(checkupdate: CheckUpdate, qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("src.api.check_update.QNetworkAccessManager", Mock_QNetworkAccessManager)
-    monkeypatch.setattr("src.api.check_update.QNetworkReply", Mock_QNetworkReply)
     monkeypatch.setattr("src.api.check_update.VERSION", QVersionNumber(1,0,0))
 
-    obj = CheckUpdate()
-
-    with qtbot.wait_signal(obj.updateDetected, timeout=10):
-        obj.start()
+    with qtbot.wait_signal(checkupdate.updateDetected, timeout=10):
+        checkupdate.start()
 
     monkeypatch.setattr("src.api.check_update.VERSION", QVersionNumber(1,0,4))
 
-    with qtbot.wait_signal(obj.upToDate, timeout=10):
-        obj.start()
+    with qtbot.wait_signal(checkupdate.upToDate, timeout=10):
+        checkupdate.start()
 
-    obj.deleteLater()
-
-def test_CheckUpdateError(qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_CheckUpdateError(checkupdate: CheckUpdate, qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("src.api.check_update.QNetworkAccessManager", Mock_QNetworkAccessManagerError)
     monkeypatch.setattr("src.api.check_update.QNetworkReply", Mock_QNetworkReplyError)
 
-    obj = CheckUpdate()
-
-    with qtbot.waitSignal(obj.error, timeout=10):
-        obj.start()
-    
-    obj.deleteLater()
+    with qtbot.waitSignal(checkupdate.error, timeout=10):
+        checkupdate.start()

@@ -8,7 +8,7 @@ from src.widgets.qwidget.main_window import MainWindow
 from src.constant_vars import PROGRAM_NAME, VERSION
 
 def test_main_window(qtbot: QtBot, createTemp_Config_ini: str, createTemp_Mod_ini: str, createTemp_Profiles_ini: str, createTemp_externalShortcuts_ini: str) -> None:  # pyright: ignore[reportUnusedParameter]
-    widget = MainWindow()
+    widget = MainWindow(qtw.QApplication.instance())
     qtbot.addWidget(widget)
 
     assert not widget.windowIcon().isNull()                               # Has icon

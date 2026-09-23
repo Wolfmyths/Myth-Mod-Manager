@@ -1,26 +1,63 @@
+from collections.abc import Generator
+from typing import Callable
 import os
 import shutil
 
 import pytest
+from pytestqt.qtbot import QtBot
 
 from src.objects.backup_mods import BackupMods
-from src.constant_vars import BACKUP_MODS
 
-#TODO: os.mkdir() isn't working
-@pytest.mark.skip
-def test_thread(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> None:  # pyright: ignore[reportUnusedParameter]
-    worker = BackupMods()
+mock_backupmods_folder_name = "backedupmods"
+
+@pytest.fixture
+def backupmods(monkeypatch: pytest.MonkeyPatch, create_mod_dirs: str) -> Generator[BackupMods]:
+    replace_getdispath: Callable[[], str] = lambda: os.path.join(create_mod_dirs, "disabledMods")
+    replace_mods: Callable[[], str] = lambda: os.path.join(create_mod_dirs, "mods")
+    replace_mod_overrides: Callable[[], str] = lambda: os.path.join(create_mod_dirs, "assets", "mod_overrides")
+    replace_maps: Callable[[], str] = lambda: os.path.join(create_mod_dirs, "Maps")
+    monkeypatch.setattr("src.objects.backup_mods.OptionsManager.getDispath", replace_getdispath)
+    monkeypatch.setattr("src.objects.backup_mods.Pathing.mods", replace_mods)
+    monkeypatch.setattr("src.objects.backup_mods.Pathing.mod_overrides", replace_mod_overrides)
+    monkeypatch.setattr("src.objects.backup_mods.Pathing.maps", replace_maps)
+    monkeypatch.setattr("src.objects.backup_mods.BACKUP_MODS",
+        os.path.join(create_mod_dirs, mock_backupmods_folder_name))
+
+    backupmods = BackupMods()
+    backupmods.error.connect(print)
+
+    yield backupmods
+
+    backupmods.deleteLater()
+
+def test_backupmods(qtbot: QtBot, backupmods: BackupMods, create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> None:  # pyright: ignore[reportUnusedParameter]
     
-    bundledFilePath: str = os.path.join(create_mod_dirs, BACKUP_MODS)
-    worker.bundledFilePath = bundledFilePath
+    base_dir = os.path.join(create_mod_dirs, mock_backupmods_folder_name)
+    os.mkdir(base_dir)
 
-    worker.start()
+    backupmods.bundledFilePath = base_dir
 
-    assert os.path.isfile(f'{bundledFilePath}.zip')
+    with qtbot.wait_signal(backupmods.succeeded, timeout=500):
+        backupmods.start()
 
-    shutil.unpack_archive(f'{bundledFilePath}.zip', create_mod_dirs)
+    archive = f"{base_dir}.zip"
 
-    assert os.listdir(bundledFilePath) == ['mods', 'assets', 'Maps']
-    assert os.listdir(os.path.join(bundledFilePath, 'mods')) == ['make game easy mod']
-    assert os.listdir(os.path.join(bundledFilePath, 'assets', 'mod_overrides')) == ['best mod ever']
-    assert os.listdir(os.path.join(bundledFilePath, 'Maps')) == ['super fun mod']
+    #print("Dir of", create_mod_dirs, os.listdir(create_mod_dirs))
+    #print("Path to archive", archive)
+    assert os.path.exists(archive) is True
+
+    shutil.unpack_archive(archive, base_dir, format="zip")
+
+    #print("Dir of", create_mod_dirs, "after unpack:", os.listdir(create_mod_dirs))
+
+    bundleFilePathFiles = os.listdir(base_dir)
+    modFiles = os.listdir(os.path.join(base_dir, 'mods'))
+    modoverrideFiles = os.listdir(os.path.join(base_dir, 'assets', 'mod_overrides'))
+    mapFiles = os.listdir(os.path.join(base_dir, 'Maps'))
+
+    #print(base_dir, modFiles, modoverrideFiles, mapFiles)
+
+    assert set(bundleFilePathFiles) == set(['mods', 'assets', 'Maps'])
+    assert modFiles == ['make game easy mod']
+    assert modoverrideFiles == ['best mod ever']
+    assert mapFiles == ['super fun mod']

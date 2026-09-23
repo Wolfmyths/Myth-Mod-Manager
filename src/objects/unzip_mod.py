@@ -35,30 +35,30 @@ class UnZipMod(Worker):
 
         try:
 
-            for modURL in self.mods:
-
-                src: str = modURL[0]
+            for src, modType in self.mods:
 
                 mod: str = os.path.basename(src)
-
-                modType: ModType = modURL[1]
 
                 self.setCurrentProgress.emit(1, qapp.translate("UnZipMod", "Unpacking") + f" {mod}")
 
                 logging.info('Unzipping %s to %s', src, modDestDict[modType])
 
                 if os.path.isfile(src):
+                    logging.debug("Extracting Archive")
                     patoolib.extract_archive(src, outdir=modDestDict[modType])
 
                 else:
                     logging.warning('%s does not exist or is not a file', src)
 
+                logging.debug("Starting cancel check")
                 self.cancelCheck()
+                logging.debug("Resting")
                 self.rest()
 
             self.succeeded.emit()
         
         except patoolib.util.PatoolError as e:
+            logging.error(f"PatoolError: {e}")
             self.error.emit(
                 qapp.translate("UnZipMod", 'An error was raised in unZipMod:') +
                 f'\n{e}\n' +
@@ -66,5 +66,6 @@ class UnZipMod(Worker):
             )
 
         except Exception as e:
+            logging.error(f"Error: {e.__class__} {e}")
             self.error.emit(
                 qapp.translate("UnZipMod", 'An error was raised in unZipMod:') + f'\n{e}') 

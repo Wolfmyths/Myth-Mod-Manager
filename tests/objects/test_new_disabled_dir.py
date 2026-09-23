@@ -9,7 +9,7 @@ from src.objects.new_disabled_dir import NewDisabledDir
 from src.helpers.options_manager import OptionsManager
 
 @pytest.fixture(scope='module')
-def create_worker(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator[NewDisabledDir]:  # pyright: ignore[reportUnusedParameter]
+def newdisableddir(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_Mod_ini: str) -> Generator[NewDisabledDir]:  # pyright: ignore[reportUnusedParameter]
     newDisabledDir: str = os.path.join(create_mod_dirs, 'newDisabledMods')
     disabledDir: str = os.path.join(create_mod_dirs, 'disabledMods')
 
@@ -24,19 +24,19 @@ def create_worker(create_mod_dirs: str, createTemp_Config_ini: str, createTemp_M
 
     worker.deleteLater()
 
-def test_thread(qtbot: QtBot, create_worker: NewDisabledDir) -> None:
-    with qtbot.wait_signal(create_worker.succeeded):
-        create_worker.start()
+def test_newdisableddir(qtbot: QtBot, newdisableddir: NewDisabledDir) -> None:
+    with qtbot.wait_signal(newdisableddir.succeeded, timeout=500):
+        newdisableddir.start()
 
     tmp: str = os.path.dirname(OptionsManager.getDispath())
 
     assert 'best mod ever' in os.listdir(os.path.join(tmp, 'newDisabledMods'))
     assert 'best mod ever' not in os.listdir(OptionsManager.getDispath())
 
-def test_cancel(qtbot: QtBot, create_worker: NewDisabledDir) -> None:
-    create_worker.cancel = True
-    with qtbot.wait_signal(create_worker.doneCanceling):
-        create_worker.cancelCheck()
+def test_newdisableddir_cancel(qtbot: QtBot, newdisableddir: NewDisabledDir) -> None:
+    newdisableddir.cancel = True
+    with qtbot.wait_signal(newdisableddir.doneCanceling, timeout=500):
+        newdisableddir.cancelCheck()
     
     tmp: str = os.path.dirname(OptionsManager.getDispath())
 

@@ -37,6 +37,7 @@ class Worker(QObject):
         '''
         Emits signals too fast even with signal blockers so we need this until we can find a better way
         '''
+        logging.debug("Sleeping...")
         self.thread().msleep(1)
 
     def cancelCheck(self) -> None:

@@ -1,6 +1,6 @@
 PySide6-Essentials==6.10.3 # https://pypi.org/project/PySide6-Essentials/
-patool==4.0.5              # https://pypi.org/project/patool/
-pyinstaller==6.22.2        # https://pypi.org/project/pyinstaller/
+patool==4.1.0              # https://pypi.org/project/patool/
+pyinstaller==6.22.3        # https://pypi.org/project/pyinstaller/
 
 # For external purposes
 pytest==9.1.1             # https://pypi.org/project/pytest/

@@ -9,8 +9,8 @@ class TagHandler(Dialog):
     REMOVE = 0
     ADD = 1
 
-    def __init__(self, mode: int, allTags: list[str]) -> None:
-        super().__init__()
+    def __init__(self, mode: int, allTags: list[str], parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
         self.mode: int = mode
         self.allTags: list[str] = allTags
 
@@ -24,14 +24,16 @@ class TagHandler(Dialog):
         self.completer.setFilterMode(qt.MatchFlag.MatchStartsWith)
         self.input.setCompleter(self.completer)
 
-        self.buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
+        buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
 
-        self.buttonBox = qtw.QDialogButtonBox(self.buttons)
-        self.buttonBox.buttons()[0].setEnabled(False)
+        self.buttonBox = qtw.QDialogButtonBox(buttons)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        if mode == 0:
+        okButton = self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok)
+        okButton.setEnabled(False)
+
+        if mode == TagHandler.REMOVE:
             self.removeMode()
         else:
             self.addMode()
@@ -47,11 +49,9 @@ class TagHandler(Dialog):
     def removeMode(self) -> None:
         self.setWindowTitle(qapp.translate('TagHandler', 'Remove tag from mod'))
 
-    @Slot()
-    def lineEditTextChanged(self) -> None:
-        okButton: qtw.QAbstractButton = self.buttonBox.buttons()[0]
+    @Slot(str)
+    def lineEditTextChanged(self, new_text: str) -> None:
+        okButton = self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok)
 
-        if not len(self.input.text()) <= 0:
-            okButton.setEnabled(True)
-        else:
-            okButton.setEnabled(False)
+        enabled = len(new_text) > 0
+        okButton.setEnabled(enabled)

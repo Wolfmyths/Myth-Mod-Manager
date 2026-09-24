@@ -49,8 +49,8 @@ class ExternalToolDisplay(qtw.QListWidget):
         if dupes:
             notice = Notice(
                 qapp.translate('ExternalToolDisplay', 'Shortcuts were not added because they already exist:') + f' {", ".join(dupes)}',
-                qapp.translate('ExternalToolDisplay', 'Duplicate shortcuts found')
-            )
+                qapp.translate('ExternalToolDisplay', 'Duplicate shortcuts found'),
+                self.window())
             notice.exec()
     
     @Slot(str)

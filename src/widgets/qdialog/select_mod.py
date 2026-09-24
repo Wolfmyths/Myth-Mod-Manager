@@ -12,8 +12,8 @@ class SelectMod(Dialog):
 
     mods: list[str] = []
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
 
         self.setWindowTitle(qapp.translate('SelectMod', 'Mods to be added:'))
 

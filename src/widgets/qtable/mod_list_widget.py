@@ -31,8 +31,8 @@ from src.api.check_mod_update import CheckModUpdate
 class ModListWidget(qtw.QTableWidget):
     modHidden = Signal()
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
         logging.getLogger(__name__)
 
         self.setSelectionMode(qtw.QAbstractItemView.SelectionMode.ExtendedSelection)
@@ -226,7 +226,9 @@ class ModListWidget(qtw.QTableWidget):
 
         disabledModDir: str = OptionsManager.getDispath()
 
-        startFileMover = ProgressWidget(MoveToDisabledDir(*[x.text() for x in items]))
+        startFileMover = ProgressWidget(
+            MoveToDisabledDir(*[x.text() for x in items]),
+            self.window())
         startFileMover.exec()
 
         for item in items:
@@ -253,8 +255,9 @@ class ModListWidget(qtw.QTableWidget):
         '''
 
         warning = Confirmation(
-            title='Deletion Confirmation', 
-            body='Are you sure you want to delete these mod(s) from your computer?\n(The mods will be placed in the recycle bin)'
+            'Deletion Confirmation', 
+            'Are you sure you want to delete these mod(s) from your computer?\n(The mods will be placed in the recycle bin)',
+            self.window()
         )
         warning.exec()
 
@@ -262,7 +265,9 @@ class ModListWidget(qtw.QTableWidget):
 
             items: list[qtw.QTableWidgetItem] = self.getSelectedNameItems()
 
-            startFileMover = ProgressWidget(DeleteMod(*[x.text() for x in items]))
+            startFileMover = ProgressWidget(
+                DeleteMod(*[x.text() for x in items]),
+                self.window())
             startFileMover.exec()
 
             for item in items:
@@ -280,7 +285,9 @@ class ModListWidget(qtw.QTableWidget):
 
         items: list[qtw.QTableWidgetItem] = self.getSelectedNameItems()
 
-        startFileMover = ProgressWidget(MoveToEnabledModDir(*[x.text() for x in items]))
+        startFileMover = ProgressWidget(
+            MoveToEnabledModDir(*[x.text() for x in items]),
+            self.window())
         startFileMover.exec()
 
         for item in items:
@@ -475,7 +482,10 @@ class ModListWidget(qtw.QTableWidget):
             ).exec()
         @Slot()
         def uptoDate() -> None:
-            Notice(modName + ' ' + qapp.translate("ModListWidget", 'is up to date'), notice_title).exec()
+            Notice(
+                modName + ' ' + qapp.translate("ModListWidget", 'is up to date'),
+                notice_title,
+                self.window()).exec()
 
         item: qtw.QTableWidgetItem = self.getSelectedNameItems()[0]
         modName: str = self.getNameItem(self.row(item)).text()
@@ -589,7 +599,9 @@ class ModListWidget(qtw.QTableWidget):
         zips: list[str] = [x for x in urls if helper.getFileType(x) == 'zip']
 
         # Gather where the user wants each mod to go
-        notice = NewModLocation(*[x for x in list(dirs + zips)])
+        notice = NewModLocation(
+            *[x for x in list(dirs + zips)],
+            parent=self.window())
         notice.exec()
 
         if not notice.result():
@@ -606,7 +618,9 @@ class ModListWidget(qtw.QTableWidget):
             for dir in dirs:
                 dirTuple.append((dir, dict_[os.path.basename(dir)]))
 
-            startFileMover = ProgressWidget(ChangeModType(*dirTuple))
+            startFileMover = ProgressWidget(
+                ChangeModType(*dirTuple),
+                self.window())
             startFileMover.exec()
 
         if zips:
@@ -616,7 +630,9 @@ class ModListWidget(qtw.QTableWidget):
             for zip in zips:
                 zipsTuple.append((zip, dict_[os.path.basename(zip)]))
 
-            startFileMover = ProgressWidget(UnZipMod(*zipsTuple))
+            startFileMover = ProgressWidget(
+                UnZipMod(*zipsTuple),
+                self.window())
             startFileMover.exec()
     
         self.itemChanged.emit(qtw.QTableWidgetItem())

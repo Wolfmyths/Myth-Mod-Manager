@@ -93,7 +93,8 @@ class ExternalTool(qtw.QFrame):
         if ask:
             notice = Confirmation(
                 qapp.translate('ExternalTool','Delete tool shortcut'),
-                qapp.translate('ExternalTool','Are you sure you want to delete this shortcut?')
+                qapp.translate('ExternalTool','Are you sure you want to delete this shortcut?'),
+                self.window()
             )
             notice.exec()
 
@@ -109,6 +110,7 @@ class ExternalTool(qtw.QFrame):
 
             notice = Notice(
                 qapp.translate('ExternalTool', 'An error was raised starting an external tool'),
-                'startExternalTool() ' + qapp.translate('ExternalTool', 'Error')
+                'startExternalTool() ' + qapp.translate('ExternalTool', 'Error'),
+                self.window()
             )
             notice.exec()

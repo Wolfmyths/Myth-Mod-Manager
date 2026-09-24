@@ -10,10 +10,11 @@ class SelectProfile(Dialog):
 
     profile: str = ''
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
 
-        self.setWindowTitle(qapp.translate('SelectProfile', 'Profile to copy mod(s) to:'))
+        self.setWindowTitle(
+            qapp.translate('SelectProfile', 'Profile to copy mod(s) to:'))
 
         layout = qtw.QVBoxLayout()
 

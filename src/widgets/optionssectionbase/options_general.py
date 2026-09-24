@@ -122,7 +122,8 @@ class OptionsGeneral(OptionsSectionBase):
 
     @Slot(str, str)
     def updateFound(self, latestVersion: str, changelog: str) -> None:
-        notice = UpdateDetected(latestVersion, changelog, self.window())
+        notice = UpdateDetected(
+            latestVersion, changelog, self.window())
         notice.rejected.connect(lambda: self.CheckUpdateButton.setText(qapp.translate("OptionsGeneral", 'Check for updates')))
         notice.exec()
         

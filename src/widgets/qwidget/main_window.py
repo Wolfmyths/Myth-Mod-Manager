@@ -71,7 +71,8 @@ class MainWindow(qtw.QMainWindow):
 
     @Slot(str, str)
     def updateDetected(self, latestVersion: str, changelog: str) -> None:
-        notice = UpdateDetected(latestVersion, changelog, self)
+        notice = UpdateDetected(
+            latestVersion, changelog, self)
         notice.exec()
 
         if notice.result():

@@ -156,7 +156,9 @@ class Options(qtw.QWidget):
             is_abs: bool = file_info.isAbsolute()
             is_valid: bool = is_exe and is_abs
 
-            progressWidget = ProgressWidget(NewDisabledDir(old_path, new_path))
+            progressWidget = ProgressWidget(
+                NewDisabledDir(old_path, new_path),
+                self.window())
 
             if is_valid:
                 progressWidget.exec()
@@ -169,7 +171,8 @@ class Options(qtw.QWidget):
 
                 Notice(
                     errmsg,
-                    qapp.translate('Options', 'Could not change disabled mods folder')
+                    qapp.translate('Options', 'Could not change disabled mods folder'),
+                    self.window()
                 ).exec()
 
             if not progressWidget.mode.cancel:

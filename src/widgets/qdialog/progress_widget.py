@@ -20,8 +20,8 @@ class ProgressWidget(Dialog):
     QDialog object to show the progress of threaded functions
     '''
 
-    def __init__(self, mode: Worker) -> None:
-        super().__init__()
+    def __init__(self, mode: Worker, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
         logging.getLogger(__name__)
 
         self.setWindowTitle(qapp.translate('ProgressWidget', 'Myth Mod Manager Task'))
@@ -50,9 +50,9 @@ class ProgressWidget(Dialog):
         
         self.setLayout(layout)
 
-        self.__initMode()
+        self._initMode()
 
-    def __initMode(self) -> None:
+    def _initMode(self) -> None:
         # Create QThread
         self.qthread = QThread(self)
 

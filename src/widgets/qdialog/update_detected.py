@@ -91,7 +91,10 @@ class UpdateDetected(Dialog):
     @Slot(str)
     def errorRaised(self, message: str) -> None:
         logging.error(message)
-        error = Notice(message, headline=qapp.translate('updateDetected', 'Error'))
+        error = Notice(
+            message,
+            qapp.translate('updateDetected', 'Error'),
+            self.window())
         error.exec()
 
         self.cancel()

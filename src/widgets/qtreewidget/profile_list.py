@@ -167,7 +167,7 @@ class ProfileList(qtw.QTreeWidget):
     
     @Slot()
     def modAddMenu(self) -> None:
-        qDialog = SelectMod()
+        qDialog = SelectMod(self.window())
 
         qDialog.exec()
 
@@ -240,7 +240,7 @@ class ProfileList(qtw.QTreeWidget):
     
     @Slot()
     def copyModsToProfileMenu(self) -> None:
-        qDialog = SelectProfile()
+        qDialog = SelectProfile(self.window())
         qDialog.exec()
 
         if qDialog.result() and qDialog.profile:
@@ -276,7 +276,7 @@ class ProfileList(qtw.QTreeWidget):
         raise an error and try it again
         '''
 
-        qDialog = InsertString('Profile name:')
+        qDialog = InsertString('Profile name:', self.window())
 
         while True:
             
@@ -291,8 +291,10 @@ class ProfileList(qtw.QTreeWidget):
                     self.addProfile(qDialog.userInput)
                     break
                 else:
-                    msg = Notice('A profile with this name already exists.', 
-                                 'Error: Duplicate profile name')
+                    msg = Notice(
+                        'A profile with this name already exists.', 
+                        'Error: Duplicate profile name',
+                        self.window())
                     msg.exec()
 
     def addProfile(self, *items: str, initalize: bool = False) -> None:
@@ -340,7 +342,9 @@ class ProfileList(qtw.QTreeWidget):
     @Slot()
     def editProfileMenu(self) -> None:
 
-        qDialog = InsertString(qapp.translate('ProfileList', 'New profile name:'))
+        qDialog = InsertString(
+            qapp.translate('ProfileList', 'New profile name:'),
+            self.window())
 
         while True:
             
@@ -359,12 +363,10 @@ class ProfileList(qtw.QTreeWidget):
                     logging.warning('A profile with the name %s already exists', qDialog.userInput)
 
                     msg = Notice(
-                        message=
                         qapp.translate('ProfileList', 'A profile with that name already exists:') +
                         f' {qDialog.userInput}', 
-
-                        headline=qapp.translate('ProfileList', 'Error: Duplicate profile name')
-                    )
+                        qapp.translate('ProfileList', 'Error: Duplicate profile name'),
+                        self.window())
                     msg.exec()
 
     def editProfile(self, name: str) -> None:
@@ -392,7 +394,9 @@ class ProfileList(qtw.QTreeWidget):
 
         modsToCopy: list[str] = [x.text(0) for x in mods]
 
-        qDialog = InsertString(qapp.translate('ProfileList', 'New profile name:'))
+        qDialog = InsertString(
+            qapp.translate('ProfileList', 'New profile name:'),
+            self.window())
 
         while True:
 
@@ -421,12 +425,10 @@ class ProfileList(qtw.QTreeWidget):
                     logging.warning('A profile with the name %s already exists', qDialog.userInput)
 
                     msg = Notice(
-                        message=
                         qapp.translate('ProfileList', 'A profile with that name already exists:') +
                         f' {qDialog.userInput}', 
-
-                        headline=qapp.translate('ProfileList', 'Error: Duplicate profile name')
-                    )
+                        qapp.translate('ProfileList', 'Error: Duplicate profile name'),
+                        self.window())
                     msg.exec()
 
     def unselectShortcut(self) -> None:

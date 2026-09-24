@@ -3,8 +3,8 @@ import PySide6.QtWidgets as qtw
 from src.widgets.qdialog.dialog import Dialog
 
 class Notice(Dialog):
-    def __init__(self, message: str, headline: str = 'Notice') -> None:
-        super().__init__()
+    def __init__(self, message: str, headline: str = 'Notice', parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
 
         self.setWindowTitle(headline)
 

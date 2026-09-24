@@ -45,8 +45,8 @@ class ModProfile(qtw.QWidget):
     def applyMods(self, mods: tuple[str, ...]) -> None:
         disabledMods: list[str] = [x for x in mods if helper.isInstalled(x)]
         enabledMods: list[str] = [x for x in Save.mods() if helper.isInstalled(x) and x not in mods]
-        enableProgressWidget = ProgressWidget(MoveToEnabledModDir(*disabledMods))
-        disableProgressWidget = ProgressWidget(MoveToDisabledDir(*enabledMods))
+        enableProgressWidget = ProgressWidget(MoveToEnabledModDir(*disabledMods), self.window())
+        disableProgressWidget = ProgressWidget(MoveToDisabledDir(*enabledMods), self.window())
 
         notice = Notice('Canceled or something went wrong when applying the mod profile')
 
@@ -72,6 +72,6 @@ class ModProfile(qtw.QWidget):
             notice = Notice(
                 qapp.translate("modProfile", 'The following mods were not applied because they are not installed:') + 
                 f'\n{" ,".join(notInstalledMods)}',
-                qapp.translate("modProfile", 'Profile: Some mods were not applied')
-            )
+                qapp.translate("modProfile", 'Profile: Some mods were not applied'),
+                self.window())
             notice.exec()

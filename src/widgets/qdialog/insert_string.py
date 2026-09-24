@@ -9,8 +9,8 @@ class InsertString(Dialog):
 
     userInput: str | None = None
 
-    def __init__(self, prompt: str) -> None:
-        super().__init__()
+    def __init__(self, prompt: str, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
 
         layout = qtw.QVBoxLayout()
 

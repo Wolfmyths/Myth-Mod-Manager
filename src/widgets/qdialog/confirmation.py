@@ -5,8 +5,8 @@ from typing_extensions import override
 from src.widgets.qdialog.dialog import Dialog
 
 class Confirmation(Dialog):
-    def __init__(self, title: str, body: str) -> None:
-        super().__init__()
+    def __init__(self, title: str, body: str, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
 
         self.setWindowTitle(title)
 

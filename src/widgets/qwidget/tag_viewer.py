@@ -46,7 +46,8 @@ class TagViewer(qtw.QWidget):
             qapp.translate('TagViewer', 'Delete all tags'),
             qapp.translate('TagViewer', 'Are you sure you want to delete all of the tags associated with your mods?') +
             '\n' +
-            qapp.translate('TagViewer', '(This action cannot be reversed)')
+            qapp.translate('TagViewer', '(This action cannot be reversed)'),
+            self.window()
         )
         confirmation.exec()
         if confirmation.result():
@@ -58,7 +59,7 @@ class TagViewer(qtw.QWidget):
         items = self.tagQTable.selectedItems()[::self.tagQTable.columnCount()]
         allTags = Save.getAllTags()
 
-        tagQDialog = TagHandler(1, allTags)
+        tagQDialog = TagHandler(1, allTags, self.window())
         tagQDialog.exec()
         if tagQDialog.result():
             modsToBeChanged = [x.text() for x in items]
@@ -77,7 +78,7 @@ class TagViewer(qtw.QWidget):
         items = self.tagQTable.selectedItems()[::self.tagQTable.columnCount()]
         allTags = Save.getAllTags()
 
-        tagQDialog = TagHandler(0, allTags)
+        tagQDialog = TagHandler(0, allTags, self.window())
         tagQDialog.exec()
 
         if tagQDialog.result():

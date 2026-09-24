@@ -137,7 +137,8 @@ class ModManager(qtw.QWidget):
 
             notice = Notice(
                 qapp.translate("ModManager", 'An error occured trying to start PAYDAY 2') + f':\n{e}',
-                qapp.translate("ModManager", 'Could not start PAYDAY 2 from MMM'))
+                qapp.translate("ModManager", 'Could not start PAYDAY 2 from MMM'),
+                self.window())
             notice.exec()
 
     @Slot()

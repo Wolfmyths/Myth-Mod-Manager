@@ -13,8 +13,8 @@ class NewModLocation(Dialog):
 
     typeDict: dict[str, ModType] = {}
     
-    def __init__(self, *modName: str) -> None:
-        super().__init__()
+    def __init__(self, *modName: str, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
 
         self.setWindowTitle(qapp.translate('newModLocation', 'Installing mods'))
 

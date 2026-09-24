@@ -1,4 +1,3 @@
-import logging
 import os
 
 import PySide6.QtGui as qtg
@@ -56,10 +55,11 @@ class MainWindow(qtw.QMainWindow):
         self.applyStaticText()
 
         if OptionsManager.getMMMUpdateAlert():
-            logging.info("Checking for an update...")
-            run_CheckUpdate = CheckUpdate()
+            run_CheckUpdate = CheckUpdate(self)
             run_CheckUpdate.updateDetected.connect(self.updateDetected)
             run_CheckUpdate.done.connect(run_CheckUpdate.deleteLater)
+
+            run_CheckUpdate.start()
 
     def applyStaticText(self) -> None:
         tab: qtw.QTabBar = self.tab.tabBar()

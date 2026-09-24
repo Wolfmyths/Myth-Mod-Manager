@@ -56,12 +56,13 @@ Rest assured, this program does not contain malicious code. The program is compr
 
 **When a release is published, github builds the executable as seen [here](https://github.com/Wolfmyths/Myth-Mod-Manager/blob/main/.github/workflows), not me.**
 
-If you still are suspicious, you can build the executable yourself with these steps:
+# Building
+**Use .bat on Windows and .sh on Linux**
 
-1. [Install Python 3.11](https://www.python.org/downloads/)
+1. [Install Python 3.12](https://www.python.org/downloads/)
 2. Clone this repository
-3. (Optional but recommended) Create and run a virtual environment with `venv.bat` or `venv.sh` depending on your OS
-4. Run `createEXE.bat` or `createEXE.sh` depending on your OS (Make sure cwd is the project folder, not the venv)
+3. Create and run a virtual environment with `venv.bat` or `venv.sh`
+4. Run `createEXE.bat` or `createEXE.sh` (Make sure cwd is the project folder, not the venv)
 5. There will be a folder created called `Myth Mod Manager` which contains the newly compiled executable. This is created within the repository.
 6. Move `Myth Mod Manager` to your preferred directory and start it.
 
@@ -74,15 +75,17 @@ Windows:
 + It is recommended to use windows 10 or higher
 + Windows 7 is not supported
 
-Linux/MacOS:
+Linux:
 
-Linux is supported, but I've only tested on Mint Linux.
+Linux is supported, but I've only tested on Linux Mint.
 
 Please report any issues found.
 
 ### Reguarding Storefront
 
-It works with both steam and epic games versions.
+It works with both Steam and EpicGames versions.
+
+The play button feature on Linux only works with Steam copies.
 
 # Supported Languages
 

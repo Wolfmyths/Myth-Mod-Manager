@@ -71,12 +71,12 @@ class MainWindow(qtw.QMainWindow):
 
     @Slot(str, str)
     def updateDetected(self, latestVersion: str, changelog: str) -> None:
-        notice = UpdateDetected(latestVersion, changelog)
+        notice = UpdateDetected(latestVersion, changelog, self)
         notice.exec()
 
         if notice.result():
             helper.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
-            qapp.instance().shutdown()
+            qapp.instance().quit()
 
     @Slot()
     def languageChange(self) -> None:

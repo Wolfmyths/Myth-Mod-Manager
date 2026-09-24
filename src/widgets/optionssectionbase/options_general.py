@@ -122,13 +122,13 @@ class OptionsGeneral(OptionsSectionBase):
 
     @Slot(str, str)
     def updateFound(self, latestVersion: str, changelog: str) -> None:
-        notice = UpdateDetected(latestVersion, changelog)
+        notice = UpdateDetected(latestVersion, changelog, self.window())
         notice.rejected.connect(lambda: self.CheckUpdateButton.setText(qapp.translate("OptionsGeneral", 'Check for updates')))
         notice.exec()
         
         if notice.result():
             helper.startFile(os.path.join(ROOT_PATH, 'Myth Mod Manager.exe'))
-            qapp.instance().shutdown()
+            qapp.instance().quit()
 
     @Slot(str)
     def gamePathChanged(self, path: str) -> None:

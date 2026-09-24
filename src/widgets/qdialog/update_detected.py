@@ -20,8 +20,8 @@ class UpdateDetected(Dialog):
     downloadState = False
     lastIterBytes = 0
 
-    def __init__(self, newVersion: str, releaseNotes: str) -> None:
-        super().__init__()
+    def __init__(self, newVersion: str, releaseNotes: str, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
 
         self.setWindowTitle(qapp.translate('updateDetected', 'Update Notice'))
         
@@ -29,7 +29,7 @@ class UpdateDetected(Dialog):
 
         layout = qtw.QVBoxLayout()
 
-        self.autoUpdate = Update()
+        self.autoUpdate = Update(self)
 
         self.progressBar = qtw.QProgressBar(
             self, 

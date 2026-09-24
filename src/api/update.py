@@ -31,8 +31,8 @@ class Update(QObject):
     succeeded = Signal()
     error = Signal(str)
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent: QObject | None = None) -> None:
+        super().__init__(parent)
         logging.getLogger(__name__)
 
         self.network = QNetworkAccessManager(self)

@@ -83,7 +83,7 @@ LANG_STR_TO_CODE: Final[dict[str, str]] = {
 LANG_CODE_TO_STR: Final[dict[str, str]] = {x:y for y,x in LANG_STR_TO_CODE.items()}
 
 # Detection if the program is in debug mode or not (Assign manually)
-IS_DEBUG: Final[bool] = True
+IS_DEBUG: Final[bool] = False
 
 IS_WINDOWS: Final[bool] = platform.system().startswith("Win")
 

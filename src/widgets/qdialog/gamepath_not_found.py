@@ -79,4 +79,4 @@ class GamePathNotFound(Dialog):
     @override
     @Slot()
     def reject(self) -> None:
-        qapp.instance().shutdown()
+        qapp.instance().quit()

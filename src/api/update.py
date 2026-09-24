@@ -57,7 +57,7 @@ class Update(QObject):
         reply: QNetworkReply = self.network.get(request)
         self.currentReply = reply
 
-        reply.finished.connect(self._handle_assetURL_fetch)
+        reply.finished.connect(lambda: self._handle_assetURL_fetch(reply))
         reply.errorOccurred.connect(self._onErrorOccured)
         reply.finished.connect(reply.deleteLater)
 
@@ -88,7 +88,7 @@ class Update(QObject):
         assetReply: QNetworkReply = self.network.get(QNetworkRequest(QUrl(assetUrl)))
         self.currentReply = assetReply
         assetReply.errorOccurred.connect(self._onErrorOccured)
-        assetReply.finished.connect(self._download_assets)
+        assetReply.finished.connect(lambda: self._download_assets(assetReply))
         assetReply.finished.connect(assetReply.deleteLater)
     
     @Slot(QNetworkReply)
@@ -127,7 +127,7 @@ class Update(QObject):
         self.currentReply = downloadUpdateReply
         downloadUpdateReply.downloadProgress.connect(self._on_download_progress)
         downloadUpdateReply.errorOccurred.connect(self._onErrorOccured)
-        downloadUpdateReply.finished.connect(self._install_update)
+        downloadUpdateReply.finished.connect(lambda: self._install_update(downloadUpdateReply))
         downloadUpdateReply.finished.connect(downloadUpdateReply.deleteLater)
         
     @Slot(QNetworkReply)

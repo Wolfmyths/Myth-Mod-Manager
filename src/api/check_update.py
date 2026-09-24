@@ -32,7 +32,7 @@ class CheckUpdate(QObject):
         logging.debug('Request for %s from checkUpdate() started', link)
         
         reply: QNetworkReply = network.get(request)
-        reply.finished.connect(self._checkVersion)
+        reply.finished.connect(lambda: self._checkVersion(reply))
         reply.finished.connect(reply.deleteLater)
         reply.errorOccurred.connect(self._onErrorOccurred)
 

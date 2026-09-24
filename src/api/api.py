@@ -25,12 +25,12 @@ def __loadXML(modPath: str) -> et.ElementTree[et.Element[str]] | None:
     except Exception as e:
         logging.error('Something went wrong parsing an xml file in %s:\n%s', os.path.basename(modPath), str(e))
 
-def __parseVersion(version: str | None) -> QVersionNumber | None:
+def __parseVersion(version: str | None) -> QVersionNumber:
 
     logging.debug('Parsing %s', version)
 
-    if version is None:
-        return
+    if not version:
+        return QVersionNumber()
     
     removeChars = ('v', 'V')
     try:
@@ -43,7 +43,7 @@ def __parseVersion(version: str | None) -> QVersionNumber | None:
 
     except Exception as e:
         logging.error('Something went wrong in __parseVersion() parsing version %s: %s', version, str(e))
-        version_qver = None
+        version_qver = QVersionNumber()
     
     return version_qver
 
@@ -69,8 +69,8 @@ def findModworkshopAssetID(modPath: str) -> str:
     
     return assetID
 
-def findModVersion(modPath: str) -> QVersionNumber | None:
-    '''Finds the mod version if it can by parsing `main.xml` and `mod.txt`'''
+def findModVersion(modPath: str) -> QVersionNumber:
+    '''Finds the mod version by parsing `main.xml` and `mod.txt`'''
     try:
 
         version: str | None = None
@@ -115,6 +115,6 @@ def findModVersion(modPath: str) -> QVersionNumber | None:
     except Exception as e:
 
         logging.error('Something happened in findModVersion with %s: %s', os.path.basename(modPath), e)
-        return None
+        return QVersionNumber()
 
     

@@ -208,9 +208,17 @@ class StyleManager():
                 margin-top: 1ex;
             }}
 
+            QGroupBox[isDarkTheme="true"] {{
+                background-color: {1};
+            }}
+
             QGroupBox::title {{
                 subcontrol-origin: margin;
                 padding: 0 3px;
+            }}
+
+            QRadioButton[isDarkTheme="true"] {{
+                background-color: {1};
             }}
 
             QFrame#externaltool {{

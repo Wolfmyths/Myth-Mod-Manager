@@ -4,9 +4,10 @@ import PySide6.QtWidgets as qtw
 from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot
 from typing_extensions import override
 
+from src.helpers.options_manager import OptionsManager
 from src.widgets.qdialog.dialog import Dialog
 
-from src.constant_vars import ModType
+from src.constant_vars import DARK, ModType
 
 class NewModLocation(Dialog):
 
@@ -43,24 +44,34 @@ class NewModLocation(Dialog):
         frameLayout.setSpacing(5)
 
         for mod in (os.path.basename(x) for x in modName):
+            
+            isDarkTheme = str(OptionsManager.getTheme() == DARK).lower()
 
             group = qtw.QGroupBox(f'{mod}')
+            group.setProperty('isDarkTheme', isDarkTheme)
             group.setObjectName(mod)
+            group.style().polish(group)
 
             radioButtonMod = qtw.QRadioButton(ModType.mods.value, group)
             radioButtonMod.setObjectName(f'{mod} {ModType.mods}')
+            radioButtonMod.setProperty('isDarkTheme', isDarkTheme)
             radioButtonMod.setChecked(False)
             radioButtonMod.clicked.connect(self.isAllChecked)
+            radioButtonMod.style().polish(radioButtonMod)
 
             radioButtonOverride = qtw.QRadioButton(ModType.mods_override.value, group)
             radioButtonOverride.setObjectName(f'{mod} {ModType.mods_override}')
+            radioButtonOverride.setProperty('isDarkTheme', isDarkTheme)
             radioButtonOverride.clicked.connect(self.isAllChecked)
             radioButtonOverride.setChecked(False)
+            radioButtonOverride.style().polish(radioButtonOverride)
 
             radioButtonMaps = qtw.QRadioButton(ModType.maps.value, group)
             radioButtonMaps.setObjectName(f'{mod} {ModType.maps}')
+            radioButtonMaps.setProperty('isDarkTheme', isDarkTheme)
             radioButtonMaps.clicked.connect(self.isAllChecked)
             radioButtonMaps.setChecked(False)
+            radioButtonMaps.style().polish(radioButtonMaps)
 
             h1 = qtw.QHBoxLayout()
             h1.addWidget(radioButtonMod)

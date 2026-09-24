@@ -4,7 +4,7 @@ from typing import cast
 
 import PySide6.QtGui as qtg
 import PySide6.QtWidgets as qtw
-from PySide6.QtCore import Qt as qt, QCoreApplication as qapp, Slot, Signal
+from PySide6.QtCore import QVersionNumber, Qt as qt, QCoreApplication as qapp, Slot, Signal
 from typing_extensions import override
 
 from src.widgets.qmenu.manager_menu import ManagerMenu
@@ -201,6 +201,9 @@ class ModListWidget(qtw.QTableWidget):
                     self.setItem(self.rowCount() - 1, 2, qtw.QTableWidgetItem(value))
                 
                 case 'version':
+                    
+                    if isinstance(value, QVersionNumber):
+                        value = value.toString()
 
                     if value == 'None':
                         value = '1.0.0'
@@ -331,7 +334,7 @@ class ModListWidget(qtw.QTableWidget):
 
             isEnabled: bool = not os.path.isdir(os.path.join(disModFolder, mod))
             modPath: list[str] | str = Pathing.mod(type, mod) if isEnabled else os.path.join(disModFolder, mod)
-            version = str(findModVersion(modPath))
+            version_versionnumber = findModVersion(modPath)
             tags: list[str] = Save.getTags(mod)
 
             assetID: str = Save.getModworkshopAssetID(mod)
@@ -339,6 +342,11 @@ class ModListWidget(qtw.QTableWidget):
             # Empty string
             if not assetID:
                 assetID = findModworkshopAssetID(modPath)
+            
+            if version_versionnumber.isNull():
+                version = "1.0.0"
+            else:
+                version = version_versionnumber.toString()
 
             Save.setEnabled(mod, isEnabled)
             

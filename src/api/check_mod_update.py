@@ -69,7 +69,7 @@ class CheckModUpdate(QObject):
 
         logging.info('Latest Version: %s', latestVersion.toString())
 
-        print("Latest version:", latestVersion.toString(), "vs local Version:", self.localVerVersionNumber.toString())
+        #print("Latest version:", latestVersion.toString(), "vs local Version:", self.localVerVersionNumber.toString())
         if latestVersion > self.localVerVersionNumber:
             self.updateDetected.emit(replyDecoded)
         else:

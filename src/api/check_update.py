@@ -29,6 +29,8 @@ class CheckUpdate(QObject):
         
         network = QNetworkAccessManager(self)
         request = QNetworkRequest(QUrl(link))
+        
+        logging.info("Checking for a MMM update...")
         logging.debug('Request for %s from checkUpdate() started', link)
         
         reply: QNetworkReply = network.get(request)
@@ -61,10 +63,10 @@ class CheckUpdate(QObject):
 
         latestVersion = QVersionNumber.fromString(data['tag_name'])  # pyright: ignore[reportUnknownArgumentType]
         
-        logging.info('Latest Version: %s', latestVersion)
+        logging.info('Latest Version: %s', latestVersion.toString())
 
         if latestVersion > VERSION:
-            self.updateDetected.emit(latestVersion, data['body'])
+            self.updateDetected.emit(latestVersion.toString(), data['body'])
         else:
             self.upToDate.emit()
             self.done.emit()

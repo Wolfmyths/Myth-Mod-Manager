@@ -1,6 +1,5 @@
-if not exist "%cd%\venv" (
-	python3 -m venv /venv
+if not exist .\.venv (
+	py -m venv .venv
 )
-	
-cd venv\Scripts
-activate
+
+.venv/Scripts/activate

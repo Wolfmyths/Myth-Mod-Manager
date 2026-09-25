@@ -1,8 +1,15 @@
 import os
-import sys
-from enum import StrEnum, auto
+import platform
+from typing import Final
+from enum import StrEnum, auto, IntEnum
 
-import semantic_version
+from PySide6.QtCore import QVersionNumber
+
+import src.rc_resources  # pyright: ignore[reportUnusedImport]
+
+##
+## THIS FILE IS PLACED NEXT TO __main__ FOR FILE PATH REASONS
+##
 
 class ModType(StrEnum):
     '''
@@ -14,6 +21,7 @@ class ModType(StrEnum):
     mods_override = auto()
     maps          = auto()
 
+    @staticmethod
     def all_types() -> list[str]:
         return [enum.value for enum in ModType]
 
@@ -30,59 +38,86 @@ class OptionKeys(StrEnum):
 
     section          = 'OPTIONS' # Main section
 
-    game_path        = auto()
-    dispath          = 'disabled-mods'
-    color_theme      = auto()
-    windowsize_w     = auto()
-    windowsize_h     = auto()
-    mmm_update_alert = auto()
-    lang             = auto()
+    game_path         = auto()
+    dispath           = 'disabled-mods'
+    color_theme       = auto()
+    windowsize_w      = auto()
+    windowsize_h      = auto()
+    mmm_update_alert  = auto()
+    lang              = auto()
+    launch_parameters = auto()
+    proton_version    = auto()
+    proton_dirs       = auto()
 
+    @staticmethod
     def all_keys() -> list[str]:
         # Splice removes section key
         return [enum.value for enum in OptionKeys][1:]
 
-class ProfileRole():
+class ProfileRole(IntEnum):
 
     parent    = 33 # Role ID for an item's parent
     type      = 32 # Role ID for an item's type
     installed = 34 # Role ID if a mod is installed or not
 
-class ModRole():
+class ModRole(IntEnum):
     tags = 33 # Role ID for a mod's tags
 
-# Detection if the program is being run through an exe or the script
-IS_SCRIPT = not getattr(sys, 'frozen', False)
+# Lang map string to code
+LANG_STR_TO_CODE: Final[dict[str, str]] = {
+    'Deutsch'            : 'de_DE',
+    'English'            : 'en_US',
+    'Español (españa)'   : 'es_ES',
+    'Français'           : 'fr_FR',
+    'Italiano'           : 'it_IT',
+    '日本語'              : 'ja_JP',
+    '한국인'              : 'ko_KR',
+    'Nederlands'         : 'nl_NL',
+    'Polski'             : 'pl_PL',
+    'Português (Brasil)' : 'pt_BR',
+    'Русский'            : 'ru_RU',
+    '中文（简体）'        : 'zh_CN'
+}
+
+# Lang code map code to string
+LANG_CODE_TO_STR: Final[dict[str, str]] = {x:y for y,x in LANG_STR_TO_CODE.items()}
+
+# Detection if the program is in debug mode or not (Assign manually)
+IS_DEBUG: Final[bool] = False
+
+IS_WINDOWS: Final[bool] = platform.system().startswith("Win")
 
 # Root Path
-ROOT_PATH = os.path.abspath(os.getcwd())
+ROOT_PATH: Final[str] = os.getcwd()
 
 # Logs Folder Path
-LOGS_PATH = os.path.join(ROOT_PATH, 'logs')
-MAX_LOGS = 10
-
-# Lang Folder Path
-LANG_FOLDER_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'lang')
-
-# Icon Path
-ICON = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'icon.ico')
+LOGS_PATH: Final[str] = os.path.join(ROOT_PATH, 'logs')
+MAX_LOGS: Final[int] = 10
 
 # File names
-MOD_CONFIG = 'mods.json'
-OPTIONS_CONFIG = 'config.ini'
-PROFILES_JSON = 'profiles.json'
-TOOLS_JSON = 'externalshortcuts.json'
-START_PAYDAY = 'runGame.bat'
-OLD_EXE = 'Myth Mod Manager.exe (Old)' if sys.platform.startswith('win') else 'Myth Mod Manager (old)'
-DISABLED_MODS = 'disabled-mods'
-BACKUP_MODS = 'backup mods'
+MOD_CONFIG: Final[str] = 'mods.json'
+OPTIONS_CONFIG: Final[str] = 'config.ini'
+PROFILES_JSON: Final[str] = 'profiles.json'
+TOOLS_JSON: Final[str] = 'externalshortcuts.json'
+OLD_EXE = 'Myth Mod Manager.exe (Old)' if platform.system().startswith('Win') else 'Myth Mod Manager (old)'
+DISABLED_MODS: Final[str] = 'disabled-mods'
+BACKUP_MODS: Final[str] = 'backup mods'
 
 # Graphics names
-MODWORKSHOP_LOGO_W = 'mws_logo_white.svg'
-MODWORKSHOP_LOGO_B = 'mws_logo_black.svg'
-GITHUB_LOGO_W = 'github-mark-white.svg'
-GITHUB_LOGO_B = 'github-mark.svg'
-KOFI_LOGO_B = 'kofi_s_logo_nolabel.webp'
+MODWORKSHOP_LOGO_W: Final[str] = 'mws_logo_white.svg'
+MODWORKSHOP_LOGO_B: Final[str] = 'mws_logo_black.svg'
+GITHUB_LOGO_W: Final[str] = 'github-mark-white.svg'
+GITHUB_LOGO_B: Final[str] = 'github-mark.svg'
+KOFI_LOGO_B: Final[str] = 'kofi_s_logo_nolabel.webp'
+
+# Lang Folder
+LANG_FOLDER_PATH: Final[str] = ":/lang"
+
+# Icon path
+ICON: Final[str] = ":/icon.ico"
+
+# Graphics Folder
+UI_GRAPHICS_PATH: Final[str] = ":/graphics"
 
 # Files in PAYDAY2/Mods/ to ignore
 MODSIGNORE = ('base', 'logs', 'saves', 'downloads')
@@ -92,16 +127,13 @@ DATA_PROFILE = (0, ProfileRole.type, 'profile') # Used to label an item as a pro
 DATA_MOD = (0, ProfileRole.type, 'mod') # Used to label an item as a mod
 
 # Default Disabled Folder
-MODS_DISABLED_PATH_DEFAULT = os.path.join(os.path.abspath(ROOT_PATH), DISABLED_MODS)
-
-# Graphics folder path
-UI_GRAPHICS_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'graphics')
+MODS_DISABLED_PATH_DEFAULT: Final[str] = os.path.join(ROOT_PATH, DISABLED_MODS)
 
 # Color Themes
-DARK = 'dark'
-LIGHT = 'light'
+DARK: Final[str] = 'dark'
+LIGHT: Final[str] = 'light'
 
 # Program Info
-PROGRAM_NAME = 'Myth Mod Manager'
+PROGRAM_NAME: Final[str] = 'Myth Mod Manager'
 
-VERSION = semantic_version.Version(major=1, minor=7, patch=0)
+VERSION: Final[QVersionNumber] = QVersionNumber(1, 8, 0)

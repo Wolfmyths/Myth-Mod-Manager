@@ -1,8 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
-import sys
+import platform
 
 import patoolib
+
+DEBUG = False
 
 block_cipher = None
 
@@ -65,15 +67,16 @@ HIDDEN_IMPORTS = [
     'patoolib.programs.zip',
 ]
 
-DATA = [
-    (os.path.join('src', 'icon.ico'), os.path.join('.', 'src')), 
-    (os.path.join('src', 'graphics'), os.path.join('.', 'src', 'graphics')),
-    (os.path.join('src', 'lang'), os.path.join('.', 'src', 'lang'))
-    ]
+DATA = []
 
 BINARIES = []
 
-if sys.platform.startswith('win'):
+NAME = 'Myth Mod Manager'
+
+if DEBUG:
+    NAME += ' DEBUG'
+
+if platform.system().startswith('Win'):
 
     ICON = os.path.join('src', 'icon.ico')
 
@@ -104,10 +107,10 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='Myth Mod Manager',
-    debug=False,
+    name=NAME,
+    debug=DEBUG,
     bootloader_ignore_signals=False,
-    strip=False,
+    strip=not DEBUG,
     icon=ICON,
     upx=True,
     upx_exclude=[],

@@ -1,10 +1,10 @@
 import xml.etree.ElementTree as et
 import tempfile
 import os
-from typing import Generator
+from collections.abc import Generator
 
 import pytest
-from semantic_version import Version
+from PySide6.QtCore import QVersionNumber
 
 from src.api import api
 
@@ -16,16 +16,16 @@ MOCK_DATA_ASSET_IDS = (
 )
 
 MOCK_DATA_VERSIONS = (
-     (MOCK_DATA_ASSET_IDS[0][0], Version(major=1, minor=2, patch=3)),
+     (MOCK_DATA_ASSET_IDS[0][0], QVersionNumber(1, 2, 3)),
      (MOCK_DATA_ASSET_IDS[1][0], None),
      (MOCK_DATA_ASSET_IDS[2][0], None),
      (MOCK_DATA_ASSET_IDS[3][0], None),
-     ('<table><AssetUpdates id="1234" version="V1.4.0" provider="modworkshop"/></table>', Version(major=1, minor=4, patch=0)),
-     ('<table><AssetUpdates id="1234" version="v1.1.0" provider="modworkshop"/></table>', Version(major=1, minor=1, patch=0))
+     ('<table><AssetUpdates id="1234" version="V1.4.0" provider="modworkshop"/></table>', QVersionNumber(1, 4, 0)),
+     ('<table><AssetUpdates id="1234" version="v1.1.0" provider="modworkshop"/></table>', QVersionNumber(1, 1, 0))
 )
 
 @pytest.fixture(scope='function')
-def create_testXML() -> Generator:
+def create_testXML() -> Generator[str]:
     with tempfile.TemporaryDirectory() as tmp_dir:
 
         with open(os.path.join(tmp_dir, 'main.xml'), 'w') as _tmp:

@@ -1,0 +1,38 @@
+import PySide6.QtWidgets as qtw
+from PySide6.QtCore import Slot
+from typing_extensions import override
+
+from src.widgets.qdialog.dialog import Dialog
+
+class Confirmation(Dialog):
+    def __init__(self, title: str, body: str, parent: qtw.QWidget | None = None) -> None:
+        super().__init__(parent)
+
+        self.setWindowTitle(title)
+
+        layout = qtw.QVBoxLayout()
+
+        self.warningLabel = qtw.QLabel(self, text=body)
+
+        buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
+
+        self.buttonBox = qtw.QDialogButtonBox(buttons)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        for widget in (self.warningLabel, self.buttonBox):
+            layout.addWidget(widget)
+        
+        self.setLayout(layout)
+    
+    @override
+    @Slot()
+    def accept(self) -> None:
+        self.setResult(qtw.QDialog.DialogCode.Accepted)
+        return super().accept()
+    
+    @override
+    @Slot()
+    def reject(self) -> None:
+        self.setResult(qtw.QDialog.DialogCode.Rejected)
+        return super().reject()

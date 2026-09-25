@@ -1,0 +1,82 @@
+from collections.abc import Generator
+from typing import override
+
+from PySide6.QtCore import QByteArray, QObject, QTimer
+
+from PySide6.QtNetwork import QNetworkReply, QNetworkRequest
+import pytest
+from pytestqt.qtbot import QtBot
+
+from src.api.check_mod_update import CheckModUpdate
+from tests.mock_baseclasses.mock_qnetworkreply import Mock_QNetworkReplyBase
+from tests.mock_baseclasses.mock_qnetworkaccessmanager import Mock_QNetworkAccessManagerBase
+
+class Mock_QNetworkReply(Mock_QNetworkReplyBase):
+    MOCK_REPLY_RESULT = '1.0.2'
+
+    def __init__(self, parent: QObject | None = None) -> None:
+        super().__init__(parent)
+
+        QTimer.singleShot(1, lambda: self.finished.emit(self))
+    
+    def error(self) -> QNetworkReply.NetworkError:
+        return self.NetworkError.NoError
+
+    def readAll(self) -> QByteArray:
+        return QByteArray(bytes(Mock_QNetworkReply.MOCK_REPLY_RESULT, "utf-8"))
+
+class Mock_QNetworkReplyError(Mock_QNetworkReplyBase):
+    def __init__(self, parent: QObject | None = None) -> None:
+        super().__init__(parent)
+
+        QTimer.singleShot(1, self, lambda: self._emit_error_occurred())
+    
+    def error(self) -> QNetworkReply.NetworkError:
+        return self.NetworkError.UnknownNetworkError
+
+    def _emit_error_occurred(self) -> None:
+        self.errorOccurred.emit(self.NetworkError.UnknownNetworkError)
+        self.finished.emit(self)
+
+class Mock_QNetworkAccessManager(Mock_QNetworkAccessManagerBase):
+    @override
+    def get(self, _request: QNetworkRequest) -> Mock_QNetworkReply:
+        return Mock_QNetworkReply()
+
+class Mock_QNetworkAccessManagerError(Mock_QNetworkAccessManagerBase):
+    @override
+    def get(self, _request: QNetworkRequest) -> Mock_QNetworkReplyError:
+        return Mock_QNetworkReplyError()
+
+@pytest.fixture
+def checkmodupdate() -> Generator[CheckModUpdate]:
+    checkmodupdate = CheckModUpdate("", "")
+
+    yield checkmodupdate
+
+    checkmodupdate.deleteLater()
+
+def test_checkmodupdate(checkmodupdate: CheckModUpdate, qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(checkmodupdate, "network", Mock_QNetworkAccessManager())
+
+    checkmodupdate.localVer = "1.0.0"
+
+    checkmodupdate.done.connect(lambda: print("Done"))
+    checkmodupdate.error.connect(lambda: print("Error"))
+    checkmodupdate.upToDate.connect(lambda: print("upToDate"))
+
+    with qtbot.wait_signal(checkmodupdate.updateDetected, timeout=10):
+        checkmodupdate.start()
+
+    checkmodupdate.localVer = "1.0.3"
+
+    with qtbot.wait_signal(checkmodupdate.upToDate, timeout=10):
+        checkmodupdate.start()
+
+def test_checkmodupdateError(checkmodupdate: CheckModUpdate, qtbot: QtBot, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(checkmodupdate, "network", Mock_QNetworkAccessManagerError())
+
+    checkmodupdate.localVer = "1.0.0"
+
+    with qtbot.waitSignal(checkmodupdate.error, timeout=10):
+        checkmodupdate.start()

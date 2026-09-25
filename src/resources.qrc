@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/">
+        <file>graphics/kofi_s_logo_nolabel.webp</file>
+        <file>graphics/github-mark.svg</file>
+        <file>graphics/github-mark-white.svg</file>
+        <file>graphics/mws_logo_black.svg</file>
+        <file>graphics/mws_logo_white.svg</file>
+        <file>icon.ico</file>
+        <file>lang/de_DE.qm</file>
+        <file>lang/es_ES.qm</file>
+        <file>lang/fr_FR.qm</file>
+        <file>lang/en_US.qm</file>
+        <file>lang/it_IT.qm</file>
+        <file>lang/ja_JP.qm</file>
+        <file>lang/ko_KR.qm</file>
+        <file>lang/pl_PL.qm</file>
+        <file>lang/nl_NL.qm</file>
+        <file>lang/zh_CN.qm</file>
+        <file>lang/pt_BR.qm</file>
+        <file>lang/ru_RU.qm</file>
+    </qresource>
+</RCC>

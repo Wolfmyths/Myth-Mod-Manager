@@ -4,32 +4,32 @@
 <context>
     <name>About</name>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="59"/>
+        <location filename="../src/widgets/qwidget/about.py" line="57"/>
         <source>Visit Github Repository</source>
         <translation>깃허브 리포지토리 방문</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="60"/>
+        <location filename="../src/widgets/qwidget/about.py" line="58"/>
         <source>Support Wolfmyths on Ko-Fi</source>
         <translation>Ko-Fi에서 Wolfmyths 지원</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="61"/>
+        <location filename="../src/widgets/qwidget/about.py" line="59"/>
         <source>Visit Modworkshop Page</source>
         <translation>모드워크샵 페이지 방문</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="65"/>
+        <location filename="../src/widgets/qwidget/about.py" line="65"/>
         <source>is an open-source mod manager for PAYDAY 2 created by Wolfmyths.</source>
         <translation>는 Wolfmyths에서 만든 PAYDAY 2용 오픈소스 모드 관리 프로그램입니다.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="66"/>
+        <location filename="../src/widgets/qwidget/about.py" line="66"/>
         <source>The goal of this program is to streamline the proccess of PAYDAY 2 mod managment without hassle of juggling multiple file explorers.</source>
         <translation>이 프로그램의 목표는 여러 파일 탐색기를 번거롭게 사용하지 않고도 페이데이 2 모드 관리 프로세스를 간소화하는 것입니다.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="68"/>
+        <location filename="../src/widgets/qwidget/about.py" line="68"/>
         <source>Suggestions are greatly appreciated on modworkshop.net and github.</source>
         <translation>modworkshop.net과 github에서 제안해 주시면 감사하겠습니다.</translation>
     </message>
@@ -37,37 +37,37 @@
 <context>
     <name>BackupMods</name>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="48"/>
+        <location filename="../src/objects/backupMods.py" line="48"/>
         <source>Validating backup folder paths</source>
         <translation>백업 폴더 경로 검증</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="69"/>
+        <location filename="../src/objects/backupMods.py" line="69"/>
         <source>Copying</source>
         <translation>복사</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="71"/>
+        <location filename="../src/objects/backupMods.py" line="71"/>
         <source>to</source>
         <translation>에</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="100"/>
+        <location filename="../src/objects/backupMods.py" line="100"/>
         <source>Zipping to</source>
         <translation>에 압축</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="102"/>
+        <location filename="../src/objects/backupMods.py" line="102"/>
         <source>This might take some time...</source>
         <translation>시간이 좀 걸릴 수 있습니다...</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="109"/>
+        <location filename="../src/objects/backupMods.py" line="109"/>
         <source>Cleanup</source>
         <translation>정리</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="125"/>
+        <location filename="../src/objects/backupMods.py" line="125"/>
         <source>An error was raised while backing up mods</source>
         <translation>모드를 백업하는 동안 오류가 발생했습니다</translation>
     </message>
@@ -75,12 +75,12 @@
 <context>
     <name>ChangeModType</name>
     <message>
-        <location filename="../src/threaded/changeModType.py" line="36"/>
+        <location filename="../src/objects/changeModType.py" line="36"/>
         <source>Installing</source>
         <translation>설치 중</translation>
     </message>
     <message>
-        <location filename="../src/threaded/changeModType.py" line="48"/>
+        <location filename="../src/objects/changeModType.py" line="48"/>
         <source>An error was raised while changing mod type:</source>
         <translation>모드 유형을 변경하는 동안 오류가 발생했습니다:</translation>
     </message>
@@ -88,12 +88,12 @@
 <context>
     <name>DeleteMod</name>
     <message>
-        <location filename="../src/threaded/deleteMod.py" line="31"/>
+        <location filename="../src/objects/deleteMod.py" line="31"/>
         <source>Deleting</source>
         <translation>삭제 중</translation>
     </message>
     <message>
-        <location filename="../src/threaded/deleteMod.py" line="49"/>
+        <location filename="../src/objects/deleteMod.py" line="49"/>
         <source>An error was raised while deleting a mod:</source>
         <translation>모드를 삭제하는 동안 오류가 발생했습니다:</translation>
     </message>
@@ -377,12 +377,12 @@
 <context>
     <name>MoveToDisabledDir</name>
     <message>
-        <location filename="../src/threaded/moveToDisabledDir.py" line="29"/>
+        <location filename="../src/objects/moveToDisabledDir.py" line="29"/>
         <source>Disabling</source>
         <translation>비활성화</translation>
     </message>
     <message>
-        <location filename="../src/threaded/moveToDisabledDir.py" line="45"/>
+        <location filename="../src/objects/moveToDisabledDir.py" line="45"/>
         <source>An error occured while disabling a mod:</source>
         <translation>모드를 비활성화하는 동안 오류가 발생했습니다:</translation>
     </message>
@@ -390,12 +390,12 @@
 <context>
     <name>MoveToEnabledModDir</name>
     <message>
-        <location filename="../src/threaded/moveToEnabledDir.py" line="30"/>
+        <location filename="../src/objects/moveToEnabledDir.py" line="30"/>
         <source>Enabling</source>
         <translation>활성화 중</translation>
     </message>
     <message>
-        <location filename="../src/threaded/moveToEnabledDir.py" line="45"/>
+        <location filename="../src/objects/moveToEnabledDir.py" line="45"/>
         <source>An error occured while enabling a mod:</source>
         <translation>모드를 활성화하는 동안 오류가 발생했습니다:</translation>
     </message>
@@ -807,18 +807,18 @@
 <context>
     <name>UnZipMod</name>
     <message>
-        <location filename="../src/threaded/unZipMod.py" line="36"/>
+        <location filename="../src/objects/unZipMod.py" line="36"/>
         <source>Unpacking</source>
         <translation>압축 풀기</translation>
     </message>
     <message>
-        <location filename="../src/threaded/unZipMod.py" line="51"/>
-        <location filename="../src/threaded/unZipMod.py" line="57"/>
+        <location filename="../src/objects/unZipMod.py" line="51"/>
+        <location filename="../src/objects/unZipMod.py" line="57"/>
         <source>An error was raised in unZipMod:</source>
         <translation>unZipMod에서 오류가 발생했습니다:</translation>
     </message>
     <message>
-        <location filename="../src/threaded/unZipMod.py" line="53"/>
+        <location filename="../src/objects/unZipMod.py" line="53"/>
         <source>Try extracting the mod manually first</source>
         <translation>먼저 수동으로 모드를 압축 해제해 보세요</translation>
     </message>
@@ -826,18 +826,18 @@
 <context>
     <name>Worker</name>
     <message>
-        <location filename="../src/threaded/workerQObject.py" line="69"/>
+        <location filename="../src/objects/workerQObject.py" line="69"/>
         <source>Checking file permissions of</source>
         <translation>의 파일 권한 확인 중</translation>
     </message>
     <message>
-        <location filename="../src/threaded/workerQObject.py" line="75"/>
-        <location filename="../src/threaded/workerQObject.py" line="80"/>
+        <location filename="../src/objects/workerQObject.py" line="75"/>
+        <location filename="../src/objects/workerQObject.py" line="80"/>
         <source>Checking folder permissions of</source>
         <translation>폴더 권한 확인 중</translation>
     </message>
     <message>
-        <location filename="../src/threaded/workerQObject.py" line="83"/>
+        <location filename="../src/objects/workerQObject.py" line="83"/>
         <source>Fixing install for</source>
         <translation>에 대한 설치 수정</translation>
     </message>

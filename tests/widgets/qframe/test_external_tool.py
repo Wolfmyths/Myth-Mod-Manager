@@ -1,0 +1,16 @@
+import os
+
+from pytestqt.qtbot import QtBot
+
+from src.widgets.qframe.external_tool import ExternalTool
+
+MOCK_URL = os.path.abspath(os.path.join("path", "program.exe"))
+
+def test_ExternalTool(qtbot: QtBot) -> None:
+
+    widget = ExternalTool(MOCK_URL)
+
+    qtbot.addWidget(widget)
+
+    assert widget.toolURL == MOCK_URL
+    assert widget.startToolButton.text() == 'program'

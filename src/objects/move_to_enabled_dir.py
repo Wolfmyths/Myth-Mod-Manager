@@ -1,0 +1,61 @@
+import logging
+import os
+
+from PySide6.QtCore import QCoreApplication as qapp, QMutex, QObject, Slot
+from typing_extensions import override
+
+from src.helpers.options_manager import OptionsManager
+from src.helpers.save_manager import Save
+from src.helpers.helper_pathing import Pathing
+from src.objects.worker import Worker
+
+class MoveToEnabledModDir(Worker):
+
+    def __init__(self, *mods: str, parent: QObject | None = None, mutex: QMutex | None = None) -> None:
+        super().__init__(parent, mutex)
+
+        self.mods: tuple[str, ...] = mods
+        self.mods_moved: list[tuple[str, str]] = []
+
+    @override
+    @Slot()
+    def start(self) -> None:
+        '''Returns a mod to their respective directory'''
+
+        self.setTotalProgress.emit(len(self.mods))
+
+        disabledModsPath: str = OptionsManager.getDispath()
+
+        for mod in self.mods:
+
+            self.setCurrentProgress.emit(1, qapp.translate('MoveToEnabledModDir', 'Enabling') + f' {mod}')
+
+            modPath: str = os.path.join(disabledModsPath, mod)
+
+            if os.path.isdir(modPath):
+
+                modType = Save.getType(mod)
+
+                if modType is None:
+                    logging.warning("mod %s type is none in MoveToEnabledDir.start(), skipping...", mod)
+                    continue
+
+                modDestPath: str = Pathing.mod(modType, mod)
+
+                self.move(modPath, modDestPath)
+                self.mods_moved.append((modPath, modDestPath))
+            else:
+                logging.warning('%s was not found in:\n%s\nIgnoring...', mod, disabledModsPath)
+
+            self.cancelCheck()
+            self.rest()
+
+        self.succeeded.emit()
+    
+    @override
+    def onCancel(self) -> None:
+        self.setTotalProgress.emit(len(self.mods_moved))
+        for modPaths in self.mods_moved:
+            self.setCurrentProgress.emit(1, qapp.translate('MoveToEnabledDir', 'Moving') + f' {os.path.basename(modPaths[0])}')
+            self.move(modPaths[1], modPaths[0])
+            self.rest()

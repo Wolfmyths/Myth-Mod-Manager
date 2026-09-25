@@ -4,32 +4,32 @@
 <context>
     <name>About</name>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="59"/>
+        <location filename="../src/widgets/qwidget/about.py" line="57"/>
         <source>Visit Github Repository</source>
         <translation>Bezoek Github archief</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="60"/>
+        <location filename="../src/widgets/qwidget/about.py" line="58"/>
         <source>Support Wolfmyths on Ko-Fi</source>
         <translation>Steun Wolfmyths op Ko-Fi</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="61"/>
+        <location filename="../src/widgets/qwidget/about.py" line="59"/>
         <source>Visit Modworkshop Page</source>
         <translation>Bezoek de Modworkshop-pagina</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="65"/>
+        <location filename="../src/widgets/qwidget/about.py" line="65"/>
         <source>is an open-source mod manager for PAYDAY 2 created by Wolfmyths.</source>
         <translation>is een open-source modmanager voor PAYDAY 2 gemaakt door Wolfmyths.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="66"/>
+        <location filename="../src/widgets/qwidget/about.py" line="66"/>
         <source>The goal of this program is to streamline the proccess of PAYDAY 2 mod managment without hassle of juggling multiple file explorers.</source>
         <translation>Het doel van dit programma is om het beheer van PAYDAY 2 mods te stroomlijnen zonder gedoe met meerdere bestandsverkenners.</translation>
     </message>
     <message>
-        <location filename="../src/widgets/aboutQWidget.py" line="68"/>
+        <location filename="../src/widgets/qwidget/about.py" line="68"/>
         <source>Suggestions are greatly appreciated on modworkshop.net and github.</source>
         <translation>Suggesties zijn zeer welkom op modworkshop.net en github.</translation>
     </message>
@@ -37,37 +37,37 @@
 <context>
     <name>BackupMods</name>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="48"/>
+        <location filename="../src/objects/backupMods.py" line="48"/>
         <source>Validating backup folder paths</source>
         <translation>Back-up mappaden valideren</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="69"/>
+        <location filename="../src/objects/backupMods.py" line="69"/>
         <source>Copying</source>
         <translation>kopiëren</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="71"/>
+        <location filename="../src/objects/backupMods.py" line="71"/>
         <source>to</source>
         <translation>naar</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="100"/>
+        <location filename="../src/objects/backupMods.py" line="100"/>
         <source>Zipping to</source>
         <translation>Zippen naar</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="102"/>
+        <location filename="../src/objects/backupMods.py" line="102"/>
         <source>This might take some time...</source>
         <translation>Dit kan even duren...</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="109"/>
+        <location filename="../src/objects/backupMods.py" line="109"/>
         <source>Cleanup</source>
         <translation>Opschonen</translation>
     </message>
     <message>
-        <location filename="../src/threaded/backupMods.py" line="125"/>
+        <location filename="../src/objects/backupMods.py" line="125"/>
         <source>An error was raised while backing up mods</source>
         <translation>Er is een fout opgetreden tijdens het back-uppen van mods</translation>
     </message>
@@ -75,12 +75,12 @@
 <context>
     <name>ChangeModType</name>
     <message>
-        <location filename="../src/threaded/changeModType.py" line="36"/>
+        <location filename="../src/objects/changeModType.py" line="36"/>
         <source>Installing</source>
         <translation>Installatie</translation>
     </message>
     <message>
-        <location filename="../src/threaded/changeModType.py" line="48"/>
+        <location filename="../src/objects/changeModType.py" line="48"/>
         <source>An error was raised while changing mod type:</source>
         <translation>Er is een fout opgetreden bij het veranderen van mod type:</translation>
     </message>
@@ -88,12 +88,12 @@
 <context>
     <name>DeleteMod</name>
     <message>
-        <location filename="../src/threaded/deleteMod.py" line="31"/>
+        <location filename="../src/objects/deleteMod.py" line="31"/>
         <source>Deleting</source>
         <translation>Verwijderen</translation>
     </message>
     <message>
-        <location filename="../src/threaded/deleteMod.py" line="49"/>
+        <location filename="../src/objects/deleteMod.py" line="49"/>
         <source>An error was raised while deleting a mod:</source>
         <translation>Er is een fout opgetreden bij het verwijderen van een mod:</translation>
     </message>
@@ -377,12 +377,12 @@
 <context>
     <name>MoveToDisabledDir</name>
     <message>
-        <location filename="../src/threaded/moveToDisabledDir.py" line="29"/>
+        <location filename="../src/objects/moveToDisabledDir.py" line="29"/>
         <source>Disabling</source>
         <translation>uitschakelen</translation>
     </message>
     <message>
-        <location filename="../src/threaded/moveToDisabledDir.py" line="45"/>
+        <location filename="../src/objects/moveToDisabledDir.py" line="45"/>
         <source>An error occured while disabling a mod:</source>
         <translation>Er is een fout opgetreden tijdens het uitschakelen van een mod:</translation>
     </message>
@@ -390,12 +390,12 @@
 <context>
     <name>MoveToEnabledModDir</name>
     <message>
-        <location filename="../src/threaded/moveToEnabledDir.py" line="30"/>
+        <location filename="../src/objects/moveToEnabledDir.py" line="30"/>
         <source>Enabling</source>
         <translation>Inschakelen</translation>
     </message>
     <message>
-        <location filename="../src/threaded/moveToEnabledDir.py" line="45"/>
+        <location filename="../src/objects/moveToEnabledDir.py" line="45"/>
         <source>An error occured while enabling a mod:</source>
         <translation>Er is een fout opgetreden tijdens het inschakelen van een mod:</translation>
     </message>
@@ -807,18 +807,18 @@
 <context>
     <name>UnZipMod</name>
     <message>
-        <location filename="../src/threaded/unZipMod.py" line="36"/>
+        <location filename="../src/objects/unZipMod.py" line="36"/>
         <source>Unpacking</source>
         <translation>Uitpakken</translation>
     </message>
     <message>
-        <location filename="../src/threaded/unZipMod.py" line="51"/>
-        <location filename="../src/threaded/unZipMod.py" line="57"/>
+        <location filename="../src/objects/unZipMod.py" line="51"/>
+        <location filename="../src/objects/unZipMod.py" line="57"/>
         <source>An error was raised in unZipMod:</source>
         <translation>Er is een fout opgetreden bij unZipMod:</translation>
     </message>
     <message>
-        <location filename="../src/threaded/unZipMod.py" line="53"/>
+        <location filename="../src/objects/unZipMod.py" line="53"/>
         <source>Try extracting the mod manually first</source>
         <translation>Probeer de mod eerst handmatig uit te pakken</translation>
     </message>
@@ -826,18 +826,18 @@
 <context>
     <name>Worker</name>
     <message>
-        <location filename="../src/threaded/workerQObject.py" line="69"/>
+        <location filename="../src/objects/workerQObject.py" line="69"/>
         <source>Checking file permissions of</source>
         <translation>Bestandsrechten controleren van</translation>
     </message>
     <message>
-        <location filename="../src/threaded/workerQObject.py" line="75"/>
-        <location filename="../src/threaded/workerQObject.py" line="80"/>
+        <location filename="../src/objects/workerQObject.py" line="75"/>
+        <location filename="../src/objects/workerQObject.py" line="80"/>
         <source>Checking folder permissions of</source>
         <translation>Maprechten controleren van</translation>
     </message>
     <message>
-        <location filename="../src/threaded/workerQObject.py" line="83"/>
+        <location filename="../src/objects/workerQObject.py" line="83"/>
         <source>Fixing install for</source>
         <translation>Installatie herstellen voor</translation>
     </message>

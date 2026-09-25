@@ -2,26 +2,25 @@ import os
 import shutil
 import logging
 import json
-import sys
+from typing import cast
 
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
-from PySide6.QtCore import QObject, QUrl, Signal, Slot
+from PySide6.QtCore import QObject, QUrl, Signal, Slot, QDir
 
-from src.constant_vars import ROOT_PATH, OLD_EXE
+from src.constant_vars import IS_WINDOWS, ROOT_PATH, OLD_EXE
 
 class Update(QObject):
     fileName: str
     exe: str
-    tmp: str
 
-    if sys.platform.startswith('win'):
+    if IS_WINDOWS:
         fileName = 'Myth-Mod-Manager.zip'
         exe = 'Myth Mod Manager.exe'
-        tmp = os.environ['TEMP']
     else:
         fileName = 'Myth-Mod-Manager.tar.gz'
         exe = 'Myth Mod Manager'
-        tmp = '/tmp'
+
+    tmp = QDir.toNativeSeparators(QDir.tempPath())
     folder: str = 'Myth Mod Manager'
 
     doneCanceling = Signal()
@@ -32,51 +31,51 @@ class Update(QObject):
     succeeded = Signal()
     error = Signal(str)
 
-    cancel = False
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.downloadUpdateReply: QNetworkReply = None
-
+    def __init__(self, parent: QObject | None = None) -> None:
+        super().__init__(parent)
         logging.getLogger(__name__)
+
+        self.network = QNetworkAccessManager(self)
+        self.currentReply: QNetworkReply | None = None
+        self.cancel = False
     
     def start(self) -> None:
         logging.info('Updating program...')
 
-        link = 'https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest'
+        LINK = 'https://api.github.com/repos/Wolfmyths/Myth-Mod-Manager/releases/latest'
 
-        logging.info('Fetching assets_url at %s', link)
+        logging.info('Fetching assets_url at %s', LINK)
 
         self.setTotalProgress.emit(6)
 
-        self.network = QNetworkAccessManager()
-        request = QNetworkRequest(QUrl(link))
+        request = QNetworkRequest(QUrl(LINK))
         
         self.setCurrentProgress.emit(1, 'Getting asset_URL')
 
-        self.__cancelCheck()
+        self._cancelCheck()
 
         reply: QNetworkReply = self.network.get(request)
+        self.currentReply = reply
 
-        reply.finished.connect(self.__handle_assetURL_fetch)
+        reply.finished.connect(lambda: self._handle_assetURL_fetch(reply))
+        reply.errorOccurred.connect(self._onErrorOccured)
+        reply.finished.connect(reply.deleteLater)
 
     @Slot(int, int)
-    def __on_download_progress(self, recievedBytes: int, totalBytes: int) -> None:
+    def _on_download_progress(self, recievedBytes: int, totalBytes: int) -> None:
         self.downloadProgressUpdated.emit(recievedBytes, totalBytes)
 
-    @Slot()
-    def __handle_assetURL_fetch(self) -> None:
+    @Slot(QNetworkReply)
+    def _handle_assetURL_fetch(self, reply: QNetworkReply) -> None:
 
-        if not self.__replyErrorCheck():
+        if not self._replyErrorCheck(reply):
             return
 
-        self.__cancelCheck()
+        self._cancelCheck()
 
         logging.info('Checking assets')
 
-        reply: QNetworkReply = self.sender()
-
-        data: dict = json.loads(reply.readAll().data().decode())
+        data: dict[str, str] = json.loads(cast(bytearray, reply.readAll().data()).decode())
 
         assetUrl: str = data['assets_url']
 
@@ -84,27 +83,28 @@ class Update(QObject):
 
         self.setCurrentProgress.emit(1, 'Getting asset data')
 
-        self.__cancelCheck()
+        self._cancelCheck()
 
         assetReply: QNetworkReply = self.network.get(QNetworkRequest(QUrl(assetUrl)))
-        assetReply.finished.connect(self.__download_assets)
+        self.currentReply = assetReply
+        assetReply.errorOccurred.connect(self._onErrorOccured)
+        assetReply.finished.connect(lambda: self._download_assets(assetReply))
+        assetReply.finished.connect(assetReply.deleteLater)
     
-    @Slot()
-    def __download_assets(self) -> None:
+    @Slot(QNetworkReply)
+    def _download_assets(self, reply: QNetworkReply) -> None:
 
-        if not self.__replyErrorCheck():
+        if not self._replyErrorCheck(reply):
             return
 
-        self.__cancelCheck()
+        self._cancelCheck()
 
         logging.info('Fetching asset data complete')
 
-        reply: QNetworkReply = self.sender()
-
-        data: dict = json.loads(reply.readAll().data().decode())
+        data: list[dict[str, str]] = json.loads(cast(bytearray, reply.readAll().data()).decode())
 
         # Incase there are muiltiple assets create a for loop
-        downloadLink: str = None
+        downloadLink: str = ''
 
         for asset in data:
         
@@ -115,7 +115,7 @@ class Update(QObject):
 
                 break
         
-        if downloadLink is None:
+        if not downloadLink:
             self.error.emit('The key "browser_download_url" was not found in Github asset data')
             return
 
@@ -123,18 +123,22 @@ class Update(QObject):
 
         self.setCurrentProgress.emit(0, 'Downloading update')
 
-        self.downloadUpdateReply: QNetworkReply = self.network.get(QNetworkRequest(QUrl(downloadLink)))
-        self.downloadUpdateReply.downloadProgress.connect(self.__on_download_progress)
-        self.downloadUpdateReply.finished.connect(self.__install_update)
-    @Slot()
-    def __install_update(self) -> None:
+        downloadUpdateReply: QNetworkReply = self.network.get(QNetworkRequest(QUrl(downloadLink)))
+        self.currentReply = downloadUpdateReply
+        downloadUpdateReply.downloadProgress.connect(self._on_download_progress)
+        downloadUpdateReply.errorOccurred.connect(self._onErrorOccured)
+        downloadUpdateReply.finished.connect(lambda: self._install_update(downloadUpdateReply))
+        downloadUpdateReply.finished.connect(downloadUpdateReply.deleteLater)
+        
+    @Slot(QNetworkReply)
+    def _install_update(self, reply: QNetworkReply) -> None:
 
-        if not self.__replyErrorCheck():
+        self.currentReply = None
+
+        if not self._replyErrorCheck(reply):
             return
 
-        self.__cancelCheck()
-
-        reply: QNetworkReply = self.sender()
+        self._cancelCheck()
 
         downloadDir: str = os.path.join(self.tmp, self.fileName)
 
@@ -150,25 +154,29 @@ class Update(QObject):
 
         self.setCurrentProgress.emit(1, 'Unzipping...')
 
-        self.__cancelCheck()
+        self._cancelCheck()
         
         shutil.unpack_archive(downloadDir, self.tmp)
 
-        if os.path.exists(os.path.join(ROOT_PATH, self.exe)):
+        exe_path = os.path.join(ROOT_PATH, self.exe)
+
+        if os.path.exists(exe_path):
 
             logging.info('Renaming old exe')
 
-            self.__cancelCheck()
+            self._cancelCheck()
 
             self.addTotalProgress.emit(1)
 
             self.setCurrentProgress.emit(1, 'Renaming old version...')
 
-            os.replace(self.exe, OLD_EXE)
+            os.rename(
+                exe_path, 
+                os.path.join(ROOT_PATH, OLD_EXE))
 
         self.setCurrentProgress.emit(1, 'Moving new version...')
 
-        self.__cancelCheck()
+        self._cancelCheck()
 
         logging.info('Moving new update to %s', ROOT_PATH)
 
@@ -183,12 +191,12 @@ class Update(QObject):
     @Slot()
     def abort(self) -> None:
         self.cancel = True
-    
-        if self.downloadUpdateReply is not None and self.downloadUpdateReply.isRunning():
-            self.downloadUpdateReply.abort()
+
+        if self.currentReply is not None:
+            self.currentReply.abort()
 
     @Slot()
-    def __cancelCheck(self) -> None:
+    def _cancelCheck(self) -> None:
         if not self.cancel:
             return
 
@@ -196,22 +204,18 @@ class Update(QObject):
         self.deleteLater()
     
     
-    @Slot()
-    def __replyErrorCheck(self) -> bool:
-        '''
-        Returns a bool based on if theres an error
-        '''
-        reply: QNetworkReply = self.sender()
-        error: QNetworkReply.NetworkError = reply.error()
+    def _replyErrorCheck(self, reply: QNetworkReply) -> bool:
+        ''' Returns `False` if `reply` has an error '''
 
-        if error == QNetworkReply.NetworkError.OperationCanceledError:
-            self.__cancelCheck()
-            return False
+        return reply.error() == QNetworkReply.NetworkError.NoError
+
+    @Slot(QNetworkReply.NetworkError)
+    def _onErrorOccured(self, err_code: QNetworkReply.NetworkError) -> None:
+
+        if err_code == QNetworkReply.NetworkError.OperationCanceledError:
+            self._cancelCheck()
+            return
         
-        if error != QNetworkReply.NetworkError.NoError:
-            logging.error('An error occured updating Myth Mod Manager')
-            self.error.emit(str(reply.error()))
-            self.deleteLater()
-            return False
-        
-        return True
+        logging.error('An error occured updating Myth Mod Manager')
+        self.error.emit(err_code)
+        self.deleteLater()

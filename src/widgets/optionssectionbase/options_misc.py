@@ -75,5 +75,6 @@ class OptionsMisc(OptionsSectionBase):
     @Slot()
     def startBackupMods(self) -> None:
         
-        startFileMover = ProgressWidget(BackupMods())
+        startFileMover = ProgressWidget(
+            BackupMods(), self.window())
         startFileMover.exec()

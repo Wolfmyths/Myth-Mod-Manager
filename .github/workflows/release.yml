@@ -35,6 +35,7 @@ jobs:
         - name: Upload Myth Mod Manager to Artifacts
           uses: actions/upload-artifact@v7
           with:
+            name: "Myth Mod Manager Windows"
             path: "./Myth Mod Manager"
 
         - name: Upload Myth Mod Manager to Latest Release Assets

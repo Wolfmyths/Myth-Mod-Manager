@@ -28,7 +28,7 @@ jobs:
           run: .venv/bin/pip install -r requirements.txt
         
         - name: Build with PyInstaller
-          run: .venv/bin/pyinstaller --clean main.spec --distpath "./Myth Mod Manager"
+          run: .venv/bin/pyinstaller --clean --onefile main.spec --distpath "./Myth Mod Manager"
         
         - name: Tar Myth Mod Manager
           run: tar -czvf Myth-Mod-Manager.tar.gz "./Myth Mod Manager/"

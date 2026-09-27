@@ -76,7 +76,9 @@ if __name__ == '__main__':
     gameEXE = QFileInfo(OptionsManager.getGameExecuteable())
     if not gameEXE.isExecutable() or not gameEXE.isFile():
         warning = GamePathNotFound()
-        warning.exec()
+        ret_val = warning.exec()
+
+        if ret_val == qtw.QDialog.DialogCode.Rejected: exit()
 
     # Checking neccessary directories
     helper.createModDirs()

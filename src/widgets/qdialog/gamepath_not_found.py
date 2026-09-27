@@ -1,9 +1,8 @@
 import logging
+from typing import override
 
 from PySide6.QtCore import QCoreApplication as qapp, Slot, QFileInfo
 import PySide6.QtWidgets as qtw
-
-from typing_extensions import override
 
 from src.widgets.qdialog.dialog import Dialog
 from src.helpers.options_manager import OptionsManager
@@ -36,7 +35,7 @@ class GamePathNotFound(Dialog):
 
         self.inputFrame.setLayout(inputFrameLayout)
 
-        buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Cancel
+        buttons = qtw.QDialogButtonBox.StandardButton.Ok | qtw.QDialogButtonBox.StandardButton.Close
 
         self.buttonBox = qtw.QDialogButtonBox(buttons)
         self.buttonBox.button(qtw.QDialogButtonBox.StandardButton.Ok).setEnabled(False)
@@ -69,14 +68,9 @@ class GamePathNotFound(Dialog):
 
         okButton.setEnabled(len(gamePath) > 0)
     
-    @override
     @Slot()
+    @override
     def accept(self) -> None:
         OptionsManager.setGameExecuteable(self.gameDir.text())
         OptionsManager.writeData()
         return super().accept()
-
-    @override
-    @Slot()
-    def reject(self) -> None:
-        qapp.instance().quit()

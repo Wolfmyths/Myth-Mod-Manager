@@ -4,8 +4,6 @@ import platform
 
 import patoolib
 
-DEBUG = False
-
 block_cipher = None
 
 HIDDEN_IMPORTS = [
@@ -73,14 +71,19 @@ BINARIES = []
 
 NAME = 'Myth Mod Manager'
 
+DEBUG = False
+
 if DEBUG:
     NAME += ' DEBUG'
 
 if platform.system().startswith('Win'):
 
+    STRIP = False
+
     ICON = os.path.join('src', 'icon.ico')
 
 else:
+    STRIP = not DEBUG
     ICON = os.path.join('assets', 'icon.png')
 
 a = Analysis(
@@ -110,7 +113,7 @@ exe = EXE(
     name=NAME,
     debug=DEBUG,
     bootloader_ignore_signals=False,
-    strip=not DEBUG,
+    strip=STRIP,
     icon=ICON,
     upx=True,
     upx_exclude=[],

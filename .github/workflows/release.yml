@@ -21,7 +21,7 @@ jobs:
             python-version: 3.12
 
         - name: Setup Virtual Env
-          run: py -m venv .venv
+          run: python3.12 -m venv .venv
 
         - name: Install Requirements
           run: .venv\Scripts\pip install -r requirements.txt
@@ -32,8 +32,13 @@ jobs:
         - name: Zip Myth Mod Manager
           run: tar -a -c -f Myth-Mod-Manager.zip "Myth Mod Manager/Myth Mod Manager.exe"
 
+        - name: Upload Myth Mod Manager to Artifacts
+          uses: actions/upload-artifact@v7
+          with:
+            path: "./Myth Mod Manager"
+
         - name: Upload Myth Mod Manager to Latest Release Assets
-          uses: softprops/action-gh-release@v2
+          uses: softprops/action-gh-release@v3
           if: startsWith(github.ref, 'refs/tags/')
           with:
             files: Myth-Mod-Manager.zip

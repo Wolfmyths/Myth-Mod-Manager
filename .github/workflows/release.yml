@@ -13,18 +13,21 @@ jobs:
 
     steps:
         - name: Checkout code
-          uses: actions/checkout@v4
+          uses: actions/checkout@v7
 
         - name: Set up Python
-          uses: actions/setup-python@v5
+          uses: actions/setup-python@v7
           with:
             python-version: 3.12
 
+        - name: Setup Virtual Env
+          run: py -m venv .venv
+
         - name: Install Requirements
-          run: pip install -r requirements.txt
+          run: .venv\Scripts\pip install -r requirements.txt
         
         - name: Build with PyInstaller
-          run: pyinstaller --clean main.spec --distpath "./Myth Mod Manager"
+          run: .venv\Scripts\pyinstaller --clean main.spec --distpath "./Myth Mod Manager"
         
         - name: Zip Myth Mod Manager
           run: tar -a -c -f Myth-Mod-Manager.zip "Myth Mod Manager/Myth Mod Manager.exe"
